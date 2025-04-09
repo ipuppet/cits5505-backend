@@ -1,6 +1,6 @@
 # CITS5505 Project
 
-## Ddependencies
+## Dependencies
 
 Please use virtual environments to manage dependencies. You can use `venv` or `virtualenv` to create a virtual environment.
 
