@@ -1,25 +1,15 @@
 import os
-
 from flask import Flask
 
-from .db import db
+from server.models import db
 
 
-def create_app(test_config=None):
+def create_app(config_class="server.config.DevelopmentConfig"):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-    app.config.from_mapping(
-        SECRET_KEY="dev",
-        SQLALCHEMY_DATABASE_URI=os.path.join(app.instance_path, "db.sqlite"),
-    )
-    # SECRET_KEY, JWT_SECRET_KEY should set in the instance/config.py file
 
-    if test_config is None:
-        # load the instance config, if it exists, when not testing
-        app.config.from_pyfile("config.py", silent=True)
-    else:
-        # load the test config if passed in
-        app.config.from_mapping(test_config)
+    app.config.from_object(config_class)
+    app.config.from_pyfile("config.py", silent=True)
 
     # ensure the instance folder exists
     try:
@@ -31,5 +21,12 @@ def create_app(test_config=None):
     db.init_app(app)
     with app.app_context():
         db.create_all()
+
+    # Register the blueprints
+    from server.blueprints.index.routes import index_bp
+    from server.blueprints.user.routes import user_bp
+
+    app.register_blueprint(index_bp)
+    app.register_blueprint(user_bp, url_prefix="/user")
 
     return app

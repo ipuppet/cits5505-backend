@@ -1,4 +1,5 @@
 Flask
 Flask-SQLAlchemy
 bcrypt
-flask-jwt-extended
+Flask-WTF
+wtforms[email]
