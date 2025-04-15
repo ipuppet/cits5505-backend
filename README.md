@@ -7,7 +7,7 @@ Please use virtual environments to manage dependencies. You can use `venv` or `v
 To create a virtual environment, run the following command:
 
 ```bash
-python3 -m venv venv
+python3 -m venv .venv
 ```
 
 To activate the virtual environment, run the following command:
@@ -15,13 +15,13 @@ To activate the virtual environment, run the following command:
 - For Linux and macOS
 
 ```bash
-source venv/bin/activate
+source .venv/bin/activate
 ```
 
 - For Windows
 
 ```bash
-venv\Scripts\activate
+.venv\Scripts\activate
 ```
 
 This project use `pip-tools` to manage dependencies. The main file is `requirements.in`, which lists the top-level dependencies. The `requirements.txt` file is generated from this file and includes all the transitive dependencies.
@@ -112,7 +112,7 @@ Use the following command to run the project:
 flask --app server.app run
 ```
 
-Run with debug mode:
+Run with debug mode (real-time reload changes):
 
 ```bash
 flask --app server.app run --debug

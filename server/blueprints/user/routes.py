@@ -10,7 +10,7 @@ user_bp = Blueprint("user", __name__, template_folder="templates")
 @user_bp.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
-        return render_template("login.html")
+        return render_template("user/login.html")
 
     email = request.form["email"]
     password = request.form["password"]
@@ -20,7 +20,7 @@ def login():
         session["user_id"] = user.id
         return redirect(url_for("index.index"))
     flash("Invalid email or password.", "danger")
-    return render_template("login.html")
+    return render_template("user/login.html")
 
 
 @user_bp.route("/logout")
@@ -34,7 +34,7 @@ def logout():
 def register():
     form = RegistrationForm()
     if request.method == "GET":
-        return render_template("register.html", form=form)
+        return render_template("user/register.html", form=form)
 
     if not form.validate_on_submit():
         flash(form.errors, "danger")
