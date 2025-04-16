@@ -33,12 +33,6 @@ def create_app(config_class="server.config.DevelopmentConfig"):
     
     # SECRET_KEY, JWT_SECRET_KEY should set in the instance/config.py file
 
-    if test_config is None:
-        # load the instance config, if it exists, when not testing
-        app.config.from_pyfile("config.py", silent=True)
-    else:
-        # load the test config if passed in
-        app.config.from_mapping(test_config)
 
     # ensure the instance folder exists
     try:
@@ -51,7 +45,7 @@ def create_app(config_class="server.config.DevelopmentConfig"):
     with app.app_context():
         db.create_all()
     return app
-app = create_app()
+
 
     # Register the blueprints
     from server.blueprints.index.routes import index_bp
