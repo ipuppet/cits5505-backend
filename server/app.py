@@ -16,17 +16,9 @@ from datetime import datetime, timedelta
 mail = Mail()
 def create_app(config_class="server.config.DevelopmentConfig"):
     # create and configure the app
-    app = Flask(__name__, instance_relative_config=True, template_folder="../templates")
-    app.config.from_mapping(
-        SECRET_KEY="a3f5c8d9e6b7a1c2d4e8f9g0h1i2j3k4",  # Replace with your secure key
-        SQLALCHEMY_DATABASE_URI=f"sqlite:///{os.path.join(app.instance_path, 'db.sqlite')}",
-        SQLALCHEMY_TRACK_MODIFICATIONS=False,
-        MAIL_SERVER="smtp.gmail.com",  # Gmail 
-        MAIL_PORT=587,
-        MAIL_USE_TLS=True,
-        MAIL_USERNAME="howitzer3761919@gmail.com", 
-        MAIL_PASSWORD="ujewgxhkrhygcucw",  
-    )
+    app = Flask(__name__, instance_relative_config=True)
+    app.config.from_object(config_class)
+    app.config.from_pyfile("config.py", silent=True)
     
     mail.init_app(app)
 
@@ -44,7 +36,7 @@ def create_app(config_class="server.config.DevelopmentConfig"):
     db.init_app(app)
     with app.app_context():
         db.create_all()
-    return app
+  
 
 
     # Register the blueprints
