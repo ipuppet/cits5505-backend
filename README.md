@@ -24,7 +24,7 @@ source .venv/bin/activate
 .venv\Scripts\activate
 ```
 
-This project use `pip-tools` to manage dependencies. The main file is `requirements.in`, which lists the top-level dependencies. The `requirements.txt` file is generated from this file and includes all the transitive dependencies.
+This project use [pip-tools](https://github.com/jazzband/pip-tools) to manage dependencies. The main file is `requirements.in`, which lists the top-level dependencies. The `requirements.txt` file is generated from this file and includes all the transitive dependencies.
 
 **Do not edit `requirements.txt` directly.**
 
@@ -60,7 +60,7 @@ Alternatively, you can use VSCode with the [Black extension](https://marketplace
 
 ## Project structure
 
-> `tree -I "__pycache__|*.pyc|venv|.venv"`
+> `tree -I "__pycache__|*.pyc|.venv|*.html|css|js"`
 
 ```plaintext
 .
@@ -76,17 +76,19 @@ Alternatively, you can use VSCode with the [Black extension](https://marketplace
     │   ├── index
     │   │   ├── routes.py
     │   │   └── templates
-    │   │       └── index.html
+    │   │       └── index
     │   └── user
     │       ├── forms.py
     │       ├── routes.py
     │       └── templates
-    │           ├── login.html
-    │           └── register.html
+    │           └── user
     ├── config.py
     ├── models.py
+    ├── static
+    ├── templates
     └── utils
-        └── decorators.py
+        ├── decorators.py
+        └── mail.py
 ```
 
 ### Directory structure
@@ -95,9 +97,11 @@ Alternatively, you can use VSCode with the [Black extension](https://marketplace
 - `requirements.in`: This file lists the top-level dependencies for the project. It is used by `pip-tools` to generate the `requirements.txt` file.
 - `server`: This directory contains the main application code. It includes the following contents:
   - `blueprints`: This directory contains the blueprints. Each blueprint is a separate module that can be registered with the main application.
-    - `index`: Blueprint for the index page.
-    - `user`: Blueprint for user-related routes.
+    - `index`: Blueprint for the home module.
+    - `user`: Blueprint for user-related module.
   - `utils`: This directory contains utility functions and decorators.
+  - `static`: This directory contains static files such as CSS and JavaScript files.
+  - `templates`: This directory contains the base templates for the application.
   - `app.py`: The main application file. It initializes the Flask application and registers the blueprints.
   - `config.py`: The configuration file for the application.
   - `models.py`: Models for the application.
