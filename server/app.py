@@ -12,7 +12,7 @@ def create_app(config_class="server.config.DevelopmentConfig"):
     # Load the default configuration
     app.config.from_object(config_class)
 
-    # ensure the instance folder and config file exist
+    # Ensure the instance folder and config file exist
     try:
         if not os.path.exists(app.instance_path):
             os.makedirs(app.instance_path)
@@ -28,8 +28,6 @@ def create_app(config_class="server.config.DevelopmentConfig"):
     except OSError:
         pass
     app.config.from_pyfile("config.py", silent=True)
-
-    # SECRET_KEY, JWT_SECRET_KEY should set in the instance/config.py file
 
     # Initialize the database
     db.init_app(app)
