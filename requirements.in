@@ -3,3 +3,4 @@ Flask-SQLAlchemy
 bcrypt
 Flask-WTF
 wtforms[email]
+Flask-Mail

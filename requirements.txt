@@ -7,7 +7,9 @@
 bcrypt==4.3.0
     # via -r requirements.in
 blinker==1.9.0
-    # via flask
+    # via
+    #   flask
+    #   flask-mail
 click==8.1.8
     # via flask
 dnspython==2.7.0
@@ -17,8 +19,11 @@ email-validator==2.2.0
 flask==3.1.0
     # via
     #   -r requirements.in
+    #   flask-mail
     #   flask-sqlalchemy
     #   flask-wtf
+flask-mail==0.10.0
+    # via -r requirements.in
 flask-sqlalchemy==3.1.1
     # via -r requirements.in
 flask-wtf==1.2.2
