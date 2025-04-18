@@ -39,7 +39,7 @@ pip-compile
 Use `pip-tools` to install the dependencies. Run the following command:
 
 ```bash
-pip-sync
+pip-sync --python-executable .venv/bin/python
 ```
 
 Or you can use `pip` to install the dependencies directly from the `requirements.txt` file:
