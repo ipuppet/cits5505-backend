@@ -2,10 +2,12 @@ import bcrypt
 import uuid
 from enum import Enum
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from sqlalchemy.orm import validates
 
 
 db = SQLAlchemy()
+migrate = Migrate()
 
 
 class User(db.Model):

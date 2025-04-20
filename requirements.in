@@ -1,8 +1,10 @@
 Flask
 Flask-SQLAlchemy
+Flask-Migrate
 bcrypt
 Flask-WTF
 wtforms[email]
 Flask-Mail
 pytest
-flask-testing
+Flask-Testing
+python-dotenv
