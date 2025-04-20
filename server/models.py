@@ -141,7 +141,7 @@ class Share(db.Model):
     id = db.Column(db.Uuid, primary_key=True, default=uuid.uuid4)
     sender_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     receiver_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    scope = db.Column(db.Text, nullable=False)
+    scope = db.Column(db.JSON, nullable=False)
     created_at = db.Column(
         db.DateTime,
         nullable=False,
