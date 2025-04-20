@@ -1,9 +1,9 @@
 import os
 from flask import Flask
-
+from flask_migrate import Migrate
 from server.models import db
 from server.utils.mail import mail
-
+migrate = Migrate()
 
 def create_app(config_class="server.config.DevelopmentConfig"):
     # Create and configure the app
@@ -31,6 +31,7 @@ def create_app(config_class="server.config.DevelopmentConfig"):
 
     # Initialize the database
     db.init_app(app)
+    migrate.init_app(app, db)
     with app.app_context():
         db.create_all()
 
