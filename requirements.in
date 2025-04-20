@@ -4,3 +4,5 @@ bcrypt
 Flask-WTF
 wtforms[email]
 Flask-Mail
+pytest
+flask-testing

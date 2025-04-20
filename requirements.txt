@@ -21,15 +21,20 @@ flask==3.1.0
     #   -r requirements.in
     #   flask-mail
     #   flask-sqlalchemy
+    #   flask-testing
     #   flask-wtf
 flask-mail==0.10.0
     # via -r requirements.in
 flask-sqlalchemy==3.1.1
     # via -r requirements.in
+flask-testing==0.8.1
+    # via -r requirements.in
 flask-wtf==1.2.2
     # via -r requirements.in
 idna==3.10
     # via email-validator
+iniconfig==2.1.0
+    # via pytest
 itsdangerous==2.2.0
     # via
     #   flask
@@ -41,6 +46,12 @@ markupsafe==3.0.2
     #   jinja2
     #   werkzeug
     #   wtforms
+packaging==25.0
+    # via pytest
+pluggy==1.5.0
+    # via pytest
+pytest==8.3.5
+    # via -r requirements.in
 sqlalchemy==2.0.38
     # via flask-sqlalchemy
 typing-extensions==4.12.2

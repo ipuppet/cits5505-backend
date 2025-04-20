@@ -89,14 +89,12 @@ class Exercise(db.Model):
             raise ValueError("Metrics must be a dictionary")
 
         required_fields = METRICS_REQUIREMENTS.get(self.type, [])
-        errors = []
-        for field in required_fields:
-            if field not in metrics:
-                errors.append(f"Missing '{field}'")
-                break
-        if errors:
+        missing_fields = [f for f in required_fields if f not in metrics]
+
+        if missing_fields:
+            error_list = ", ".join([f"Missing '{f}'" for f in missing_fields])
             raise ValueError(
-                f"Invalid metrics for {self.type.name}: {', '.join(errors)}. "
+                f"Invalid metrics for {self.type}: {error_list}. "
                 f"Required fields: {required_fields}"
             )
         return metrics
