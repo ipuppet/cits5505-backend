@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 
 from server.utils.decorators import login_required
-from server.models import db, User
 from server.blueprints.user.forms import RegistrationForm
+import server.blueprints.user.logic as user_logic
 
 user_bp = Blueprint("user", __name__, template_folder="templates")
 
@@ -14,19 +14,23 @@ def login():
 
     email = request.form["email"]
     password = request.form["password"]
-    user = User.query.filter_by(email=email).first()
-    if user and user.check_password(password):
+    try:
+        user = user_logic.login(email, password)
         flash("Login successful!", "success")
         session["user_id"] = user.id
         return redirect(url_for("index.index"))
-    flash("Invalid email or password.", "danger")
-    return render_template("user/login.html")
+    except ValueError as e:
+        flash(str(e), "danger")
+        return redirect(url_for("user.login"))
+    except Exception as e:
+        flash("An unexpected error occurred. Please try again.", "danger")
+        return redirect(url_for("user.login"))
 
 
 @user_bp.route("/logout")
 def logout():
     session.pop("user_id", None)  # Remove user ID from session
-    flash("You have been logged out.", "info")
+    flash("You have been logged out.", "success")
     return redirect(url_for("index.index"))
 
 
@@ -45,40 +49,28 @@ def register():
     email = form.email.data
     nickname = form.nickname.data or username
 
-    # Check if the username or email already exists
-    existing_user = User.query.filter(
-        (User.username == username) | (User.email == email)
-    ).first()
-    if existing_user:
-        flash("Username or email already exists.", "danger")
-        return redirect(url_for("user.register"))
-
-    # Create a new user
     try:
-        new_user = User(
-            username=username,
-            nickname=nickname,
-            password=User.hash_password(password),  # Hash the password
-            email=email,
-        )
-        db.session.add(new_user)
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        print(f"Error creating user: {e}")
-        flash("Registration failed. Please try again.", "danger")
+        user_logic.register(username, password, email, nickname)
+        flash(f"Registration successful {nickname}! You can now log in.", "success")
+        return redirect(url_for("user.login"))
+    except ValueError as e:
+        flash(str(e), "danger")
         return redirect(url_for("user.register"))
-
-    flash(f"Registration successful {nickname}! You can now log in.", "success")
-    return redirect(url_for("user.login"))
+    except Exception as e:
+        flash("An unexpected error occurred. Please try again.", "danger")
+        return redirect(url_for("user.register"))
 
 
 @user_bp.route("/<int:user_id>")
 @login_required
 def get_user(user_id):
-    user = User.query.get(user_id)
-    if not user:
-        flash("User not found.", "danger")
-        return redirect(url_for("index"))
-    # TODO Render user profile page
-    return f"User Info: {user}"
+    try:
+        user = user_logic.get_user(user_id)
+        # TODO: Render user information
+        return f"User Info: {user}"
+    except ValueError as e:
+        flash(str(e), "danger")
+        return redirect(url_for("index.index"))
+    except Exception as e:
+        flash("An unexpected error occurred. Please try again.", "danger")
+        return redirect(url_for("index.index"))
