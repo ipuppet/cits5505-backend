@@ -21,8 +21,7 @@ class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = "sqlite:///db.sqlite"
 
 
-class TestingConfig:
+class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
     WTF_CSRF_ENABLED = False
