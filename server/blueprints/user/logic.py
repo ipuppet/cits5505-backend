@@ -1,3 +1,4 @@
+from sqlalchemy.exc import SQLAlchemyError
 from server.models import db, User
 
 
@@ -12,64 +13,65 @@ def register(
     username: str,
     password: str,
     email: str,
-    nickname: str = None,
-) -> bool:
+    nickname: str,
+):
     # Check if the username or email already exists
-    if User.unique_user(username, email):
-        raise ValueError("Username or email already exists.")
+    User.validate_unique(username, email)
 
     # Create a new user
     try:
         new_user = User(
             username=username,
-            nickname=nickname or username,
+            nickname=nickname,
             password=User.hash_password(password),  # Hash the password
             email=email,
         )
         db.session.add(new_user)
         db.session.commit()
-    except Exception as e:
+    except SQLAlchemyError as e:
         db.session.rollback()
-        raise e
-    return True
+        raise RuntimeError("Failed to register user.") from e
 
 
-def reset_password(user_id: int, new_password: str) -> bool:
+def reset_password(user_id: int, new_password: str):
     user = User.get(user_id)
     if not user:
         raise ValueError("User not found.")
     try:
         user.password = User.hash_password(new_password)  # Hash the new password
         db.session.commit()
-    except Exception as e:
+    except SQLAlchemyError as e:
         db.session.rollback()
-        raise e
-    return True
+        raise RuntimeError("Failed to reset password.") from e
 
 
 def update_user(
     user_id: int,
-    username: str = None,
-    email: str = None,
-    nickname: str = None,
-) -> bool:
+    username: str | None = None,
+    email: str | None = None,
+    nickname: str | None = None,
+):
+    if not any([username, email, nickname]):
+        return
+
     user = User.get(user_id)
     if not user:
         raise ValueError("User not found.")
-    if User.unique_user(username, email):
-        raise ValueError("Username or email already exists.")
+
+    if username or email:
+        User.validate_unique(username, email, exclude_id=user_id)
+
     try:
-        if username:
+        if username is not None:
             user.username = username
-        if email:
+        if email is not None:
             user.email = email
-        if nickname:
+        if nickname is not None:
             user.nickname = nickname
         db.session.commit()
-    except Exception as e:
+    except SQLAlchemyError as e:
         db.session.rollback()
-        raise e
-    return True
+        raise RuntimeError("Failed to update user.") from e
 
 
 def get_user(user_id: int) -> User:

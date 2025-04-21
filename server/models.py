@@ -10,6 +10,13 @@ db = SQLAlchemy()
 migrate = Migrate()
 
 
+class UserConflictError(ValueError):
+    def __init__(self, field: str, value: str):
+        self.field = field
+        self.value = value
+        super().__init__(f"User with this {field} already exists: {value}")
+
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.Text, nullable=False, unique=True)
@@ -34,7 +41,7 @@ class User(db.Model):
     )
 
     @staticmethod
-    def get(user_id, as_dict=False):
+    def get(user_id: int, as_dict: bool = False):
         if not user_id:
             raise ValueError("ID cannot be empty")
         user = db.session.get(User, int(user_id))
@@ -52,18 +59,18 @@ class User(db.Model):
         return user
 
     @staticmethod
-    def get_by_email(email):
+    def get_by_email(email: str):
         if not email:
             raise ValueError("Email cannot be empty")
         return db.session.query(User).filter_by(email=email).first()
 
     @staticmethod
-    def hash_password(plain_password):
+    def hash_password(plain_password: str):
         salt = bcrypt.gensalt()
         hashed_password = bcrypt.hashpw(plain_password.encode("utf-8"), salt)
         return hashed_password.decode("utf-8")
 
-    def check_password(self, plain_password):
+    def check_password(self, plain_password: str):
         if isinstance(self.password, str):
             hashed_password = self.password.encode("utf-8")
         elif isinstance(self.password, bytes):
@@ -71,19 +78,25 @@ class User(db.Model):
         return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password)
 
     @staticmethod
-    def unique_user(username: str, email: str) -> bool:
-        """
-        Check if the username or email is unique.
-        :param username: The username to check.
-        :param email: The email to check.
-        :return: True if both are unique, False otherwise.
-        """
-        existing_user = (
-            db.session.query(User)
-            .filter((User.username == username) | (User.email == email))
-            .first()
-        )
-        return existing_user is None
+    def validate_unique(
+        username: str | None,
+        email: str | None,
+        exclude_id: int | None = None,
+    ):
+        """Check if the username or email is unique."""
+        if not username and not email:
+            raise ValueError("At least one of username or email must be provided")
+
+        query = db.session.query(User)
+        if exclude_id:
+            query = query.filter(User.id != exclude_id)
+
+        if username:
+            if query.filter(User.username == username).first():
+                raise UserConflictError("username", username)
+        if email:
+            if query.filter(User.email == email).first():
+                raise UserConflictError("email", email)
 
 
 class ExerciseType(Enum):
@@ -119,10 +132,7 @@ class Exercise(db.Model):
     )
 
     @validates("metrics")
-    def validate_metrics(self, key, metrics):
-        if not isinstance(metrics, dict):
-            raise ValueError("Metrics must be a dictionary")
-
+    def validate_metrics(self, key, metrics: dict):
         required_fields = METRICS_REQUIREMENTS.get(self.type, [])
         missing_fields = [f for f in required_fields if f not in metrics]
 
@@ -135,13 +145,13 @@ class Exercise(db.Model):
         return metrics
 
     @staticmethod
-    def get(exercise_id):
+    def get(exercise_id: int):
         if not exercise_id:
             raise ValueError("ID cannot be empty")
         return db.session.get(Exercise, int(exercise_id))
 
     @staticmethod
-    def get_by_user(user_id):
+    def get_by_user(user_id: int):
         if not user_id:
             raise ValueError("User ID cannot be empty")
         return db.session.query(Exercise).filter_by(user_id=user_id).all()
@@ -170,13 +180,13 @@ class BodyMeasurement(db.Model):
     )
 
     @staticmethod
-    def get(body_measurement_id):
+    def get(body_measurement_id: int):
         if not body_measurement_id:
             raise ValueError("ID cannot be empty")
         return db.session.get(BodyMeasurement, int(body_measurement_id))
 
     @staticmethod
-    def get_by_user(user_id):
+    def get_by_user(user_id: int):
         if not user_id:
             raise ValueError("User ID cannot be empty")
         return db.session.query(BodyMeasurement).filter_by(user_id=user_id).all()
@@ -201,7 +211,7 @@ class Share(db.Model):
     )
 
     @staticmethod
-    def get(share_id, include_deleted=False):
+    def get(share_id: str, include_deleted: bool = False):
         if not share_id:
             raise ValueError("ID cannot be empty")
         try:
@@ -216,7 +226,7 @@ class Share(db.Model):
         return query.one_or_none()
 
     @staticmethod
-    def get_by_sender(sender_id):
+    def get_by_sender(sender_id: int):
         if not sender_id:
             raise ValueError("Sender ID cannot be empty")
         return (
@@ -224,7 +234,7 @@ class Share(db.Model):
         )
 
     @staticmethod
-    def get_by_receiver(receiver_id):
+    def get_by_receiver(receiver_id: int):
         if not receiver_id:
             raise ValueError("Receiver ID cannot be empty")
         return (
