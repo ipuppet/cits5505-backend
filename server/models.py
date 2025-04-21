@@ -34,10 +34,28 @@ class User(db.Model):
     )
 
     @staticmethod
-    def get(user_id):
+    def get(user_id, as_dict=False):
         if not user_id:
             raise ValueError("ID cannot be empty")
-        return db.session.get(User, int(user_id))
+        user = db.session.get(User, int(user_id))
+        if not user:
+            raise ValueError("User not found")
+        if as_dict:
+            return {
+                "id": user.id,
+                "username": user.username,
+                "nickname": user.nickname,
+                "email": user.email,
+                "created_at": user.created_at,
+                "last_login": user.last_login,
+            }
+        return user
+
+    @staticmethod
+    def get_by_email(email):
+        if not email:
+            raise ValueError("Email cannot be empty")
+        return db.session.query(User).filter_by(email=email).first()
 
     @staticmethod
     def hash_password(plain_password):
@@ -51,6 +69,21 @@ class User(db.Model):
         elif isinstance(self.password, bytes):
             hashed_password = self.password
         return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password)
+
+    @staticmethod
+    def unique_user(username: str, email: str) -> bool:
+        """
+        Check if the username or email is unique.
+        :param username: The username to check.
+        :param email: The email to check.
+        :return: True if both are unique, False otherwise.
+        """
+        existing_user = (
+            db.session.query(User)
+            .filter((User.username == username) | (User.email == email))
+            .first()
+        )
+        return existing_user is None
 
 
 class ExerciseType(Enum):
@@ -107,6 +140,12 @@ class Exercise(db.Model):
             raise ValueError("ID cannot be empty")
         return db.session.get(Exercise, int(exercise_id))
 
+    @staticmethod
+    def get_by_user(user_id):
+        if not user_id:
+            raise ValueError("User ID cannot be empty")
+        return db.session.query(Exercise).filter_by(user_id=user_id).all()
+
 
 class BodyMeasurementType(Enum):
     WEIGHT = "weight"
@@ -136,6 +175,12 @@ class BodyMeasurement(db.Model):
             raise ValueError("ID cannot be empty")
         return db.session.get(BodyMeasurement, int(body_measurement_id))
 
+    @staticmethod
+    def get_by_user(user_id):
+        if not user_id:
+            raise ValueError("User ID cannot be empty")
+        return db.session.query(BodyMeasurement).filter_by(user_id=user_id).all()
+
 
 class Share(db.Model):
     id = db.Column(db.Uuid, primary_key=True, default=uuid.uuid4)
@@ -164,8 +209,26 @@ class Share(db.Model):
         except (ValueError, AttributeError):
             raise ValueError("Invalid share ID format")
 
-        query = Share.query.filter_by(id=share_id)
+        query = db.session.query(Share).filter_by(id=share_id)
         if not include_deleted:
             query = query.filter_by(deleted=False)
 
         return query.one_or_none()
+
+    @staticmethod
+    def get_by_sender(sender_id):
+        if not sender_id:
+            raise ValueError("Sender ID cannot be empty")
+        return (
+            db.session.query(Share).filter_by(sender_id=sender_id, deleted=False).all()
+        )
+
+    @staticmethod
+    def get_by_receiver(receiver_id):
+        if not receiver_id:
+            raise ValueError("Receiver ID cannot be empty")
+        return (
+            db.session.query(Share)
+            .filter_by(receiver_id=receiver_id, deleted=False)
+            .all()
+        )
