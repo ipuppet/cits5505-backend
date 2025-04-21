@@ -87,8 +87,7 @@ def reset_password():
             "Password reset successful! Please log in with your new password.",
             "success",
         )
-        logout()
-        return redirect(url_for("user.login"))
+        return logout()
     except Exception as e:
         flash(str(e), "danger")
         return redirect(url_for("user.reset_password"))
