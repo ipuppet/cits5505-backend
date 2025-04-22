@@ -1,36 +1,91 @@
 {% extends "base.html" %}
 
 {% block title %}
-    Home Page
+    Sport Track
 {% endblock %}
 
-{% block content %}
-    <h1>Welcome to the Home Page</h1>
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index/index.css') }}"/>
+{% endblock %}
 
-    {% if g.user %}
-        <p>Hello, {{ g.user.nickname }}!</p>
-        <a href="{{ url_for('user.reset_password') }}">Reset Password</a>
-        <p><a href="{{ url_for('user.logout') }}">Logout</a></p>
-    {% else %}
-        <p>You are not logged in.</p>
-        <p>To access your account, please log in or register.</p>
 
-        <a href="{{ url_for('user.register') }}">Register</a>
-        <a href="{{ url_for('index.index') }}?login=true">Login</a>
-    {% endif %}
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const urlParams = new URLSearchParams(window.location.search);
-            const dropdownParam = urlParams.get("login");
-            if (dropdownParam === "true") {
-                const dropdownElement = document.querySelector("#login");
-                if (dropdownElement) {
-                    const dropdown = new bootstrap.Dropdown(dropdownElement);
-                    dropdown.show();
-                }
-            }
-        });
-    </script>
+{% block overlap_content %}
+    <div class="big-screen">
+        <h1>Your personal sport tracker</h1>
+        {% if g.user %}
+            <div class="start-button">
+                <button class="btn btn-light" onclick="toDashboard()">Open dashboard</button>
+            </div>
+            <p>Welcome back, {{ g.user.nickname }}!</p>
+        {% else %}
+            <div class="start-button">
+                <button class="btn btn-light" onclick="toRegister()">Get started for free</button>
+            </div>
+            <p>Already have an account? <a onclick="toggleLogin()">Login</a> now.</p>
+        {% endif %}
+    </div>
+    <div class="content-block">
+        <div class="block-tag">Features</div>
+        <h1>Track your workouts</h1>
+        <div class="block-space"></div>
+        <div class="container text-center">
+            <div class="row align-items-start">
+                <div class="col">
+                    <h2>Feature 1</h2>
+                    <p>Track your workouts with ease.</p>
+                </div>
+                <div class="col">
+                    <img src="{{ url_for('static', filename='img/index.feature1.avif') }}" alt="Feature 1"
+                         class="feature-image">
+                </div>
+            </div>
+            <div class="block-space"></div>
+            <div class="row align-items-start">
+                <div class="col">
+                    <img src="{{ url_for('static', filename='img/index.feature1.avif') }}" alt="Feature 2"
+                         class="feature-image">
+                </div>
+                <div class="col">
+                    <h2>Feature 2</h2>
+                    <p>Track your workouts with ease.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="content-block">
+        <div class="block-tag">Plans</div>
+        <h1>Choose your plan</h1>
+        <div class="block-space"></div>
+        <div class="card plan-card">
+            <div class="card-body">
+                <h2>Free Plan</h2>
+                <h1 class="card-title">$0</h1>
+                <p class="plan-info">Track your workouts with ease.</p>
+                <a href="{{ url_for('user.register') }}" class="btn btn-light w-100">Get started</a>
+                <p class="plan-info w-100 text-center">No credit card required.</p>
+                <hr class="my-4">
+                <h5 class="plan-info">What's included</h5>
+                <span class="plan-info">
+                    <i class="bi bi-check"></i>
+                    Track your workouts
+                </span>
+                <br>
+                <span class="plan-info">
+                    <i class="bi bi-check"></i>
+                    Follow your friends
+                </span>
+                <br>
+                <span class="plan-info">
+                    <i class="bi bi-check"></i>
+                    Share your activity
+                </span>
+            </div>
+        </div>
+        <div class="block-space"></div>
+    </div>
+{% endblock %}
 
+{% block js %}
+    <script src="{{ url_for('static', filename='js/index/index.js') }}"></script>
 {% endblock %}
