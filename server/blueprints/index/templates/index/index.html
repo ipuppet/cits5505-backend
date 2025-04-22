@@ -22,7 +22,7 @@
             <div class="start-button">
                 <button class="btn btn-light" onclick="toRegister()">Get started for free</button>
             </div>
-            <p>Already have an account? <a onclick="toggleLogin()">Login</a> now.</p>
+            <p>Already have an account? <a id="toggleLoginBtn">Login</a> now.</p>
         {% endif %}
     </div>
     <div class="content-block">
@@ -37,14 +37,14 @@
                 </div>
                 <div class="col">
                     <img src="{{ url_for('static', filename='img/index.feature1.avif') }}" alt="Feature 1"
-                         class="feature-image">
+                         class="img-fluid">
                 </div>
             </div>
             <div class="block-space"></div>
             <div class="row align-items-start">
                 <div class="col">
                     <img src="{{ url_for('static', filename='img/index.feature1.avif') }}" alt="Feature 2"
-                         class="feature-image">
+                         class="img-fluid">
                 </div>
                 <div class="col">
                     <h2>Feature 2</h2>
