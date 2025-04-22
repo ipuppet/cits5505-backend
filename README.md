@@ -66,35 +66,39 @@ Alternatively, you can use VSCode with the [Black extension](https://marketplace
 .
 ├── instance
 │   ├── config.py
-│   └── db.sqlite
+│   └── dev.sqlite
+├── migrations
 ├── README.md
 ├── requirements.in
 ├── requirements.txt
-└── server
-    ├── app.py
-    ├── blueprints
-    │   ├── index
-    │   │   ├── routes.py
-    │   │   └── templates
-    │   │       └── index
-    │   └── user
-    │       ├── forms.py
-    │       ├── routes.py
-    │       └── templates
-    │           └── user
-    ├── config.py
-    ├── models.py
-    ├── static
-    ├── templates
-    └── utils
-        ├── decorators.py
-        └── mail.py
+├── server
+│   ├── app.py
+│   ├── blueprints
+│   │   ├── index
+│   │   │   ├── routes.py
+│   │   │   └── templates
+│   │   │       └── index
+│   │   └── user
+│   │       ├── forms.py
+│   │       ├── logic.py
+│   │       ├── routes.py
+│   │       └── templates
+│   │           └── user
+│   ├── config.py
+│   ├── models.py
+│   ├── static
+│   ├── templates
+│   └── utils
+└── tests
+    ├── conftest.py
+    └── test_models
 ```
 
 ### Directory structure
 
 - `instance`: This directory contains the development configuration file and the SQLite database file. The configuration will override the default configuration in `server/config.py`.
 - `requirements.in`: This file lists the top-level dependencies for the project. It is used by `pip-tools` to generate the `requirements.txt` file.
+- `migrations`: This directory contains the database migration files. It is created by Flask-Migrate.
 - `server`: This directory contains the main application code. It includes the following contents:
   - `blueprints`: This directory contains the blueprints. Each blueprint is a separate module that can be registered with the main application.
     - `index`: Blueprint for the home module.
@@ -105,6 +109,9 @@ Alternatively, you can use VSCode with the [Black extension](https://marketplace
   - `app.py`: The main application file. It initializes the Flask application and registers the blueprints.
   - `config.py`: The configuration file for the application.
   - `models.py`: Models for the application.
+- `tests`: This directory contains the test files for the application. It includes the following contents:
+  - `conftest.py`: This file contains the test configuration and fixtures.
+  - `test_models`: This directory contains the test files for the models.
 
 *`instance` should not be included in version control.*
 
@@ -113,11 +120,37 @@ Alternatively, you can use VSCode with the [Black extension](https://marketplace
 Use the following command to run the project:
 
 ```bash
-flask --app server.app run
+flask run
 ```
 
 Run with debug mode (real-time reload changes):
 
 ```bash
-flask --app server.app run --debug
+flask run --debug
+```
+
+## Running tests
+
+To run the tests, use the following command:
+
+```bash
+python -m pytest
+```
+
+> In virtual environment, you need to run `python -m pytest` instead of `pytest`.
+
+## Database migration
+
+This project uses [Flask-Migrate](https://flask-migrate.readthedocs.io/en/latest/) to manage database migrations.
+
+To create a new migration, use the following command:
+
+```bash
+flask db migrate -m "migration message"
+```
+
+To see all the commands that are available run this command:
+
+```bash
+flask db --help
 ```
