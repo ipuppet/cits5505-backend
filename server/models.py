@@ -4,7 +4,7 @@ from enum import Enum
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import uuid
-from sqlalchemy.schema import UniqueConstraintfrom flask_migrate import Migrate
+from flask_migrate import Migrate
 from sqlalchemy.orm import validates
 
 
