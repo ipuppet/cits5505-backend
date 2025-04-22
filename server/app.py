@@ -40,9 +40,15 @@ def create_app(config_class="server.config.DevelopmentConfig"):
 
     # Register the blueprints
     from server.blueprints.index.routes import index_bp
+    from server.blueprints.dashboard.routes import dashboard_bp
     from server.blueprints.user.routes import user_bp
+    from server.blueprints.exercise.routes import exercise_bp
+    from server.blueprints.share.routes import share_bp
 
     app.register_blueprint(index_bp)
+    app.register_blueprint(dashboard_bp, url_prefix="/dashboard")
     app.register_blueprint(user_bp, url_prefix="/user")
+    app.register_blueprint(exercise_bp, url_prefix="/exercise")
+    app.register_blueprint(share_bp, url_prefix="/share")
 
     return app
