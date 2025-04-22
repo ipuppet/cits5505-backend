@@ -1,7 +1,7 @@
 import os
 from flask import Flask
-from flask_migrate import Migrate
-from server.models import db
+
+from server.models import db, migrate
 from server.utils.mail import mail
 migrate = Migrate()
 

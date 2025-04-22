@@ -6,6 +6,17 @@
 
 {% block content %}
 <h1>Welcome to the Home Page</h1>
+
+{% if user %}
+<p>Hello, {{ user.nickname }}!</p>
+<a href="{{ url_for('user.reset_password') }}">Reset Password</a>
+<p><a href="{{ url_for('user.logout') }}">Logout</a></p>
+{% else %}
+<p>You are not logged in.</p>
+<p>To access your account, please log in or register.</p>
+
 <a href="{{ url_for('user.register') }}">Register</a>
 <a href="{{ url_for('user.login') }}">Login</a>
+{% endif %}
+
 {% endblock %}

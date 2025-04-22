@@ -3,9 +3,7 @@ from wtforms import StringField, PasswordField
 from wtforms.validators import DataRequired, Length, Optional, Email
 
 
-class RegistrationForm(FlaskForm):
-    username = StringField("username", validators=[DataRequired()])
-    nickname = StringField("nickname", validators=[Optional()])
+class PasswordForm(FlaskForm):
     password = PasswordField(
         "password",
         validators=[
@@ -16,4 +14,27 @@ class RegistrationForm(FlaskForm):
             ),
         ],
     )
-    email = StringField("email", validators=[Email()])
+
+
+class EmailForm(FlaskForm):
+    email = StringField("email", validators=[Optional(), Email()])
+
+
+class UserInfoForm(EmailForm):
+    username = StringField("username", validators=[Optional()])
+    nickname = StringField("nickname", validators=[Optional()])
+
+
+class LoginForm(PasswordForm, EmailForm):
+    pass
+
+
+class RegistrationForm(PasswordForm, UserInfoForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.email.validators = [DataRequired(), Email()]
+        self.username.validators = [DataRequired()]
+
+        if not self.nickname.data and self.username.data:
+            self.nickname.data = self.username.data
