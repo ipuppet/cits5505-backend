@@ -71,7 +71,7 @@ Alternatively, you can use VSCode with the [Black extension](https://marketplace
 ├── README.md
 ├── requirements.in
 ├── requirements.txt
-├── server
+├── backend
 │   ├── app.py
 │   ├── blueprints
 │   │   ├── index
