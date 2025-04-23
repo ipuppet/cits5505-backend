@@ -28,7 +28,6 @@ a{
 .navbar{
    height:100%;
 }
-
 .nav-link:active{
    color:var(--bs-navbar-active-color);
 }
