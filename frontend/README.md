@@ -89,10 +89,22 @@ Alternatively, you can use VSCode with the [Black extension](https://marketplace
 │   ├── static
 │   ├── templates
 │   └── utils
+├── fontend
+│   ├──README.md
+│   ├──navbar.html
+│   ├──introductory.html
+│   ├──uploaddata.html
+│   ├──style.css
+│   ├──frontend.js
+│   ├──fitsum-admasu-oGv9xIl7DkY-unsplash.jpg
+│   ├──towfiqu-barbhuiya-J6g_szOtMF4-unsplash.jpg
+│   ├──mahbub-majid-C2uAWfPYTao-unsplash.jpg
+│   └──.gitignore
 └── tests
     ├── conftest.py
     └── test_models
 ```
+
 
 ### Directory structure
 
