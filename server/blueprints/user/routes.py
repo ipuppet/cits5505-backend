@@ -12,27 +12,26 @@ import server.blueprints.user.logic as user_logic
 user_bp = Blueprint("user", __name__, template_folder="templates")
 
 
-@user_bp.route("/login", methods=["GET", "POST"])
+@user_bp.route("/login", methods=["POST"])
 def login():
     form = LoginForm()
-
-    if request.method == "GET":
-        return render_template("user/login.html", form=form)
-
     if not form.validate_on_submit():
         flash(form.errors, "danger")
-        return redirect(url_for("user.login"))
+        return redirect(url_for("index.index"))
 
     email = form.email.data
     password = form.password.data
+    remember_me = form.remember_me.data
     try:
         user = user_logic.login(email, password)
         flash("Login successful!", "success")
         session["user_id"] = user.id
-        return redirect(url_for("index.index"))
+        if remember_me:
+            session.permanent = True
+        return redirect(url_for("dashboard.index"))
     except Exception as e:
         flash(str(e), "danger")
-        return redirect(url_for("user.login"))
+        return redirect(url_for("index.index"))
 
 
 @user_bp.route("/logout")
@@ -60,8 +59,8 @@ def register():
 
     try:
         user_logic.register(username, password, email, nickname)
-        flash(f"Registration successful {nickname}! You can now log in.", "success")
-        return redirect(url_for("user.login"))
+        flash(f"Registration successful {nickname}!", "success")
+        return redirect(url_for("index.index"))
     except Exception as e:
         flash(str(e), "danger")
         return redirect(url_for("user.register"))
@@ -112,7 +111,7 @@ def update_user():
     try:
         user_logic.update_user(user_id, username, email, nickname)
         flash("User information updated successfully!", "success")
-        return redirect(url_for("index.index"))
+        return redirect(url_for("dashboard.index"))
     except Exception as e:
         flash(str(e), "danger")
         return redirect(url_for("user.update_user"))
@@ -127,4 +126,4 @@ def get_user(user_id):
         return f"User Info: {user}"
     except Exception as e:
         flash(str(e), "danger")
-        return redirect(url_for("index.index"))
+        return redirect(url_for("dashboard.index"))

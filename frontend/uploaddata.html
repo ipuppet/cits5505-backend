@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    <link rel="stylesheet" href="./style.css">
+    <title>Document</title>
+</head>
+<body>
+    <div class="mainstr"> 
+        <!-- nav bar -->
+        <div id="navbar"></div>
+        <!-- upload data -->
+        <div class="container upload">
+            <div class="h4 mt-2 mb-2">Upload your data</div>
+            <div>Only csv files with the same format and column names as the following file example are supported:</div>
+            <table class="table">
+                <thead>
+                    <tr><th>Daily calories intake(whole number)</th><th>Daily calories burn(whole number)</th><th>Weight(kg)</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>2000</td><td>1500</td><td>70</td></tr>
+                    <tr><td>2500</td><td>2000</td><td>75</td></tr>
+                    <tr><td>3000</td><td>2500</td><td>80</td></tr>
+                </tbody>
+            </table>
+            <!-- here the value of action is only a placeholder, it should be replaced with the url of the server that will process the data -->
+            <form action="">
+                <label for="file"class="form-label h6">Upload your file</label> 
+                <input type="file" class="form-control mb-2" name="file" id="file" accept=".csv">
+                <div class="text-center"><button type="submit" class="btn btn-primary mt-2">Submit</button></div>
+            </form> 
+                     
+           
+    </div>
+     <script src="./frontend.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous">
+      </script>
+</body>
+</html>
