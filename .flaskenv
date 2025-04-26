@@ -1,1 +1,3 @@
 FLASK_APP=server.app
+FLASK_ENV=development
+SECRET_KEY=default_secret_key
