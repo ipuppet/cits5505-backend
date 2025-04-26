@@ -3,7 +3,6 @@ from flask import Flask
 
 from server.models import db, migrate
 from server.utils.mail import mail
-migrate = Migrate()
 
 def create_app(config_class="server.config.DevelopmentConfig"):
     # Create and configure the app
