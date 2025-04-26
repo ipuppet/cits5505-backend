@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 
-from server.utils.decorators import login_required
+from server.utils.decorators import login_required, api_response
 from server.blueprints.user.forms import (
     RegistrationForm,
     PasswordForm,
@@ -66,9 +66,9 @@ def register():
         return redirect(url_for("user.register"))
 
 
-@user_bp.route("/reset_password", methods=["GET", "POST"])
+@user_bp.route("/password", methods=["GET", "POST"])
 @login_required
-def reset_password():
+def password():
     form = PasswordForm()
 
     if request.method == "GET":
@@ -92,12 +92,12 @@ def reset_password():
         return redirect(url_for("user.reset_password"))
 
 
-@user_bp.route("/update_user", methods=["GET", "POST"])
+@user_bp.route("/", methods=["GET", "POST"])
 @login_required
-def update_user():
+def index():
     form = UserInfoForm()
     if request.method == "GET":
-        return render_template("user/update_user.html", form=form)
+        return render_template("user/index.html", form=form)
 
     if not form.validate_on_submit():
         flash(form.errors, "danger")
@@ -117,13 +117,8 @@ def update_user():
         return redirect(url_for("user.update_user"))
 
 
-@user_bp.route("/<int:user_id>")
+@user_bp.route("/<string:username>")
 @login_required
-def get_user(user_id):
-    try:
-        user = user_logic.get_user(user_id)
-        # TODO: Render user information
-        return f"User Info: {user}"
-    except Exception as e:
-        flash(str(e), "danger")
-        return redirect(url_for("dashboard.index"))
+@api_response
+def search_user(username):
+    return user_logic.search_user(username)

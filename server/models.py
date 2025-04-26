@@ -5,7 +5,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy.orm import validates
 
-
 db = SQLAlchemy()
 migrate = Migrate()
 
@@ -41,6 +40,17 @@ class User(db.Model):
     )
 
     @staticmethod
+    def as_dict(user: "User") -> dict:
+        return {
+            "id": user.id,
+            "username": user.username,
+            "nickname": user.nickname,
+            "email": user.email,
+            "created_at": user.created_at,
+            "last_login": user.last_login,
+        }
+
+    @staticmethod
     def get(user_id: int, as_dict: bool = False):
         if not user_id:
             raise ValueError("ID cannot be empty")
@@ -48,14 +58,7 @@ class User(db.Model):
         if not user:
             raise ValueError("User not found")
         if as_dict:
-            return {
-                "id": user.id,
-                "username": user.username,
-                "nickname": user.nickname,
-                "email": user.email,
-                "created_at": user.created_at,
-                "last_login": user.last_login,
-            }
+            return User.as_dict(user)
         return user
 
     @staticmethod
@@ -65,23 +68,35 @@ class User(db.Model):
         return db.session.query(User).filter_by(email=email).first()
 
     @staticmethod
+    def search_by_username(username: str):
+        """Fuzzy search for a user by username."""
+        if not username:
+            raise ValueError("Username cannot be empty")
+        users = db.session.query(User).filter(User.username.ilike(f"%{username}%")).all()
+        user_list = []
+        for user in users:
+            user_list.append(User.as_dict(user))
+        return user_list
+
+    @staticmethod
     def hash_password(plain_password: str):
         salt = bcrypt.gensalt()
         hashed_password = bcrypt.hashpw(plain_password.encode("utf-8"), salt)
         return hashed_password.decode("utf-8")
 
     def check_password(self, plain_password: str):
-        if isinstance(self.password, str):
-            hashed_password = self.password.encode("utf-8")
-        elif isinstance(self.password, bytes):
-            hashed_password = self.password
+        hashed_password = self.password
+        if isinstance(hashed_password, str):
+            hashed_password = hashed_password.encode("utf-8")
+        if not isinstance(hashed_password, bytes):
+            raise TypeError("Password must be of type bytes")
         return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password)
 
     @staticmethod
     def validate_unique(
-        username: str | None,
-        email: str | None,
-        exclude_id: int | None = None,
+            username: str | None,
+            email: str | None,
+            exclude_id: int | None = None,
     ):
         """Check if the username or email is unique."""
         if not username and not email:
