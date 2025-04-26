@@ -5,6 +5,13 @@ from server.models import db, User
 def login(email: str, password: str) -> User:
     user = User.get_by_email(email)
     if user and user.check_password(password):
+        try:
+            # Update the last login time
+            user.last_login = db.func.now()
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            raise RuntimeError("Failed to update last login time.") from e
         return user
     raise ValueError("Invalid email or password.")
 
