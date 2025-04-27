@@ -30,9 +30,9 @@ class User(db.Model):
     last_login = db.Column(
         db.DateTime, nullable=True, default=db.func.current_timestamp()
     )
-    tracking_data = db.relationship("TrackingData", backref="user", lazy=True)
-    exercises = db.relationship("Exercise", backref="user", lazy=True)
-    achievements = db.relationship("Achievement", backref="user", lazy=True)
+    #tracking_data = db.relationship("TrackingData", backref="user", lazy=True)
+    #exercises = db.relationship("Exercise", backref="user", lazy=True)
+    #achievements = db.relationship("Achievement", backref="user", lazy=True)
 
 
     exercises = db.relationship(

@@ -1,22 +1,127 @@
 {% extends "base.html" %}
 
 {% block title %}
-    Dashboard Page
+Dashboard
 {% endblock %}
 
 {% block content %}
+
+
+<div class="mainstr mt-5">
     <h1>Welcome to the Dashboard Page</h1>
 
     {% if g.user %}
-        <p>Hello, {{ g.user.nickname }}!</p>
-        <a href="{{ url_for('user.password') }}">Reset Password</a>
-        <p><a href="{{ url_for('user.logout') }}">Logout</a></p>
+    <p>Hello, {{ g.user.nickname }}!</p>
+    <a href="{{ url_for('user.password') }}">Reset Password</a>
+    <p><a href="{{ url_for('user.logout') }}">Logout</a></p>
     {% else %}
-        <p>You are not logged in.</p>
-        <p>To access your account, please log in or register.</p>
+    <p>You are not logged in.</p>
+    <p>To access your account, please log in or register.</p>
 
-        <a href="{{ url_for('user.register') }}">Register</a>
-        <a href="{{ url_for('user.login') }}">Login</a>
+    <a href="{{ url_for('user.register') }}">Register</a>
+    <a href="{{ url_for('user.login') }}">Login</a>
     {% endif %}
+    <!-- Chart 1: Calories Burned -->
+    <div class="chart-container">
+        <h4>Daily Exercise Calories Burned</h4>
+        <canvas id="exerciseChart"></canvas>
+    </div>
 
+    <!-- Chart 2: Calorie Intake -->
+    <div class="chart-container">
+        <h4>Daily Calorie Intake</h4>
+        <canvas id="intakeChart"></canvas>
+    </div>
+
+    <!-- Chart 3: Weight Trend -->
+    <div class="chart-container">
+        <h4>Weight Trend (Regression Analysis)</h4>
+        <canvas id="weightChart"></canvas>
+    </div>
+</div>
+{% endblock %}
+
+{% block css %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" />
+<style>
+    .chart-container {
+        width: 80%;
+        margin: 2rem auto;
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    }
+</style>
+{% endblock %}
+
+{% block js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    function getLast14DaysLabels() {
+        const labels = [];
+        const today = new Date();
+        for (let i = 13; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(today.getDate() - i);
+            const label = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            labels.push(label);
+        }
+        return labels;
+    }
+
+    const labels = getLast14DaysLabels();
+
+    const burned = [300, 500, 450, 600, 700, 400, 500, 550, 620, 700, 600, 580, 640, 670];
+    const intake = [2000, 2100, 1800, 2200, 2500, 2300, 2000, 1950, 2100, 2400, 2350, 2250, 2150, 2050];
+    const weight = [70.0, 69.9, 69.8, 69.7, 69.6, 69.5, 69.4, 69.3, 69.2, 69.1, 69.0, 68.9, 68.8, 68.7];
+
+    new Chart(document.getElementById('exerciseChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Calories Burned',
+                data: burned,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+
+    new Chart(document.getElementById('intakeChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Calories Intake',
+                data: intake,
+                backgroundColor: 'rgba(255, 159, 64, 0.6)',
+                borderColor: 'rgba(255, 159, 64, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+
+    new Chart(document.getElementById('weightChart'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Weight (kg)',
+                data: weight,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                fill: false,
+                tension: 0.3,
+                pointRadius: 5,
+                pointBackgroundColor: 'rgba(54, 162, 235, 1)'
+            }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: false, title: { display: true, text: 'kg' } } } }
+    });
+</script>
 {% endblock %}

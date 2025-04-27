@@ -1,9 +1,64 @@
 {% extends "base.html" %}
 
 {% block title %}
-    Exercise
+Exercise
 {% endblock %}
 
 {% block content %}
-    <p>Exercise Page</p>
+<div class="exercise-bg"></div>
+
+<div class="container mt-5 position-relative">
+    <h4 class="mb-4">Upload your data</h4>
+    <div>Only csv files with the same format and column names as the following file example are supported:</div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Daily calories intake(whole number)</th>
+                <th>Daily calories burn(whole number)</th>
+                <th>Weight(kg)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>2000</td>
+                <td>1500</td>
+                <td>70</td>
+            </tr>
+            <tr>
+                <td>2500</td>
+                <td>2000</td>
+                <td>75</td>
+            </tr>
+            <tr>
+                <td>3000</td>
+                <td>2500</td>
+                <td>80</td>
+            </tr>
+        </tbody>
+    </table>
+    <form action="" method="post" enctype="multipart/form-data">
+        <label for="file" class="form-label h6">Upload your file</label>
+        <input type="file" class="form-control mb-2" name="file" id="file" accept=".csv">
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary mt-2">Submit</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block css %}
+<style>
+    .exercise-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: -1;
+        background: url('{{ url_for("static", filename="frontend/towfiqu-barbhuiya-J6g_szOtMF4-unsplash.jpg") }}') center center/cover no-repeat;
+        filter: blur(2px);
+    }
+</style>
+{% endblock %}
+{% block js %}
 {% endblock %}
