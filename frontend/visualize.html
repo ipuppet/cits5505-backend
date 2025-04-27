@@ -21,39 +21,8 @@
 </head>
 <body>
 <div class="mainstr">
-  <!-- Navigation bar -->
-  <nav class="navbar navbar-expand-lg bg-body-tertiary bg-dark border-bottom border-body" data-bs-theme="dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">Exercise Expert</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarText">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link" href="introductory.html">Introductory</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Upload data</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="visualize.html">Visualize data</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Share data</a>
-          </li>
-        </ul>
-        <div class="navbar-text">
-          <a class="nav-link" href="#">Sign in</a>
-        </div>
-        <div class="navbar-text">
-          <a class="nav-link" href="#">Contact</a>
-        </div>
-      </div>
-    </div>
-  </nav>
-  
-  
+  <!-- Navigation bar placeholder -->
+  <div id="navbar"></div>
 
   <!-- Chart 1: Calories Burned -->
   <div class="chart-container">
@@ -75,7 +44,6 @@
 </div>
 
 <script>
-  // Automatically generate last 14 days as date labels in 'MMM DD' format (e.g., Apr 18)
   function getLast14DaysLabels() {
     const labels = [];
     const today = new Date();
@@ -88,15 +56,12 @@
     return labels;
   }
 
-  // X-axis labels (last 14 days)
   const labels = getLast14DaysLabels();
 
-  // Sample dataset — these values should be replaced dynamically from backend
   const burned = [300, 500, 450, 600, 700, 400, 500, 550, 620, 700, 600, 580, 640, 670];
   const intake = [2000, 2100, 1800, 2200, 2500, 2300, 2000, 1950, 2100, 2400, 2350, 2250, 2150, 2050];
   const weight = [70.0, 69.9, 69.8, 69.7, 69.6, 69.5, 69.4, 69.3, 69.2, 69.1, 69.0, 68.9, 68.8, 68.7];
 
-  // Chart 1: Calories burned (Bar Chart)
   new Chart(document.getElementById('exerciseChart'), {
     type: 'bar',
     data: {
@@ -109,15 +74,9 @@
         borderWidth: 1
       }]
     },
-    options: {
-      responsive: true,
-      scales: {
-        y: { beginAtZero: true }
-      }
-    }
+    options: { responsive: true, scales: { y: { beginAtZero: true } } }
   });
 
-  // Chart 2: Calorie Intake (Bar Chart)
   new Chart(document.getElementById('intakeChart'), {
     type: 'bar',
     data: {
@@ -130,15 +89,9 @@
         borderWidth: 1
       }]
     },
-    options: {
-      responsive: true,
-      scales: {
-        y: { beginAtZero: true }
-      }
-    }
+    options: { responsive: true, scales: { y: { beginAtZero: true } } }
   });
 
-  // Chart 3: Weight Trend (Line Chart with simulated regression)
   new Chart(document.getElementById('weightChart'), {
     type: 'line',
     data: {
@@ -154,21 +107,12 @@
         pointBackgroundColor: 'rgba(54, 162, 235, 1)'
       }]
     },
-    options: {
-      responsive: true,
-      scales: {
-        y: {
-          beginAtZero: false,
-          title: {
-            display: true,
-            text: 'kg'
-          }
-        }
-      }
-    }
+    options: { responsive: true, scales: { y: { beginAtZero: false, title: { display: true, text: 'kg' } } } }
   });
 </script>
 
+<!-- Include your existing frontend.js for dynamic navbar loading -->
+<script src="./frontend.js"></script>
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
 </body>
