@@ -89,7 +89,7 @@ Alternatively, you can use VSCode with the [Black extension](https://marketplace
 │   ├── static
 │   ├── templates
 │   └── utils
-├── fontend
+├── frontend
 │   ├──README.md
 │   ├──navbar.html
 │   ├──introductory.html
