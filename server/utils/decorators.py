@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import redirect, url_for, flash, session, g
+from flask import redirect, url_for, flash, session, g, jsonify
 
 from server.blueprints.user.logic import get_user
 
@@ -22,3 +22,23 @@ def login_required(f):
         return f(*args, **kwargs)
 
     return decorated_function
+
+
+def api_response(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            response = {
+                "code": 1,
+                "message": "success",
+                "data": func(*args, **kwargs)
+            }
+        except Exception as e:
+            response = {
+                "code": 0,
+                "message": str(e),
+                "data": None
+            }
+        return jsonify(response)
+
+    return wrapper

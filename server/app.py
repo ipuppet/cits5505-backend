@@ -4,11 +4,13 @@ from flask import Flask
 from server.models import db, migrate
 from server.utils.mail import mail
 
-def create_app(config_class="server.config.DevelopmentConfig"):
+def create_app(config_class=None):
     # Create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-
     # Load the default configuration
+    if config_class is None:
+        env = os.getenv("FLASK_ENV", "production")
+        config_class = f"server.config.{env.capitalize()}Config"
     app.config.from_object(config_class)
 
     # Ensure the instance folder and config file exist

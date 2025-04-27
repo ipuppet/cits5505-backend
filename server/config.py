@@ -1,7 +1,8 @@
+import os
+
+
 class Config:
-    # SECRET_KEY should be set with os.getenv("SECRET_KEY")
-    # In this project, environment variables will not be used
-    SECRET_KEY = "default_secret_key"
+    SECRET_KEY = os.getenv("SECRET_KEY")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 

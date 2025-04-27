@@ -2,7 +2,8 @@
 
 ## Dependencies
 
-Please use virtual environments to manage dependencies. You can use `venv` or `virtualenv` to create a virtual environment.
+Please use virtual environments to manage dependencies. You can use `venv` or `virtualenv` to create a virtual
+environment.
 
 To create a virtual environment, run the following command:
 
@@ -24,7 +25,9 @@ source .venv/bin/activate
 .venv\Scripts\activate
 ```
 
-This project use [pip-tools](https://github.com/jazzband/pip-tools) to manage dependencies. The main file is `requirements.in`, which lists the top-level dependencies. The `requirements.txt` file is generated from this file and includes all the transitive dependencies.
+This project use [pip-tools](https://github.com/jazzband/pip-tools) to manage dependencies. The main file is
+`requirements.in`, which lists the top-level dependencies. The `requirements.txt` file is generated from this file and
+includes all the transitive dependencies.
 
 **Do not edit `requirements.txt` directly.**
 
@@ -50,34 +53,55 @@ pip install -r requirements.txt
 
 ## Style guide
 
-This project follows the [Black](https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html) style guide for Python code. To format the code, run the following command:
+This project follows the [Black](https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html) style
+guide for Python code. To format the code, run the following command:
 
 ```bash
 black .
 ```
 
-Alternatively, you can use VSCode with the [Black extension](https://marketplace.visualstudio.com/items/?itemName=ms-python.black-formatter) to format the code automatically on save.
+Alternatively, you can use VSCode with
+the [Black extension](https://marketplace.visualstudio.com/items/?itemName=ms-python.black-formatter) to format the code
+automatically on save.
 
 ## Project structure
 
-> `tree -I "__pycache__|*.pyc|.venv|*.html|css|js"`
+> `tree -I "__pycache__|.venv|*.html|css|js|img|test_*.py"`
 
 ```plaintext
 .
+├── frontend
 ├── instance
 │   ├── config.py
 │   └── dev.sqlite
 ├── migrations
+│   ├── alembic.ini
+│   ├── env.py
+│   ├── README
+│   ├── script.py.mako
+│   └── versions
 ├── README.md
 ├── requirements.in
 ├── requirements.txt
-├── backend
+├── server
 │   ├── app.py
 │   ├── blueprints
+│   │   ├── dashboard
+│   │   │   ├── routes.py
+│   │   │   └── templates
+│   │   │       └── dashboard
+│   │   ├── exercise
+│   │   │   ├── routes.py
+│   │   │   └── templates
+│   │   │       └── exercise
 │   │   ├── index
 │   │   │   ├── routes.py
 │   │   │   └── templates
 │   │   │       └── index
+│   │   ├── share
+│   │   │   ├── routes.py
+│   │   │   └── templates
+│   │   │       └── share
 │   │   └── user
 │   │       ├── forms.py
 │   │       ├── logic.py
@@ -105,25 +129,27 @@ Alternatively, you can use VSCode with the [Black extension](https://marketplace
     └── test_models
 ```
 
-
 ### Directory structure
 
-- `instance`: This directory contains the development configuration file and the SQLite database file. The configuration will override the default configuration in `server/config.py`.
-- `requirements.in`: This file lists the top-level dependencies for the project. It is used by `pip-tools` to generate the `requirements.txt` file.
+- `instance`: This directory contains the development configuration file and the SQLite database file. The configuration
+  will override the default configuration in `server/config.py`.
+- `requirements.in`: This file lists the top-level dependencies for the project. It is used by `pip-tools` to generate
+  the `requirements.txt` file.
 - `migrations`: This directory contains the database migration files. It is created by Flask-Migrate.
 - `server`: This directory contains the main application code. It includes the following contents:
-  - `blueprints`: This directory contains the blueprints. Each blueprint is a separate module that can be registered with the main application.
-    - `index`: Blueprint for the home module.
-    - `user`: Blueprint for user-related module.
-  - `utils`: This directory contains utility functions and decorators.
-  - `static`: This directory contains static files such as CSS and JavaScript files.
-  - `templates`: This directory contains the base templates for the application.
-  - `app.py`: The main application file. It initializes the Flask application and registers the blueprints.
-  - `config.py`: The configuration file for the application.
-  - `models.py`: Models for the application.
+    - `blueprints`: This directory contains the blueprints. Each blueprint is a separate module that can be registered
+      with the main application.
+        - `index`: Blueprint for the home module.
+        - `user`: Blueprint for user-related module.
+    - `utils`: This directory contains utility functions and decorators.
+    - `static`: This directory contains static files such as CSS and JavaScript files.
+    - `templates`: This directory contains the base templates for the application.
+    - `app.py`: The main application file. It initializes the Flask application and registers the blueprints.
+    - `config.py`: The configuration file for the application.
+    - `models.py`: Models for the application.
 - `tests`: This directory contains the test files for the application. It includes the following contents:
-  - `conftest.py`: This file contains the test configuration and fixtures.
-  - `test_models`: This directory contains the test files for the models.
+    - `conftest.py`: This file contains the test configuration and fixtures.
+    - `test_models`: This directory contains the test files for the models.
 
 *`instance` should not be included in version control.*
 

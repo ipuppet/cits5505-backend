@@ -5,15 +5,22 @@ from server.models import db, User
 def login(email: str, password: str) -> User:
     user = User.get_by_email(email)
     if user and user.check_password(password):
+        try:
+            # Update the last login time
+            user.last_login = db.func.now()
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            raise RuntimeError("Failed to update last login time.") from e
         return user
     raise ValueError("Invalid email or password.")
 
 
 def register(
-    username: str,
-    password: str,
-    email: str,
-    nickname: str,
+        username: str,
+        password: str,
+        email: str,
+        nickname: str,
 ):
     # Check if the username or email already exists
     User.validate_unique(username, email)
@@ -46,10 +53,10 @@ def reset_password(user_id: int, new_password: str):
 
 
 def update_user(
-    user_id: int,
-    username: str | None = None,
-    email: str | None = None,
-    nickname: str | None = None,
+        user_id: int,
+        username: str | None = None,
+        email: str | None = None,
+        nickname: str | None = None,
 ):
     if not any([username, email, nickname]):
         return
@@ -76,6 +83,13 @@ def update_user(
 
 def get_user(user_id: int) -> User:
     user = User.get(user_id, as_dict=True)
+    if not user:
+        raise ValueError("User not found.")
+    return user
+
+
+def search_user(username: str) -> list[dict]:
+    user = User.search_by_username(username)
     if not user:
         raise ValueError("User not found.")
     return user
