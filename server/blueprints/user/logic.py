@@ -82,9 +82,9 @@ def update_user(
 
 
 def get_user(user_id: int) -> User:
-    user = User.get(user_id, as_dict=True)
+    user = User.get(user_id)  # Do NOT use as_dict=True
     if not user:
-        raise ValueError("User not found.")
+        return None
     return user
 
 

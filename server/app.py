@@ -1,7 +1,8 @@
 import os
 from flask import Flask
+from flask import g, session
 
-from server.models import db, migrate
+from server.models import db, migrate,User
 from server.utils.mail import mail
 
 def create_app(config_class=None):

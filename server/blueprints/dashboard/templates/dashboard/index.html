@@ -11,7 +11,20 @@ Dashboard
     <h1>Welcome to the Dashboard Page</h1>
 
     {% if g.user %}
+
+    {% if g.user.avatar %}
+    <img src="{{ url_for('static', filename=g.user.avatar) }}" alt="Avatar" class="rounded-circle mb-2" width="48"
+        height="48">
+    {% else %}
+    <img src="https://ui-avatars.com/api/?name={{ g.user.nickname|default('User') }}" ...>
+
+    {% endif %}
     <p>Hello, {{ g.user.nickname }}!</p>
+    <form action="{{ url_for('dashboard.upload_avatar') }}" method="post" enctype="multipart/form-data">
+        <label for="avatar">Upload Avatar:</label>
+        <input type="file" name="avatar" id="avatar" accept="image/*" class="form-control" required>
+        <button type="submit" class="btn btn-primary mt-2">Upload</button>
+    </form>
     <a href="{{ url_for('user.password') }}">Reset Password</a>
     <p><a href="{{ url_for('user.logout') }}">Logout</a></p>
     {% else %}

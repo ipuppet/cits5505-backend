@@ -22,6 +22,8 @@ class User(db.Model):
     password = db.Column(db.Text, nullable=False)
     email = db.Column(db.Text, nullable=False, unique=True)
     nickname = db.Column(db.Text, nullable=False)
+    avatar = db.Column(db.String(256), nullable=True)  # Stores the relative path to the avatar image
+
     created_at = db.Column(
         db.DateTime, nullable=False, default=db.func.current_timestamp()
     )
@@ -49,6 +51,7 @@ class User(db.Model):
             "username": user.username,
             "nickname": user.nickname,
             "email": user.email,
+            "avatar": user.avatar, 
             "created_at": user.created_at,
             "last_login": user.last_login,
         }
@@ -59,7 +62,7 @@ class User(db.Model):
             raise ValueError("ID cannot be empty")
         user = db.session.get(User, int(user_id))
         if not user:
-            raise ValueError("User not found")
+            return None
         if as_dict:
             return User.as_dict(user)
         return user
