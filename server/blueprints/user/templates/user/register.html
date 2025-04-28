@@ -24,7 +24,8 @@
         <input type="password" class="form-control" id="confirm_password"
                required oninput="checkPasswordMatch()">
         <div class="invalid-feedback" id="password-match-error"></div>
-        <button type="submit">Register</button>
+        <br/>
+        <button class="btn btn-primary" type="submit">Register</button>
     </form>
     <a href="{{ url_for('index.index') }}?login=true">Already have an account? Login here</a>
 
