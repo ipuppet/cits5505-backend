@@ -2,8 +2,6 @@ import bcrypt
 import uuid
 from enum import Enum
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
-import uuid
 from flask_migrate import Migrate
 from sqlalchemy.orm import validates
 
@@ -30,9 +28,7 @@ class User(db.Model):
     last_login = db.Column(
         db.DateTime, nullable=True, default=db.func.current_timestamp()
     )
-    #tracking_data = db.relationship("TrackingData", backref="user", lazy=True)
-    #exercises = db.relationship("Exercise", backref="user", lazy=True)
-    #achievements = db.relationship("Achievement", backref="user", lazy=True)
+   
 
 
     exercises = db.relationship(
