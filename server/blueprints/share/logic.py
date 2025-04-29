@@ -58,9 +58,6 @@ def delete_share(share_id: uuid.UUID):
 
     Args:
         share_id (uuid.UUID): The ID of the share to delete.
-
-    Returns:
-        bool: True if the share was deleted, False otherwise.
     """
     try:
         share = Share.get(share_id)
