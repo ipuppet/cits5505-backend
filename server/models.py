@@ -52,24 +52,22 @@ class User(db.Model):
         }
 
     @staticmethod
-    def get(user_id: int, as_dict: bool = False):
+    def get(user_id: int) -> "User":
         if not user_id:
             raise ValueError("ID cannot be empty")
         user = db.session.get(User, int(user_id))
         if not user:
             raise ValueError("User not found")
-        if as_dict:
-            return User.as_dict(user)
         return user
 
     @staticmethod
-    def get_by_email(email: str):
+    def get_by_email(email: str) -> "User":
         if not email:
             raise ValueError("Email cannot be empty")
         return db.session.query(User).filter_by(email=email).first()
 
     @staticmethod
-    def search_by_username(username: str):
+    def search_by_username(username: str) -> list[dict]:
         """Fuzzy search for a user by username."""
         if not username:
             raise ValueError("Username cannot be empty")
