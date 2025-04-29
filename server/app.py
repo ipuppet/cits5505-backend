@@ -4,7 +4,7 @@ from flask import Flask
 from server.models import db, migrate
 from server.utils.mail import mail
 
-def create_app(config_class=None):
+def  create_app(config_class=None):
     # Create and configure the app
     app = Flask(__name__, instance_relative_config=True)
     # Load the default configuration
@@ -13,7 +13,7 @@ def create_app(config_class=None):
         config_class = f"server.config.{env.capitalize()}Config"
     app.config.from_object(config_class)
 
-    # Ensure the instance folder and config file exist
+   # Ensure the instance folder and config file exist
     try:
         if not os.path.exists(app.instance_path):
             os.makedirs(app.instance_path)
