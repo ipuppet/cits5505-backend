@@ -56,9 +56,16 @@ def register():
     password = form.password.data
     email = form.email.data
     nickname = form.nickname.data
+    date_of_birth=form.date_of_birth.data
+    sex=form.sex.data
+    height=form.height.data
+    weight=form.weight.data
 
     try:
-        user_logic.register(username, password, email, nickname)
+        user_logic.register(username, password, email, nickname,date_of_birth=date_of_birth,
+            sex=sex,
+            height=height,
+            weight=weight)
         flash(f"Registration successful {nickname}!", "success")
         return redirect(url_for("index.index"))
     except Exception as e:

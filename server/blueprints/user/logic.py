@@ -21,6 +21,10 @@ def register(
         password: str,
         email: str,
         nickname: str,
+        date_of_birth=None,
+        sex=None,
+        height=None,
+        weight=None,
 ):
     # Check if the username or email already exists
     User.validate_unique(username, email)
@@ -32,6 +36,10 @@ def register(
             nickname=nickname,
             password=User.hash_password(password),  # Hash the password
             email=email,
+            date_of_birth=date_of_birth,
+            sex=sex,
+            height=height,
+            weight=weight,
         )
         db.session.add(new_user)
         db.session.commit()

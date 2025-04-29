@@ -5,71 +5,176 @@ Dashboard
 {% endblock %}
 
 {% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-xl-10 col-12">
+            <div class="row">
 
-
-<div class="mainstr mt-5">
-    <h1>Welcome to the Dashboard Page</h1>
-
-    {% if g.user %}
-
-    {% if g.user.avatar %}
-    <img src="{{ url_for('static', filename=g.user.avatar) }}" alt="Avatar" class="rounded-circle mb-2" width="48"
-        height="48">
-    {% else %}
-    <img src="https://ui-avatars.com/api/?name={{ g.user.nickname|default('User') }}" ...>
-
-    {% endif %}
-    <p>Hello, {{ g.user.nickname }}!</p>
-    <form action="{{ url_for('dashboard.upload_avatar') }}" method="post" enctype="multipart/form-data">
-        <label for="avatar">Upload Avatar:</label>
-        <input type="file" name="avatar" id="avatar" accept="image/*" class="form-control" required>
-        <button type="submit" class="btn btn-primary mt-2">Upload</button>
-    </form>
-    <a href="{{ url_for('user.password') }}">Reset Password</a>
-    <p><a href="{{ url_for('user.logout') }}">Logout</a></p>
-    {% else %}
-    <p>You are not logged in.</p>
-    <p>To access your account, please log in or register.</p>
-
-    <a href="{{ url_for('user.register') }}">Register</a>
-    <a href="{{ url_for('user.login') }}">Login</a>
-    {% endif %}
-    <!-- Chart 1: Calories Burned -->
-    <div class="chart-container">
-        <h4>Daily Exercise Calories Burned</h4>
-        <canvas id="exerciseChart"></canvas>
-    </div>
-
-    <!-- Chart 2: Calorie Intake -->
-    <div class="chart-container">
-        <h4>Daily Calorie Intake</h4>
-        <canvas id="intakeChart"></canvas>
-    </div>
-
-    <!-- Chart 3: Weight Trend -->
-    <div class="chart-container">
-        <h4>Weight Trend (Regression Analysis)</h4>
-        <canvas id="weightChart"></canvas>
+                {% if g.user %}
+                <!-- User Info Left -->
+                <div class="col-lg-4 mb-4">
+                    <div class="card shadow-lg border-0 h-100">
+                        <div class="card-body">
+                            <form id="avatar-form" action="{{ url_for('dashboard.upload_avatar') }}" method="post"
+                                enctype="multipart/form-data" class="mt-2 mb-3 text-center">
+                                <label for="avatar" style="cursor:pointer; display:block;">
+                                    {% if g.user.avatar %}
+                                    <img src="{{ url_for('static', filename=g.user.avatar) }}" alt="Avatar"
+                                        class="rounded-circle shadow mb-3" width="96" height="96" id="avatar-img">
+                                    {% else %}
+                                    <img src="https://ui-avatars.com/api/?name={{ g.user.nickname|default('User') }}&size=96&background=0D8ABC&color=fff"
+                                        alt="Default Avatar" class="rounded-circle shadow mb-3" width="96" height="96"
+                                        id="avatar-img">
+                                    {% endif %}
+                                </label>
+                                <input type="file" name="avatar" id="avatar" accept="image/*" style="display:none"
+                                    required>
+                            </form>
+                            <h2 class="card-title mb-1 text-center"><strong>{{ g.user.nickname }}</strong></h2>
+                            <div class="card mb-3 shadow-sm border-0">
+                                <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                                    <strong>Personal Information</strong>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div class="row mb-2">
+                                        <div class="col-5 text-muted"><strong>Username:</strong></div>
+                                        <div class="col-7">{{ g.user.username }}</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-5 text-muted"><strong>Email:</strong></div>
+                                        <div class="col-7">{{ g.user.email }}</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-5 text-muted"><strong>Date of Birth:</strong></div>
+                                        <div class="col-7">{{ g.user.date_of_birth or 'N/A' }}</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-5 text-muted"><strong>Sex:</strong></div>
+                                        <div class="col-7">{{ g.user.sex or 'N/A' }}</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-5 text-muted"><strong>Height (cm):</strong></div>
+                                        <div class="col-7">{{ g.user.height or 'N/A' }}</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-5 text-muted"><strong>Weight (kg):</strong></div>
+                                        <div class="col-7">{{ g.user.weight or 'N/A' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <a href="{{ url_for('user.password') }}" class="btn btn-link p-0 me-3">Reset
+                                    Password</a>
+                                <a href="{{ url_for('user.logout') }}" class="btn btn-link text-danger p-0">Logout</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Charts Right -->
+                <div class="col-lg-8">
+                    <div class="row g-4">
+                        <div class="col-md-12">
+                            <div class="card chart-card shadow-sm border-0 mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title text-center">Calories Burned</h5>
+                                    <canvas id="exerciseChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card chart-card shadow-sm border-0 mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title text-center">Calorie Intake</h5>
+                                    <canvas id="intakeChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card chart-card shadow-sm border-0">
+                                <div class="card-body">
+                                    <h5 class="card-title text-center">Weight Trend</h5>
+                                    <canvas id="weightChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-info text-center">
+                    <p>You are not logged in.</p>
+                    <p>
+                        <a href="{{ url_for('user.register') }}" class="btn btn-primary btn-sm">Register</a>
+                        <a href="{{ url_for('user.login') }}" class="btn btn-outline-primary btn-sm">Login</a>
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
 
 {% block css %}
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
 <style>
-    .chart-container {
-        width: 80%;
-        margin: 2rem auto;
-        background-color: #f8f9fa;
-        padding: 1rem;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    body {
+        background: #292a2c51 !important;
+        /* light grey */
+    }
+
+    .card {
+        border-radius: 1rem;
+    }
+
+    .chart-card {
+        min-height: 400px;
+        background: linear-gradient(135deg, #f8fafc 60%, #e0e7ef 100%);
+    }
+
+    .card-header.bg-light {
+        background: #f8fafc !important;
+        font-size: 1.1rem;
+        border-bottom: 1px solid #e0e7ef;
+    }
+
+    .card-body .row {
+        align-items: center;
+    }
+
+    .card-body .col-5 {
+        font-weight: 500;
+    }
+
+    .card-body .col-7 {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .rounded-circle {
+        border: 3px solid #0d6efd;
+    }
+
+    .btn-link {
+        text-decoration: none;
+    }
+
+    .btn-link:hover {
+        text-decoration: underline;
     }
 </style>
 {% endblock %}
 
 {% block js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.getElementById('avatar').addEventListener('change', function () {
+        if (this.files.length > 0) {
+            document.getElementById('avatar-form').submit();
+        }
+    });
+</script>
 <script>
     function getLast14DaysLabels() {
         const labels = [];

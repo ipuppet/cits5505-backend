@@ -23,6 +23,10 @@ class User(db.Model):
     email = db.Column(db.Text, nullable=False, unique=True)
     nickname = db.Column(db.Text, nullable=False)
     avatar = db.Column(db.String(256), nullable=True)  # Stores the relative path to the avatar image
+    date_of_birth = db.Column(db.Date, nullable=True)
+    sex = db.Column(db.String(10), nullable=True)  # e.g. 'Male', 'Female', 'Other'
+    height = db.Column(db.Float, nullable=True)    # in cm
+    weight = db.Column(db.Float, nullable=True)    # in kg
 
     created_at = db.Column(
         db.DateTime, nullable=False, default=db.func.current_timestamp()
