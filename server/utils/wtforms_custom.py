@@ -1,5 +1,7 @@
-from wtforms import fields
 import json
+from wtforms import fields
+
+from wtforms.validators import ValidationError
 
 
 class JSONField(fields.StringField):
@@ -10,8 +12,8 @@ class JSONField(fields.StringField):
         if valuelist:
             try:
                 self.data = json.loads(valuelist[0])
-            except ValueError:
-                raise ValueError("Invalid JSON data")
+            except (ValueError, json.JSONDecodeError):
+                raise ValidationError("Invalid JSON data")
         else:
             self.data = None
 
@@ -20,5 +22,5 @@ class JSONField(fields.StringField):
         if self.data:
             try:
                 json.dumps(self.data)
-            except TypeError:
-                raise ValueError("Invalid JSON data")
+            except (TypeError, ValueError):
+                raise ValidationError("Invalid JSON data")
