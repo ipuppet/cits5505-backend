@@ -22,7 +22,7 @@ def get_shared(share_id: uuid.UUID) -> Share:
         raise ValueError(f"Error retrieving share: {str(e)}")
 
 
-def create_shared(
+def create_share(
         sender_id: int,
         receiver_id: int,
         scope: dict,
@@ -52,7 +52,7 @@ def create_shared(
         raise ValueError(f"Error creating share: {str(e)}")
 
 
-def delete_shared(share_id: uuid.UUID):
+def delete_share(share_id: uuid.UUID):
     """
     Delete a share record from the database.
 
