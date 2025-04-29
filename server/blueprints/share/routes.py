@@ -20,7 +20,6 @@ def index():
 def shared(share_id):
     if not share_id:
         raise ValueError("Share ID is required.")
-    share_id = uuid.UUID(share_id)
     # Handle DELETE request
     if request.method == "DELETE":
         return logic.delete_share(share_id)
