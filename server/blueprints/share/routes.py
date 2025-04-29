@@ -35,7 +35,8 @@ def shared(share_id):
 def create_share():
     share_form = ShareForm(request.form)
     if not share_form.validate():
-        raise ValueError(share_form.errors)
+        flash("Form validation failed. Please correct the errors and try again.", "danger")
+        return render_template("share/create.html", form=share_form)
     try:
         share = logic.create_share(
             sender_id=g.user.id,
