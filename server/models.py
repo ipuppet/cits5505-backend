@@ -28,8 +28,6 @@ class User(db.Model):
     last_login = db.Column(
         db.DateTime, nullable=True, default=db.func.current_timestamp()
     )
-   
-
 
     exercises = db.relationship(
         "Exercise", backref="user", lazy=True, cascade="all, delete-orphan"
@@ -229,13 +227,9 @@ class Share(db.Model):
     )
 
     @staticmethod
-    def get(share_id: str, include_deleted: bool = False):
+    def get(share_id: uuid.UUID, include_deleted: bool = False):
         if not share_id:
             raise ValueError("ID cannot be empty")
-        try:
-            share_id = uuid.UUID(share_id) if isinstance(share_id, str) else share_id
-        except (ValueError, AttributeError):
-            raise ValueError("Invalid share ID format")
 
         query = db.session.query(Share).filter_by(id=share_id)
         if not include_deleted:
