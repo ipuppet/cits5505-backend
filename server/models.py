@@ -64,10 +64,9 @@ class User(db.Model):
             raise ValueError("ID cannot be empty")
         user = db.session.get(User, int(user_id))
         if not user:
-            return None
-        if as_dict:
-            return User.as_dict(user)
+            raise ValueError("User not found")
         return user
+
 
     @staticmethod
     def get_by_email(email: str) -> "User":
