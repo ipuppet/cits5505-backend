@@ -28,8 +28,6 @@ class User(db.Model):
     last_login = db.Column(
         db.DateTime, nullable=True, default=db.func.current_timestamp()
     )
-   
-
 
     exercises = db.relationship(
         "Exercise", backref="user", lazy=True, cascade="all, delete-orphan"
@@ -54,24 +52,22 @@ class User(db.Model):
         }
 
     @staticmethod
-    def get(user_id: int, as_dict: bool = False):
+    def get(user_id: int) -> "User":
         if not user_id:
             raise ValueError("ID cannot be empty")
         user = db.session.get(User, int(user_id))
         if not user:
             raise ValueError("User not found")
-        if as_dict:
-            return User.as_dict(user)
         return user
 
     @staticmethod
-    def get_by_email(email: str):
+    def get_by_email(email: str) -> "User":
         if not email:
             raise ValueError("Email cannot be empty")
         return db.session.query(User).filter_by(email=email).first()
 
     @staticmethod
-    def search_by_username(username: str):
+    def search_by_username(username: str) -> list[dict]:
         """Fuzzy search for a user by username."""
         if not username:
             raise ValueError("Username cannot be empty")
@@ -229,13 +225,9 @@ class Share(db.Model):
     )
 
     @staticmethod
-    def get(share_id: str, include_deleted: bool = False):
+    def get(share_id: uuid.UUID, include_deleted: bool = False):
         if not share_id:
             raise ValueError("ID cannot be empty")
-        try:
-            share_id = uuid.UUID(share_id) if isinstance(share_id, str) else share_id
-        except (ValueError, AttributeError):
-            raise ValueError("Invalid share ID format")
 
         query = db.session.query(Share).filter_by(id=share_id)
         if not include_deleted:
