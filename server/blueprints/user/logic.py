@@ -1,4 +1,5 @@
 from sqlalchemy.exc import SQLAlchemyError
+
 from server.models import db, User
 
 
@@ -87,13 +88,6 @@ def update_user(
     except SQLAlchemyError as e:
         db.session.rollback()
         raise RuntimeError("Failed to update user.") from e
-
-
-def get_user(user_id: int) -> User:
-    user = User.get(user_id)  # Do NOT use as_dict=True
-    if not user:
-        return None
-    return user
 
 
 def search_user(username: str) -> list[dict]:
