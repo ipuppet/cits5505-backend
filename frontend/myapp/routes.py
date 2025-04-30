@@ -22,6 +22,4 @@ def visualize():
 def share():
     return render_template('share.html')
 
-@app.route('/navbar')
-def navbar():
-    return render_template('navbar.html')
+
