@@ -25,13 +25,8 @@ a {
    min-height: 100vh;
   
 }
-#navbar{
-   /* height:10vh; */
- 
-}
 
 .navbar.navbar-expand-lg.bg-body-tertiary.bg-dark.border-bottom.border-body{
-   /* height:100%; */ 
    position:sticky;
    top:0;
    z-index: 100;
@@ -125,7 +120,7 @@ a {
 .uploadForm,.uploadFile{
    background-color: #f8f9fa;
    flex:1;
-   max-height:40%;
+   /* max-height:40%; */
 }
 #form{
    background-color: #f8f9fa;
