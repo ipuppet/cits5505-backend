@@ -30,7 +30,8 @@ Dashboard
                                 <input type="file" name="avatar" id="avatar" accept="image/*" style="display:none"
                                     required>
                             </form>
-                            <h2 class="card-title mb-1 text-center"><strong>{{ g.user.nickname }}</strong></h2>
+                            <h2 class="card-title mb-1 text-center" id="greeting-line"><strong>{{ g.user.nickname
+                                    }}</strong></h2>
                             <div class="card mb-3 shadow-sm border-0">
                                 <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
                                     <strong>Personal Information</strong>
@@ -105,8 +106,34 @@ Dashboard
                     </div>
                 </div>
                 <!-- Charts Right -->
+                <!-- Achievements Card START -->
                 <div class="col-lg-8">
                     <div class="row g-4">
+                        <div class="col-md-12">
+                            <div class="card chart-card shadow-sm border-0 mb-4">
+                                <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                                    <strong>Achievements</strong>
+                                </div>
+                                <div class="card-body p-3">
+                                    {% if achievements %}
+                                    <div class="d-flex flex-wrap gap-3 justify-content-center">
+                                        {% for ach in achievements %}
+                                        <div class="achievement-card d-flex flex-column align-items-center p-3">
+                                            <i class="bi bi-trophy-fill text-warning" style="font-size: 2rem;"></i>
+                                            <span class="mt-2" style="font-weight: 500;">{{ ach }}</span>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% else %}
+                                    <div class="text-muted text-center">No achievements yet. Start logging your
+                                        activities!
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Achievements Card END -->
+
                         <div class="col-md-12">
                             <div class="card chart-card shadow-sm border-0 mb-4">
                                 <div class="card-body">
@@ -133,6 +160,7 @@ Dashboard
                         </div>
                     </div>
                 </div>
+
                 {% else %}
                 <div class="alert alert-info text-center">
                     <p>You are not logged in.</p>
@@ -269,6 +297,28 @@ Dashboard
     document.getElementById('avatar').addEventListener('change', function () {
         if (this.files.length > 0) {
             document.getElementById('avatar-form').submit();
+        }
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        const greetingLine = document.getElementById('greeting-line');
+        if (greetingLine) {
+            const hour = new Date().getHours();
+            let greeting = "Hello";
+            let emoji = "👋";
+            if (hour >= 5 && hour < 12) {
+                greeting = "Good morning";
+                emoji = "🌅";
+            } else if (hour >= 12 && hour < 18) {
+                greeting = "Good afternoon";
+                emoji = "☀️";
+            } else if (hour >= 18 && hour < 22) {
+                greeting = "Good evening";
+                emoji = "🌇";
+            } else {
+                greeting = "Good night";
+                emoji = "🌙";
+            }
+            greetingLine.innerHTML = `<span>${emoji} ${greeting}, <strong>{{ g.user.nickname }}</strong></span>`;
         }
     });
 </script>
