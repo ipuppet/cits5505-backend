@@ -51,7 +51,9 @@ class User(db.Model):
             "username": user.username,
             "nickname": user.nickname,
             "email": user.email,
-            "avatar": user.avatar, 
+            "avatar": user.avatar,
+            "date_of_birth": user.date_of_birth,
+            "sex": user.sex,
             "created_at": user.created_at,
             "last_login": user.last_login,
         }
@@ -64,7 +66,6 @@ class User(db.Model):
         if not user:
             raise ValueError("User not found")
         return user
-
 
     @staticmethod
     def get_by_email(email: str) -> "User":

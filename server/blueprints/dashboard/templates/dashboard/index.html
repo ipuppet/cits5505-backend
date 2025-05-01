@@ -4,10 +4,12 @@
 Dashboard
 {% endblock %}
 
+{% set perth = pytz.timezone('Australia/Perth') %}
+
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-xl-10 col-12">
+        <div class="col-12">
             <div class="row">
 
                 {% if g.user %}
@@ -102,12 +104,6 @@ Dashboard
                                     </div>
                                 </div>
                                 <!-- Calendar Card END -->
-                                <div class="mt-3">
-                                    <a href="{{ url_for('user.password') }}" class="btn btn-link p-0 me-3">Reset
-                                        Password</a>
-                                    <a href="{{ url_for('user.logout') }}"
-                                        class="btn btn-link text-danger p-0">Logout</a>
-                                </div>
                             </div>
                         </div>
                     </div>

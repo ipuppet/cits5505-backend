@@ -1,7 +1,9 @@
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
 
-def fetch_weather_forecast(city, api_key, days=5):
+
+def fetch_weather_forecast(city, days=5):
+    api_key = "5118a8c67aec70333dac3704a6b65bb6"
     url = "https://api.openweathermap.org/data/2.5/forecast"
     params = {
         "q": city,
@@ -14,7 +16,7 @@ def fetch_weather_forecast(city, api_key, days=5):
     weather_forecast = []
     seen_dates = set()
     for item in data.get("list", []):
-        date_str = datetime.utcfromtimestamp(item["dt"]).strftime("%a %d")
+        date_str = datetime.fromtimestamp(item["dt"], tz=timezone.utc).strftime("%a %d")
         if date_str not in seen_dates and len(weather_forecast) < days:
             weather_forecast.append({
                 "date": date_str,
