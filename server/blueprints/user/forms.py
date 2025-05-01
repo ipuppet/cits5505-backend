@@ -25,9 +25,6 @@ class UserInfoForm(EmailForm):
     nickname = StringField("nickname", validators=[Optional()])
     date_of_birth = DateField("Date of Birth", format='%Y-%m-%d', validators=[DataRequired()])
     sex = SelectField("Sex", choices=[('', 'Select'), ('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')], validators=[DataRequired()])
-    height = FloatField("Height (cm)", validators=[DataRequired(), NumberRange(min=0, max=300)])
-    weight = FloatField("Weight (kg)", validators=[DataRequired(), NumberRange(min=0, max=500)])
-
 
 class LoginForm(PasswordForm, EmailForm):
     remember_me = BooleanField("remember_me", validators=[Optional()])

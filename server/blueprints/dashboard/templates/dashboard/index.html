@@ -15,7 +15,7 @@ Dashboard
                 <div class="col-lg-4 mb-4">
                     <div class="card shadow-lg border-0 h-100">
                         <div class="card-body">
-                            <form id="avatar-form" action="{{ url_for('dashboard.upload_avatar') }}" method="post"
+                            <form id="avatar-form" action="{{ url_for('user.upload_avatar') }}" method="post"
                                 enctype="multipart/form-data" class="mt-2 mb-3 text-center">
                                 <label for="avatar" style="cursor:pointer; display:block;">
                                     {% if g.user.avatar %}
@@ -54,53 +54,60 @@ Dashboard
                                         <div class="col-7">{{ g.user.sex or 'N/A' }}</div>
                                     </div>
                                     <div class="row mb-2">
-                                        <div class="col-5 text-muted"><strong>Height (cm):</strong></div>
-                                        <div class="col-7">{{ g.user.height or 'N/A' }}</div>
+                                        <div class="col-5 text-muted"><strong>Created At:</strong></div>
+                                        <div class="col-7">
+                                            {{ g.user.created_at.astimezone(perth).strftime('%Y-%m-%d %H:%M') if
+                                            g.user.created_at else 'N/A' }}
+                                        </div>
                                     </div>
                                     <div class="row mb-2">
-                                        <div class="col-5 text-muted"><strong>Weight (kg):</strong></div>
-                                        <div class="col-7">{{ g.user.weight or 'N/A' }}</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Weather Forecast Card START -->
-                            <div class="card mb-4 shadow-sm border-0">
-                                <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
-                                    <strong>Weather Forecast (Next 5 Days)</strong>
-                                </div>
-                                <div class="card-body p-2">
-                                    <div class="d-flex justify-content-between flex-nowrap overflow-auto gap-2">
-                                        {% for day in weather_forecast %}
-                                        <div
-                                            class="weather-day-card flex-shrink-0 text-center p-2 border rounded bg-light">
-                                            <div class="fw-bold" style="font-size: 1rem;">{{ day.date }}</div>
-                                            <div>
-                                                <img src="{{ day.icon_url }}" alt="weather" width="28" height="28">
-                                            </div>
-                                            <div style="font-size: 1rem;">{{ day.temp }}°C</div>
-                                            <div class="text-muted" style="font-size:0.85em;">{{ day.description }}
-                                            </div>
+                                        <div class="col-5 text-muted"><strong>Last Login:</strong></div>
+                                        <div class="col-7">
+                                            {{ g.user.last_login.astimezone(perth).strftime('%Y-%m-%d %H:%M') if
+                                            g.user.last_login else 'N/A' }}
                                         </div>
-                                        {% endfor %}
                                     </div>
                                 </div>
-                            </div>
-                            <!-- Weather Forecast Card END -->
+                                <!-- Weather Forecast Card START -->
+                                <div class="card mb-4 shadow-sm border-0">
+                                    <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                                        <strong>Weather Forecast (Next 5 Days)</strong>
+                                    </div>
+                                    <div class="card-body p-2">
+                                        <div class="d-flex justify-content-between flex-nowrap overflow-auto gap-2">
+                                            {% for day in weather_forecast %}
+                                            <div
+                                                class="weather-day-card flex-shrink-0 text-center p-2 border rounded bg-light">
+                                                <div class="fw-bold" style="font-size: 1rem;">{{ day.date }}</div>
+                                                <div>
+                                                    <img src="{{ day.icon_url }}" alt="weather" width="28" height="28">
+                                                </div>
+                                                <div style="font-size: 1rem;">{{ day.temp }}°C</div>
+                                                <div class="text-muted" style="font-size:0.85em;">{{ day.description }}
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Weather Forecast Card END -->
 
-                            <!-- Calendar Card START -->
-                            <div class="card mb-4 shadow-sm border-0">
-                                <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
-                                    <strong>Calendar</strong>
+                                <!-- Calendar Card START -->
+                                <div class="card mb-4 shadow-sm border-0">
+                                    <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                                        <strong>Calendar</strong>
+                                    </div>
+                                    <div class="card-body p-3">
+                                        <div id="calendar"></div>
+                                    </div>
                                 </div>
-                                <div class="card-body p-3">
-                                    <div id="calendar"></div>
+                                <!-- Calendar Card END -->
+                                <div class="mt-3">
+                                    <a href="{{ url_for('user.password') }}" class="btn btn-link p-0 me-3">Reset
+                                        Password</a>
+                                    <a href="{{ url_for('user.logout') }}"
+                                        class="btn btn-link text-danger p-0">Logout</a>
                                 </div>
-                            </div>
-                            <!-- Calendar Card END -->
-                            <div class="mt-3">
-                                <a href="{{ url_for('user.password') }}" class="btn btn-link p-0 me-3">Reset
-                                    Password</a>
-                                <a href="{{ url_for('user.logout') }}" class="btn btn-link text-danger p-0">Logout</a>
                             </div>
                         </div>
                     </div>
