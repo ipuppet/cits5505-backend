@@ -22,6 +22,10 @@ class User(db.Model):
     password = db.Column(db.Text, nullable=False)
     email = db.Column(db.Text, nullable=False, unique=True)
     nickname = db.Column(db.Text, nullable=False)
+    avatar = db.Column(db.String(256), nullable=True)  # Stores the relative path to the avatar image
+    date_of_birth = db.Column(db.Date, nullable=True)
+    sex = db.Column(db.String(10), nullable=True)  # e.g. 'Male', 'Female', 'Other'
+
     created_at = db.Column(
         db.DateTime, nullable=False, default=db.func.current_timestamp()
     )
@@ -47,6 +51,7 @@ class User(db.Model):
             "username": user.username,
             "nickname": user.nickname,
             "email": user.email,
+            "avatar": user.avatar, 
             "created_at": user.created_at,
             "last_login": user.last_login,
         }
@@ -59,6 +64,7 @@ class User(db.Model):
         if not user:
             raise ValueError("User not found")
         return user
+
 
     @staticmethod
     def get_by_email(email: str) -> "User":

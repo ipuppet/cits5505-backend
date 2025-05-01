@@ -1,4 +1,6 @@
 from sqlalchemy.exc import SQLAlchemyError
+import requests
+from datetime import datetime
 
 from server.models import db, User
 
@@ -22,6 +24,9 @@ def register(
         password: str,
         email: str,
         nickname: str,
+        date_of_birth=None,
+        sex=None,
+       
 ):
     # Check if the username or email already exists
     User.validate_unique(username, email)
@@ -33,6 +38,9 @@ def register(
             nickname=nickname,
             password=User.hash_password(password),  # Hash the password
             email=email,
+            date_of_birth=date_of_birth,
+            sex=sex,
+           
         )
         db.session.add(new_user)
         db.session.commit()
@@ -87,3 +95,4 @@ def search_user(username: str) -> list[dict]:
     if not user:
         raise ValueError("User not found.")
     return user
+
