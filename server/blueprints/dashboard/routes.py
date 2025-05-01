@@ -2,8 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from server.utils.decorators import login_required
-from server.blueprints.user.logic import fetch_weather_forecast
-
+from server.blueprints.dashboard.logic import fetch_weather_forecast
 
 dashboard_bp = Blueprint("dashboard", __name__, template_folder="templates")
 
