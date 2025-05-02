@@ -23,7 +23,7 @@ a {
    display: flex;
    flex-direction: column;
    min-height: 100vh;
-  
+   background-color: #f8f9fa;
 }
 
 .navbar.navbar-expand-lg.bg-body-tertiary.bg-dark.border-bottom.border-body{
@@ -119,8 +119,17 @@ a {
 }
 .uploadForm,.uploadFile{
    background-color: #f8f9fa;
-   flex:1;
+   flex:2;
    /* max-height:40%; */
+}
+.outset{
+   box-shadow:2px 2px rgb(0,0,0,0.3);
+}
+.inset{
+   box-shadow:inset 2px 2px rgb(0,0,0,0.3); 
+}
+.uploadForm{
+   display:none;
 }
 #form{
    background-color: #f8f9fa;
