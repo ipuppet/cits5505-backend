@@ -22,14 +22,16 @@ class User(db.Model):
     password = db.Column(db.Text, nullable=False)
     email = db.Column(db.Text, nullable=False, unique=True)
     nickname = db.Column(db.Text, nullable=False)
+    avatar = db.Column(db.String(256), nullable=True)  # Stores the relative path to the avatar image
+    date_of_birth = db.Column(db.Date, nullable=True)
+    sex = db.Column(db.String(10), nullable=True)  # e.g. 'Male', 'Female', 'Other'
+
     created_at = db.Column(
         db.DateTime, nullable=False, default=db.func.current_timestamp()
     )
     last_login = db.Column(
         db.DateTime, nullable=True, default=db.func.current_timestamp()
     )
-   
-
 
     exercises = db.relationship(
         "Exercise", backref="user", lazy=True, cascade="all, delete-orphan"
@@ -49,29 +51,30 @@ class User(db.Model):
             "username": user.username,
             "nickname": user.nickname,
             "email": user.email,
+            "avatar": user.avatar,
+            "date_of_birth": user.date_of_birth,
+            "sex": user.sex,
             "created_at": user.created_at,
             "last_login": user.last_login,
         }
 
     @staticmethod
-    def get(user_id: int, as_dict: bool = False):
+    def get(user_id: int) -> "User":
         if not user_id:
             raise ValueError("ID cannot be empty")
         user = db.session.get(User, int(user_id))
         if not user:
             raise ValueError("User not found")
-        if as_dict:
-            return User.as_dict(user)
         return user
 
     @staticmethod
-    def get_by_email(email: str):
+    def get_by_email(email: str) -> "User":
         if not email:
             raise ValueError("Email cannot be empty")
         return db.session.query(User).filter_by(email=email).first()
 
     @staticmethod
-    def search_by_username(username: str):
+    def search_by_username(username: str) -> list[dict]:
         """Fuzzy search for a user by username."""
         if not username:
             raise ValueError("Username cannot be empty")
@@ -229,13 +232,9 @@ class Share(db.Model):
     )
 
     @staticmethod
-    def get(share_id: str, include_deleted: bool = False):
+    def get(share_id: uuid.UUID, include_deleted: bool = False):
         if not share_id:
             raise ValueError("ID cannot be empty")
-        try:
-            share_id = uuid.UUID(share_id) if isinstance(share_id, str) else share_id
-        except (ValueError, AttributeError):
-            raise ValueError("Invalid share ID format")
 
         query = db.session.query(Share).filter_by(id=share_id)
         if not include_deleted:

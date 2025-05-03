@@ -1,4 +1,9 @@
+import os
+from werkzeug.datastructures import FileStorage
 from sqlalchemy.exc import SQLAlchemyError
+from werkzeug.utils import secure_filename
+from flask import current_app, g
+
 from server.models import db, User
 
 
@@ -21,6 +26,9 @@ def register(
         password: str,
         email: str,
         nickname: str,
+        date_of_birth=None,
+        sex=None,
+
 ):
     # Check if the username or email already exists
     User.validate_unique(username, email)
@@ -32,6 +40,9 @@ def register(
             nickname=nickname,
             password=User.hash_password(password),  # Hash the password
             email=email,
+            date_of_birth=date_of_birth,
+            sex=sex,
+
         )
         db.session.add(new_user)
         db.session.commit()
@@ -81,15 +92,37 @@ def update_user(
         raise RuntimeError("Failed to update user.") from e
 
 
-def get_user(user_id: int) -> User:
-    user = User.get(user_id, as_dict=True)
-    if not user:
-        raise ValueError("User not found.")
-    return user
-
-
 def search_user(username: str) -> list[dict]:
     user = User.search_by_username(username)
     if not user:
         raise ValueError("User not found.")
     return user
+
+
+def update_avatar(file: FileStorage):
+    filename = secure_filename(file.filename)
+    avatar_folder = os.path.join(current_app.static_folder, "avatars")
+    os.makedirs(avatar_folder, exist_ok=True)
+    file_path = os.path.join(avatar_folder, filename)
+
+    old_avatar_path = os.path.join(avatar_folder, g.user.avatar.split('/')[-1]) if g.user.avatar else None
+    try:
+        if old_avatar_path and os.path.exists(old_avatar_path):
+            os.remove(old_avatar_path)
+    except OSError as e:
+        raise RuntimeError(f"Failed to delete old avatar: {e}") from e
+
+    try:
+        file.save(file_path)
+        g.user.avatar = f"avatars/{filename}"
+        db.session.commit()
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        raise RuntimeError("Failed to upload avatar.") from e
+    except Exception as e:
+        # Handle any other exceptions that may occur
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        raise RuntimeError(f"Failed to save avatar: {e}") from e

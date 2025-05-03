@@ -8,3 +8,5 @@ Flask-Mail
 pytest
 Flask-Testing
 python-dotenv
+requests
+pytz

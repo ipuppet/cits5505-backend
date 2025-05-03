@@ -1,7 +1,7 @@
 from functools import wraps
-from flask import redirect, url_for, flash, session, g, jsonify
+from flask import flash, session, g, jsonify
 
-from server.blueprints.user.logic import get_user
+from server.models import User
 
 
 def login_required(f):
@@ -10,15 +10,15 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if "user_id" not in session:
-            flash("Please log in to access this page.", "warning")
-            return redirect(url_for('index.index'))
+            flash("Login required.", "danger")
+            raise ValueError("Login required.")
         try:
-            user = get_user(session["user_id"])
+            user = User.get(session["user_id"])
             g.user = user
         except ValueError:
-            flash("User not found. Please log in again.", "danger")
             session.pop("user_id", None)
-            return redirect(url_for('index.index'))
+            flash("User not found. Please log in again.", "danger")
+            raise ValueError("User not found. Please log in again.")
         return f(*args, **kwargs)
 
     return decorated_function

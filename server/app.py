@@ -1,7 +1,8 @@
 import os
 from flask import Flask
 
-from server.models import db, migrate
+from server.models import db, migrate,User
+from server.utils.context_processors import inject_pytz
 from server.utils.mail import mail
 
 def  create_app(config_class=None):
@@ -12,8 +13,12 @@ def  create_app(config_class=None):
         env = os.getenv("FLASK_ENV", "production")
         config_class = f"server.config.{env.capitalize()}Config"
     app.config.from_object(config_class)
+<<<<<<< HEAD
 
    # Ensure the instance folder and config file exist
+=======
+    # Ensure the instance folder and config file exist
+>>>>>>> 78f5ef41f81d91b12f819b002c260a5e5ce20d2b
     try:
         if not os.path.exists(app.instance_path):
             os.makedirs(app.instance_path)
@@ -30,6 +35,9 @@ def  create_app(config_class=None):
         pass
     app.config.from_pyfile("config.py", silent=True)
 
+    # Initialize the context processors
+    app.context_processor(inject_pytz)
+
     # Initialize the database
     db.init_app(app)
     migrate.init_app(app, db)
@@ -43,13 +51,13 @@ def  create_app(config_class=None):
     from server.blueprints.index.routes import index_bp
     from server.blueprints.dashboard.routes import dashboard_bp
     from server.blueprints.user.routes import user_bp
-    from server.blueprints.exercise.routes import exercise_bp
+    from server.blueprints.browse.routes import browse_bp
     from server.blueprints.share.routes import share_bp
 
     app.register_blueprint(index_bp)
     app.register_blueprint(dashboard_bp, url_prefix="/dashboard")
     app.register_blueprint(user_bp, url_prefix="/user")
-    app.register_blueprint(exercise_bp, url_prefix="/exercise")
+    app.register_blueprint(browse_bp, url_prefix="/browse")
     app.register_blueprint(share_bp, url_prefix="/share")
 
     return app

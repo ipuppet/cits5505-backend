@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app, g
 
 from server.utils.decorators import login_required, api_response
 from server.blueprints.user.forms import (
@@ -56,9 +56,13 @@ def register():
     password = form.password.data
     email = form.email.data
     nickname = form.nickname.data
+    date_of_birth = form.date_of_birth.data
+    sex = form.sex.data
 
     try:
-        user_logic.register(username, password, email, nickname)
+        user_logic.register(username, password, email, nickname, date_of_birth=date_of_birth,
+                            sex=sex
+                            )
         flash(f"Registration successful {nickname}!", "success")
         return redirect(url_for("index.index"))
     except Exception as e:
@@ -122,3 +126,19 @@ def index():
 @api_response
 def search_user(username):
     return user_logic.search_user(username)
+
+
+@user_bp.route("/upload_avatar", methods=["POST"])
+@login_required
+def upload_avatar():
+    file = request.files.get("avatar")
+    if file and file.filename:
+        try:
+            user_logic.update_avatar(file)
+        except Exception as e:
+            flash(str(e), "danger")
+            return redirect(url_for("dashboard.index"))
+        flash("Avatar updated!", "success")
+    else:
+        flash("No file selected.", "danger")
+    return redirect(url_for("dashboard.index"))

@@ -1,11 +1,11 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField
-from wtforms.validators import DataRequired, Length, Optional, Email
+from wtforms import StringField, PasswordField, BooleanField, DateField, SelectField, FloatField
+from wtforms.validators import DataRequired, Length, Optional, Email, NumberRange
 
 
 class PasswordForm(FlaskForm):
     password = PasswordField(
-        "password",
+        "Password",
         validators=[
             DataRequired(),
             Length(
@@ -17,16 +17,19 @@ class PasswordForm(FlaskForm):
 
 
 class EmailForm(FlaskForm):
-    email = StringField("email", validators=[Optional(), Email()])
+    email = StringField("Email", validators=[Optional(), Email()])
 
 
 class UserInfoForm(EmailForm):
-    username = StringField("username", validators=[Optional()])
-    nickname = StringField("nickname", validators=[Optional()])
+    username = StringField("Username", validators=[Optional()])
+    nickname = StringField("Nickname", validators=[Optional()])
+    date_of_birth = DateField("Date of Birth", format='%Y-%m-%d', validators=[Optional()])
+    sex = SelectField("Sex", choices=[('', 'Select'), ('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')],
+                      validators=[Optional()])
 
 
 class LoginForm(PasswordForm, EmailForm):
-    remember_me = BooleanField("remember_me", validators=[Optional()])
+    remember_me = BooleanField("Remember Me", validators=[Optional()])
 
 
 class RegistrationForm(PasswordForm, UserInfoForm):

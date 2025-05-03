@@ -70,7 +70,6 @@ automatically on save.
 
 ```plaintext
 .
-├── frontend
 ├── instance
 │   ├── config.py
 │   └── dev.sqlite
@@ -113,17 +112,6 @@ automatically on save.
 │   ├── static
 │   ├── templates
 │   └── utils
-├── frontend
-│   ├──README.md
-│   ├──navbar.html
-│   ├──introductory.html
-│   ├──uploaddata.html
-│   ├──style.css
-│   ├──frontend.js
-│   ├──fitsum-admasu-oGv9xIl7DkY-unsplash.jpg
-│   ├──towfiqu-barbhuiya-J6g_szOtMF4-unsplash.jpg
-│   ├──mahbub-majid-C2uAWfPYTao-unsplash.jpg
-│   └──.gitignore
 └── tests
     ├── conftest.py
     └── test_models
@@ -184,6 +172,7 @@ This project uses [Flask-Migrate](https://flask-migrate.readthedocs.io/en/latest
 To create a new migration, use the following command:
 
 ```bash
+flask db upgrade # upgrade the database to the latest version before creating a new migration
 flask db migrate -m "migration message"
 ```
 
