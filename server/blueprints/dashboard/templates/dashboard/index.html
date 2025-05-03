@@ -167,7 +167,6 @@ Dashboard
                 <!-- Right: Schedule & Goals -->
                 <div class="col-lg-4 mb-4">
                     <!-- Schedule Card -->
-                    <!-- Schedule Card -->
                     <div class="card shadow-sm border-0 mb-4">
                         <div class="card-header bg-light d-flex justify-content-between align-items-center">
                             <strong>My Schedule</strong>
@@ -179,7 +178,7 @@ Dashboard
                         </div>
                         <div class="card-body">
                             <div class="mb-2 text-muted">
-                                {{ selected_date.strftime('%A, %d %b %y') if selected_date else "Today" }}
+                                {{ now.strftime('%A, %d %b %y') }}
                             </div>
                             {% if scheduled_exercises %}
                             <ul class="list-unstyled">
@@ -191,8 +190,9 @@ Dashboard
                                     </button>
                                     <div class="flex-grow-1">
                                         <div class="fw-bold" style="font-size:1.1rem;">
-                                            {{ ex.exercise_type.value if ex.exercise_type is not string else
-                                            ex.exercise_type }}
+                                            {{ (ex.exercise_type.value if ex.exercise_type is not string else
+                                            ex.exercise_type).capitalize() }}
+
                                         </div>
                                         <div class="text-muted small">
                                             {{ ex.scheduled_time.strftime('%I:%M %p').lstrip('0') }}
@@ -537,7 +537,6 @@ Dashboard
         padding: 0.5rem;
     }
 
-    /* Remove extra margin/padding from calendar cells */
     .fc-daygrid-day {
         padding: 0 !important;
         margin: 0 !important;
@@ -592,20 +591,18 @@ Dashboard
         opacity: 0.7;
     }
 
-    /* Highlight event days as circles (optional, if you use events) */
-    .fc-daygrid-event {
-        background: #b3d8fd !important;
+    .fc-blue-circle .fc-daygrid-day-number {
+        background: #339af0 !important;
+        color: #fff !important;
         border-radius: 50% !important;
-        color: #222 !important;
-        border: none !important;
-        min-width: 2em;
-        min-height: 2em;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto;
-        font-weight: bold;
-        box-shadow: none !important;
+        font-weight: 600;
+        box-shadow: 0 0 0 2px #e3f0fb;
+        transition: background 0.2s;
+    }
+
+    /* Hide default event lines under the date number */
+    .fc-daygrid-event-harness {
+        display: none !important;
     }
 
     .weather-day-card {
@@ -735,20 +732,41 @@ Dashboard
                 initialView: 'dayGridMonth',
                 height: 330,
                 headerToolbar: {
-                    start: 'title',      // Month Year at left
+                    start: 'title',
                     center: '',
-                    end: 'prev,next'     // Navigation at right
+                    end: 'prev,next'
                 },
                 buttonText: {
                     today: 'Today'
                 },
                 events: events,
-                eventDisplay: 'background',
+                eventDisplay: 'auto',
                 dayHeaders: true,
                 dayHeaderFormat: { weekday: 'narrow' },
+                eventDidMount: function (info) {
+                    // Find the day cell
+                    var dayCell = info.el.closest('.fc-daygrid-day');
+                    if (dayCell) {
+                        dayCell.classList.add('fc-blue-circle');
+                        // Collect all events for this day
+                        var dateStr = info.event.startStr;
+                        var eventsForDay = info.view.calendar.getEvents().filter(function (ev) {
+                            return ev.startStr === dateStr;
+                        });
+                        // Combine tooltips
+                        var tooltip = eventsForDay.map(function (ev) {
+                            return ev.extendedProps.tooltip;
+                        }).join('\n');
+                        // Set tooltip on the day cell (not just the event)
+                        dayCell.setAttribute('title', tooltip);
+                    }
+                },
+                eventContent: function (arg) {
+                    return false;
+                }
             });
+
             calendar.render();
-            // Custom: Update the Today button to show the day of week
             function updateTodayButton() {
                 var todayBtn = calendarEl.querySelector('.fc-today-button');
                 if (todayBtn) {
@@ -758,10 +776,10 @@ Dashboard
                 }
             }
             updateTodayButton();
-            // Also update after navigation (in case user clicks prev/next)
             calendar.on('datesSet', updateTodayButton);
 
         }
     });
+
 </script>
 {% endblock %}
