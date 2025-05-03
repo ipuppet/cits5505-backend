@@ -44,19 +44,36 @@ class User(db.Model):
         "Share", foreign_keys="Share.receiver_id", backref="receiver", lazy=True
     )
 
-    @staticmethod
-    def as_dict(user: "User") -> dict:
+    def to_dict(self) -> dict:
         return {
-            "id": user.id,
-            "username": user.username,
-            "nickname": user.nickname,
-            "email": user.email,
-            "avatar": user.avatar,
-            "date_of_birth": user.date_of_birth,
-            "sex": user.sex,
-            "created_at": user.created_at,
-            "last_login": user.last_login,
+            "id": self.id,
+            "username": self.username,
+            "nickname": self.nickname,
+            "avatar": self.avatar,
+            "date_of_birth": self.date_of_birth,
+            "sex": self.sex,
         }
+
+    def exercises_to_list(self) -> list:
+        exercises = []
+        for exercise in self.exercises:
+            exercises.append({
+                'type': exercise.type.name,
+                **exercise.metrics,
+                'created_at': exercise.created_at,
+            })
+        return exercises
+
+    def body_measurements_to_list(self) -> list:
+        body_measurements = []
+        for measurement in self.body_measurements:
+            body_measurements.append({
+                'type': measurement.type.name,
+                'value': measurement.value,
+                'unit': measurement.unit,
+                'created_at': measurement.created_at,
+            })
+        return body_measurements
 
     @staticmethod
     def get(user_id: int) -> "User":
@@ -81,7 +98,7 @@ class User(db.Model):
         users = db.session.query(User).filter(User.username.ilike(f"%{username}%")).all()
         user_list = []
         for user in users:
-            user_list.append(User.as_dict(user))
+            user_list.append(user.to_dict())
         return user_list
 
     @staticmethod
@@ -121,20 +138,20 @@ class User(db.Model):
 
 
 class ExerciseType(Enum):
-    RUNNING = "running"
     CYCLING = "cycling"
+    RUNNING = "running"
     SWIMMING = "swimming"
-    WEIGHTLIFTING = "weightlifting"
+    WEIGHTLIFTING = "weight_lifting"
     YOGA = "yoga"
 
     def __str__(self):
-        return self.value
+        return self.value.replace("_", " ").title()
 
 
 METRICS_REQUIREMENTS = {
-    ExerciseType.RUNNING: ["distance_km", "duration"],
-    ExerciseType.CYCLING: ["distance_km", "duration"],
-    ExerciseType.SWIMMING: ["distance_m", "duration"],
+    ExerciseType.CYCLING: ["distance_km", "duration_min"],
+    ExerciseType.RUNNING: ["distance_km", "duration_min"],
+    ExerciseType.SWIMMING: ["distance_m", "duration_min"],
     ExerciseType.WEIGHTLIFTING: ["weight_kg", "sets", "reps"],
     ExerciseType.YOGA: ["duration"],
 }
@@ -184,7 +201,14 @@ class BodyMeasurementType(Enum):
     BODY_FAT = "body_fat"
 
     def __str__(self):
-        return self.value
+        return self.value.replace("_", " ").title()
+
+
+BODY_MEASUREMENT_UNITS = {
+    BodyMeasurementType.WEIGHT: ["kg", "lbs"],
+    BodyMeasurementType.HEIGHT: ["cm", "inches"],
+    BodyMeasurementType.BODY_FAT: ["%"],
+}
 
 
 class BodyMeasurement(db.Model):
@@ -199,6 +223,15 @@ class BodyMeasurement(db.Model):
         default=db.func.current_timestamp(),
         index=True,
     )
+
+    @validates("unit")
+    def validate_unit(self, key, unit: str):
+        if unit not in BODY_MEASUREMENT_UNITS.get(self.type, []):
+            raise ValueError(
+                f"Invalid unit '{unit}' for {self.type}. "
+                f"Allowed units: {BODY_MEASUREMENT_UNITS[self.type]}"
+            )
+        return unit
 
     @staticmethod
     def get(body_measurement_id: int):
