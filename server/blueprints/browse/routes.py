@@ -1,4 +1,4 @@
-from flask import request, Blueprint, render_template, flash, redirect, url_for
+from flask import Blueprint, render_template, flash, redirect, url_for
 
 from server.utils.decorators import login_required
 from server.blueprints.browse.forms import ExerciseForm, BodyMeasurementForm

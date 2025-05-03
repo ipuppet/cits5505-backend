@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import SelectField, SubmitField, StringField, FloatField
-from wtforms.validators import ValidationError, InputRequired, DataRequired, Optional
+from wtforms import SelectField, SubmitField, FloatField
+from wtforms.validators import ValidationError, DataRequired, Optional
 
 from server.utils.wtforms_custom import JSONField
 from server.models import ExerciseType, BodyMeasurementType, BODY_MEASUREMENT_UNITS
