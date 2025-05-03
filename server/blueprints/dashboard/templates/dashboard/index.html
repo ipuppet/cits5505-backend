@@ -297,46 +297,90 @@ Dashboard
                                     </div>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="submit" class="btn btn-primary">{{ form.submit.label.text
-                                        }}</button>
+                                    <button type="submit" class="btn btn-primary">{{ form.submit(class="btn
+                                        btn-primary") }}</button>
                                 </div>
                             </form>
                         </div>
                     </div>
                 </div>
                 <!-- Goals Card -->
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-light"><strong>Goals</strong></div>
+                <!-- Goals List Card -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <strong>My Goals</strong>
+                        <button class="btn btn-circle btn-add" data-bs-toggle="modal" data-bs-target="#addGoalModal">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
                     <div class="card-body">
                         {% if goals %}
-                        <ul>
+                        <ul class="list-group">
                             {% for goal in goals %}
-                            <li>
-                                {{ goal.description }}: {{ goal.current_value }}/{{ goal.target_value }} {{
-                                goal.unit or '' }}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>
+                                    <strong>{{ goal.description }}</strong>
+                                    <br>
+                                    Target: {{ goal.target_value }} {{ goal.unit }}
+                                </span>
+                                <span class="badge bg-primary rounded-pill">
+                                    {{ goal.current_value }} / {{ goal.target_value }}
+                                </span>
                             </li>
                             {% endfor %}
                         </ul>
                         {% else %}
-                        <div class="text-muted">No goals set.</div>
+                        <div class="text-muted">No goals set yet.</div>
                         {% endif %}
                     </div>
                 </div>
-            </div>
+                <!-- Add Goal Modal -->
+                <div class="modal fade" id="addGoalModal" tabindex="-1" aria-labelledby="addGoalModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form method="POST" action="{{ url_for('dashboard.index') }}">
+                                {{ goal_form.hidden_tag() }} <div class="modal-header">
+                                    <h5 class="modal-title" id="addGoalModalLabel">Add Goal</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-2">{{ goal_form.exercise_type.label }} {{
+                                        goal_form.exercise_type(class="form-select") }}</div>
+                                    <div class="mb-2">{{ goal_form.metric.label }} {{
+                                        goal_form.metric(class="form-select") }}</div>
+                                    <div class="mb-2">{{ goal_form.target_value.label }} {{
+                                        goal_form.target_value(class="form-control") }}</div>
+                                    <div class="mb-2">{{ goal_form.unit.label }} {{ goal_form.unit(class="form-control",
+                                        readonly=True) }}</div>
+                                    <div class="mb-2">{{ goal_form.description.label }} {{
+                                        goal_form.description(class="form-control") }}</div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-primary">{{ goal_form.submit(class="btn
+                                            btn-primary") }}</button>
+                                    </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
 
 
-            {% else %}
-            <div class="alert alert-info text-center">
-                <p>You are not logged in.</p>
-                <p>
-                    <a href="{{ url_for('user.register') }}" class="btn btn-primary btn-sm">Register</a>
-                    <a href="{{ url_for('user.login') }}" class="btn btn-outline-primary btn-sm">Login</a>
-                </p>
+
+
+
+                {% else %}
+                <div class="alert alert-info text-center">
+                    <p>You are not logged in.</p>
+                    <p>
+                        <a href="{{ url_for('user.register') }}" class="btn btn-primary btn-sm">Register</a>
+                        <a href="{{ url_for('user.login') }}" class="btn btn-outline-primary btn-sm">Login</a>
+                    </p>
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
         </div>
     </div>
-</div>
 
 
 
@@ -781,5 +825,32 @@ Dashboard
         }
     });
 
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const exerciseType = document.querySelector('[name="exercise_type"]');
+        const metric = document.querySelector('[name="metric"]');
+        const unit = document.querySelector('[name="unit"]');
+        const metricsByType = JSON.parse('{{ metrics_by_type|tojson|safe }}');
+        if (exerciseType && metric && unit) {
+            exerciseType.addEventListener('change', function () {
+                const metrics = metricsByType[this.value];
+                metric.innerHTML = '';
+                metrics.forEach(function (m) {
+                    const opt = document.createElement('option');
+                    opt.value = m[0];
+                    opt.textContent = m[0].replace('_', ' ').toUpperCase();
+                    metric.appendChild(opt);
+                });
+                unit.value = metrics[0][1];
+            });
+            metric.addEventListener('change', function () {
+                const metrics = metricsByType[exerciseType.value];
+                const selected = metrics.find(m => m[0] === this.value);
+                if (selected) unit.value = selected[1];
+            });
+        }
+    });
 </script>
 {% endblock %}
