@@ -5,45 +5,60 @@ Browse
 {% endblock %}
 
 {% block content %}
-<div class="exercise-bg"></div>
+<div class="container upload">
+    <div class="h4 mt-2 mb-2">&nbsp; Upload your data</div>
+    <div class="mt-2 mb-2">There are two ways to upload your data:</div>
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="#" class="filebtn inset" id="filebtn">&nbsp;Upload a File&nbsp;</a></li>
+              <li class="breadcrumb-item active" aria-current="page"><a href="#" class="formbtn outset" id="formbtn">&nbsp;Fill in a form&nbsp;</a></li>
+            </ol>
+          </nav>
+    </div>
+    <div class="uploadFile" id="uploadFile">
+        <div class="h4 mt-2 mb-2">&nbsp;Upload a file</div>
+        <div>&nbsp; Only csv files with the same format and column names as the following file example are supported:</div>
+        <table class="table">
+            <thead>
+                <tr><th>Running(whole number)</th><th>Cycling(whole number)</th>
+                <th>Swimming</th><th>Yoga</th><th>Weight(kg)</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>2000</td><td>2000</td><td>2000</td><td>2000</td><td>66.6</td></tr>
+                <tr><td>2000</td><td>2000</td><td>2000</td><td>2000</td><td>88.8</td></tr>                        
+            </tbody>
+        </table>
+        <!-- here the value of action is only a placeholder, it should be replaced with the url of the server that will process the data -->
+        <form action="">
+            <label for="file"class="form-label h6">&nbsp; Upload your file</label> 
+            <input type="file" class="form-control mb-2" name="file" id="file" accept=".csv">
+            <div class="text-center"><button type="submit" class="btn btn-outline-primary mt-2 formSubmit">Submit</button></div>
+        </form> 
+    </div>
 
-<div class="container mt-5 position-relative">
-    <h4 class="mb-4">Upload your data</h4>
-    <div>Only csv files with the same format and column names as the following file example are supported:</div>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Daily calories intake(whole number)</th>
-                <th>Daily calories burn(whole number)</th>
-                <th>Weight(kg)</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>2000</td>
-                <td>1500</td>
-                <td>70</td>
-            </tr>
-            <tr>
-                <td>2500</td>
-                <td>2000</td>
-                <td>75</td>
-            </tr>
-            <tr>
-                <td>3000</td>
-                <td>2500</td>
-                <td>80</td>
-            </tr>
-        </tbody>
-    </table>
-    <form action="" method="post" enctype="multipart/form-data">
-        <label for="file" class="form-label h6">Upload your file</label>
-        <input type="file" class="form-control mb-2" name="file" id="file" accept=".csv">
-        <div class="text-center">
-            <button type="submit" class="btn btn-primary mt-2">Submit</button>
-        </div>
-    </form>
+    <div class="uploadForm" id="uploadForm">
+        <div class="h4 mt-2 mb-2">&nbsp; Fill in a form</div>
+        <div>&nbsp; Alternatively, you can fill the form directly.</div>
+        <form id="nextForm">
+            <select id="select" class="form-select mb-2 mt-2">
+                <option value="running" selected>Running</option>
+                <option value="cycling">Cycling</option>
+                <option value="swimming">Swimming</option>
+                <option value="yoga">Yoga</option>
+                <option value="weight">Weight</option>
+            </select>
+           
+            <div>Running:&nbsp;
+                <input type="number" placeholder="distance(km)">
+                <input type="number" placeholder="duration">&nbsp;<button type="button" class="delete btn btn-outline-primary">delete</button>
+            </div>
+            
+            <button type="submit" class="btn btn-outline-primary formSubmit" id="submit">Submit</button>
+        </form>
+    </div>
 </div>
+
 {% endblock %}
 
 {% block css %}
@@ -58,7 +73,108 @@ Browse
         background: url('{{ url_for("static", filename="frontend/towfiqu-barbhuiya-J6g_szOtMF4-unsplash.jpg") }}') center center/cover no-repeat;
         filter: blur(2px);
     }
+    .mainstr {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        background-color: #f8f9fa;
+    }
+    .upload {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    height:85vh;
+    }
+    .uploadForm,.uploadFile{
+    background-color: #f8f9fa;
+    flex:2;
+    /* max-height:40%; */
+    }
+    .outset{
+    box-shadow:2px 2px rgb(0,0,0,0.3);
+    }
+    .inset{
+    box-shadow:inset 2px 2px rgb(0,0,0,0.3); 
+    }
+    .uploadForm{
+    display:none;
+    }
+    #form{
+    background-color: #f8f9fa;
+    margin-left: 2%;
+    /* display: flex;
+    flex-direction: column;
+    justify-content:center; */
+    }
+    #form div:nth-child(1){
+    margin-top: 2%;
+    }
+    .formSubmit{
+    display:block;
+    margin: auto;
+    }
+
 </style>
 {% endblock %}
 {% block js %}
+<script>
+    let filebtn=document.querySelector('#filebtn');
+    let formbtn=document.querySelector('#formbtn');
+    let uploadForm=document.querySelector('#uploadForm');
+    let uploadFile=document.querySelector('#uploadFile');
+    filebtn.addEventListener('click',function(){
+        filebtn.classList.remove('outset');
+        filebtn.classList.add('inset');
+        formbtn.classList.remove('inset');
+        formbtn.classList.add('outset');
+        uploadFile.style.display="block";
+        uploadForm.style.display="none";            
+    })
+    formbtn.addEventListener('click',function(){
+        filebtn.classList.remove('inset');
+        filebtn.classList.add('outset');
+        formbtn.classList.remove('outset');
+        formbtn.classList.add('inset');
+        uploadFile.style.display="none";
+        uploadForm.style.display="block";
+    })
+    let select=document.querySelector('#select');
+    let submit=document.querySelector('#submit');
+    let nextForm=document.querySelector('#nextForm');
+    let activities={running:
+    `Running:&nbsp;
+    <input type="number" placeholder="distance(km)">
+    <input type="number" placeholder="duration">
+    `, cycling:
+    `Cycling:&nbsp
+    <input type="number" placeholder="distance(km)">
+    <input type="number" placeholder="duration">`
+    , swimming:
+    `Swimming:&nbsp;
+    <input type="number" placeholder="distance(m)">
+    <input type="number" placeholder="duration">`
+    , yoga:"Yoga:&nbsp<input type='number' placeholder='duration'>"
+    , weight:
+    `Weight:&nbsp;
+    <input type='number' placeholder='weight(kg)'>
+    <input type='number' placeholder='set'>
+    <input type='number' placeholder='reps'>
+    `}
+    select.addEventListener('change',function(){
+        let activity=select.value;
+            if(activities[activity]){
+            let activityBlock=document.createElement('div');
+            activityBlock.classList.add('my-1');
+            activityBlock.innerHTML=activities[activity];
+            activityBlock.innerHTML+= '&nbsp;<button type="button" class="delete btn btn-outline-primary">delete</button>'
+            nextForm.insertBefore(activityBlock,submit);
+        }
+    })
+    nextForm.addEventListener('click',function(event){
+        if(event.target && event.target.classList.contains('delete')){
+            event.target.closest('div').remove();
+        }
+    })
+</script>
+
 {% endblock %}
