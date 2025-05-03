@@ -11,6 +11,8 @@ def index():
     login_form = LoginForm()
     user_id = session.get("user_id")
     if user_id:
-        g.user = User.get(user_id)
-
+        try:
+            g.user = User.get(user_id)
+        except ValueError:
+            g.user = None
     return render_template("index/index.html", login_form=login_form)
