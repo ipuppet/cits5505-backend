@@ -4,15 +4,17 @@
 Dashboard
 {% endblock %}
 
+{% set perth = pytz.timezone('Australia/Perth') %}
+
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-xl-10 col-12">
+        <div class="col-12">
             <div class="row">
 
                 {% if g.user %}
                 <!-- User Info Left -->
-                <div class="col-lg-4 mb-4">
+                <div class="col-lg-3 mb-4">
                     <div class="card shadow-lg border-0 h-100">
                         <div class="card-body">
                             <form id="avatar-form" action="{{ url_for('user.upload_avatar') }}" method="post"
@@ -102,19 +104,13 @@ Dashboard
                                     </div>
                                 </div>
                                 <!-- Calendar Card END -->
-                                <div class="mt-3">
-                                    <a href="{{ url_for('user.password') }}" class="btn btn-link p-0 me-3">Reset
-                                        Password</a>
-                                    <a href="{{ url_for('user.logout') }}"
-                                        class="btn btn-link text-danger p-0">Logout</a>
-                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <!-- Charts Right -->
                 <!-- Achievements Card START -->
-                <div class="col-lg-8">
+                <div class="col-lg-5 mb-4">
                     <div class="row g-4">
                         <div class="col-md-12">
                             <div class="card chart-card shadow-sm border-0 mb-4">
@@ -168,6 +164,211 @@ Dashboard
                     </div>
                 </div>
 
+                <!-- Right: Schedule & Goals -->
+                <div class="col-lg-4 mb-4">
+                    <!-- Schedule Card -->
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <strong>My Schedule</strong>
+                            <!-- Add Button (opens modal) -->
+                            <button class="btn btn-circle btn-add" data-bs-toggle="modal"
+                                data-bs-target="#addScheduleModal">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2 text-muted">
+                                {{ now.strftime('%A, %d %b %y') }}
+                            </div>
+                            {% if scheduled_exercises %}
+                            <ul class="list-unstyled">
+                                {% for ex in scheduled_exercises %}
+                                <li class="schedule-item d-flex align-items-start mb-3">
+                                    <!-- Check/complete button (optional, add logic as needed) -->
+                                    <button class="btn btn-check me-3" title="Mark as done">
+                                        <i class="bi bi-circle"></i>
+                                    </button>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-bold" style="font-size:1.1rem;">
+                                            {{ (ex.exercise_type.value if ex.exercise_type is not string else
+                                            ex.exercise_type).capitalize() }}
+
+                                        </div>
+                                        <div class="text-muted small">
+                                            {{ ex.scheduled_time.strftime('%I:%M %p').lstrip('0') }}
+                                            {% if ex.note %} &mdash; {{ ex.note }}{% endif %}
+                                        </div>
+                                    </div>
+                                    <!-- Edit button (opens modal, implement logic as needed) -->
+                                    <!-- Edit button -->
+                                    <button class="btn btn-edit ms-2" title="Edit" data-bs-toggle="modal"
+                                        data-bs-target="#editScheduleModal-{{ ex.id }}">
+                                        <i class="bi bi-three-dots"></i>
+                                    </button>
+                                    <!-- Edit Modal for each schedule item -->
+                                    <div class="modal fade" id="editScheduleModal-{{ ex.id }}" tabindex="-1"
+                                        aria-labelledby="editScheduleModalLabel-{{ ex.id }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <form method="POST"
+                                                    action="{{ url_for('dashboard.edit_schedule', id=ex.id) }}">
+                                                    {{ form.hidden_tag() }}
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="editScheduleModalLabel-{{ ex.id }}">
+                                                            Edit or Delete Exercise</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="mb-2">
+                                                            <label>Day</label>
+                                                            <select name="day_of_week" class="form-select">
+                                                                {% for val, label in form.day_of_week.choices %}
+                                                                <option value="{{ val }}" {% if ex.day_of_week==val
+                                                                    %}selected{% endif %}>{{ label }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        <div class="mb-2">
+                                                            <label>Exercise</label>
+                                                            <select name="exercise_type" class="form-select">
+                                                                {% for val, label in form.exercise_type.choices %}
+                                                                <option value="{{ val }}" {% if
+                                                                    ex.exercise_type.value==val or ex.exercise_type==val
+                                                                    %}selected{% endif %}>{{ label }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        <div class="mb-2">
+                                                            <label>Time</label>
+                                                            <input type="time" name="scheduled_time"
+                                                                class="form-control"
+                                                                value="{{ ex.scheduled_time.strftime('%H:%M') }}">
+                                                        </div>
+                                                        <div class="mb-2">
+                                                            <label>Note</label>
+                                                            <input type="text" name="note" class="form-control"
+                                                                value="{{ ex.note }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer d-flex justify-content-between">
+                                                        <button type="submit" class="btn btn-primary">Save
+                                                            Changes</button>
+                                                </form>
+                                                <form method="POST"
+                                                    action="{{ url_for('dashboard.delete_schedule', id=ex.id) }}"
+                                                    onsubmit="return confirm('Delete this schedule?');">
+                                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                                </form>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                        </div>
+
+                        {% endfor %}
+                        </ul>
+                        {% else %}
+                        <div class="text-muted">No scheduled exercises.</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Add Schedule Modal -->
+                <div class="modal fade" id="addScheduleModal" tabindex="-1" aria-labelledby="addScheduleModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form method="POST" action="{{ url_for('dashboard.index') }}">
+                                {{ form.hidden_tag() }}
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="addScheduleModalLabel">Add Exercise</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-2">{{ form.day_of_week.label }} {{
+                                        form.day_of_week(class="form-select") }}</div>
+                                    <div class="mb-2">{{ form.exercise_type.label }} {{
+                                        form.exercise_type(class="form-select") }}</div>
+                                    <div class="mb-2">{{ form.scheduled_time.label }} {{
+                                        form.scheduled_time(class="form-control") }}</div>
+                                    <div class="mb-2">{{ form.note.label }} {{ form.note(class="form-control") }}
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">{{ form.submit(class="btn
+                                        btn-primary") }}</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!-- Goals Card -->
+                <!-- Goals List Card -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <strong>My Goals</strong>
+                        <button class="btn btn-circle btn-add" data-bs-toggle="modal" data-bs-target="#addGoalModal">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        {% if goals %}
+                        <ul class="list-group">
+                            {% for goal in goals %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>
+                                    <strong>{{ goal.description }}</strong>
+                                    <br>
+                                    Target: {{ goal.target_value }} {{ goal.unit }}
+                                </span>
+                                <span class="badge bg-primary rounded-pill">
+                                    {{ goal.current_value }} / {{ goal.target_value }}
+                                </span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <div class="text-muted">No goals set yet.</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <!-- Add Goal Modal -->
+                <div class="modal fade" id="addGoalModal" tabindex="-1" aria-labelledby="addGoalModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form method="POST" action="{{ url_for('dashboard.index') }}">
+                                {{ goal_form.hidden_tag() }} <div class="modal-header">
+                                    <h5 class="modal-title" id="addGoalModalLabel">Add Goal</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-2">{{ goal_form.exercise_type.label }} {{
+                                        goal_form.exercise_type(class="form-select") }}</div>
+                                    <div class="mb-2">{{ goal_form.metric.label }} {{
+                                        goal_form.metric(class="form-select") }}</div>
+                                    <div class="mb-2">{{ goal_form.target_value.label }} {{
+                                        goal_form.target_value(class="form-control") }}</div>
+                                    <div class="mb-2">{{ goal_form.unit.label }} {{ goal_form.unit(class="form-control",
+                                        readonly=True) }}</div>
+                                    <div class="mb-2">{{ goal_form.description.label }} {{
+                                        goal_form.description(class="form-control") }}</div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-primary">{{ goal_form.submit(class="btn
+                                            btn-primary") }}</button>
+                                    </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
                 {% else %}
                 <div class="alert alert-info text-center">
                     <p>You are not logged in.</p>
@@ -180,6 +381,9 @@ Dashboard
             </div>
         </div>
     </div>
+
+
+
 </div>
 {% endblock %}
 
@@ -235,48 +439,214 @@ Dashboard
         text-decoration: underline;
     }
 
+    .btn-circle {
+        width: 2.2rem;
+        height: 2.2rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff86a;
+        color: #222;
+        border: none;
+        font-size: 1.3rem;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        transition: background 0.2s;
+    }
+
+    .btn-circle:hover {
+        background: #ffe066;
+    }
+
+    .btn-add {
+        background: #fff86a;
+        color: #222;
+    }
+
+    .btn-check {
+        background: none;
+        border: none;
+        color: #bbb;
+        font-size: 1.5rem;
+        margin-top: 0.2rem;
+    }
+
+    .btn-check:hover {
+        color: #0d6efd;
+    }
+
+    .btn-edit {
+        background: none;
+        border: none;
+        color: #bbb;
+        font-size: 1.3rem;
+    }
+
+    .btn-edit:hover {
+        color: #0d6efd;
+    }
+
+    .schedule-item {
+        border-radius: 1.2rem;
+        padding: 0.7rem 1rem;
+        background: #f8fafc;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+        transition: box-shadow 0.2s;
+    }
+
+    .schedule-item:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        background: #fffde7;
+    }
+
     /* Make the calendar more compact and modern */
     #calendar {
         font-size: 0.95rem;
         padding: 0.5rem;
+        background: #faf8f6 !important;
+        border-radius: 1rem;
     }
 
+    /* Remove grid lines */
+    .fc-theme-standard .fc-scrollgrid,
+    .fc-theme-standard td,
+    .fc-theme-standard th {
+        border: none !important;
+        background: transparent !important;
+    }
+
+    /* Black day header letters (S M T W T F S) */
+    .fc-col-header-cell-cushion {
+        color: #222 !important;
+        font-weight: 500;
+        font-size: 1.1rem;
+        letter-spacing: 0.05em;
+        text-decoration: none;
+    }
+
+    /* Month/Year title at top left, bold, black */
+    .fc-toolbar-title {
+        font-size: 1.3rem !important;
+        font-weight: 600;
+        color: #222 !important;
+        text-align: left !important;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Navigation arrows at top right */
     .fc-header-toolbar {
         display: flex;
-        flex-direction: column;
+        justify-content: space-between;
         align-items: center;
         gap: 0.25rem;
+        flex-direction: row;
+        margin-bottom: 0.5rem;
     }
 
-    .fc-toolbar-chunk:first-child {
-        order: -1;
-    }
-
-    .fc-button,
-    .fc-button-primary {
-        padding: 0.15rem 0.5rem !important;
-        font-size: 0.85rem !important;
-        min-width: 32px;
-    }
-
-    .fc-toolbar-title {
+    /* Style navigation buttons */
+    .fc .fc-button,
+    .fc .fc-button-primary {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        background: #fff !important;
+        border: none !important;
+        color: #222 !important;
+        box-shadow: none !important;
+        border-radius: 50% !important;
+        width: 2.2rem;
+        height: 2.2rem;
         font-size: 1.2rem !important;
-        font-weight: 600;
+        transition: background 0.2s;
+        padding: 0 !important;
     }
 
-
-
-    .fc .fc-button-group {
-        gap: 0.25rem;
+    .fc-button:hover,
+    .fc-button-primary:hover {
+        background: #f0f0f0 !important;
     }
 
+    /* Remove cell hover/focus */
+    .fc-daygrid-day-frame {
+        background: transparent !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Remove background from calendar */
     .fc {
-        border-radius: 0.75rem;
-        background: #f8fafc;
+        background: #faf8f6 !important;
+        border-radius: 1rem;
+        padding: 0.5rem;
     }
 
-    .card-body #calendar {
-        margin: 0.5rem 0.25rem 0.25rem 0.25rem;
+    .fc-daygrid-day {
+        padding: 0 !important;
+        margin: 0 !important;
+        height: 2em !important;
+        min-height: 2em !important;
+        vertical-align: middle !important;
+    }
+
+    /* Remove extra space from the row */
+    .fc-daygrid-row {
+        min-height: 2em !important;
+        height: 2em !important;
+    }
+
+    /* Make date numbers compact, centered, and today's highlight a perfect circle */
+    .fc-daygrid-day-number {
+        color: #222 !important;
+        text-decoration: none !important;
+        font-weight: 400;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2em;
+        height: 2em;
+        line-height: 2em;
+        vertical-align: middle;
+        font-size: 1rem;
+        border-radius: 50%;
+        margin: 0;
+        padding: 0;
+        transition: background 0.2s;
+    }
+
+    /* Highlight today as a filled yellow circle */
+    .fc-day-today {
+        background: none !important;
+    }
+
+    .fc-day-today .fc-daygrid-day-number {
+        background: #fff86a !important;
+        color: #222 !important;
+        border-radius: 50% !important;
+        font-weight: 500;
+        box-shadow: none !important;
+        text-decoration: none !important;
+        border: none !important;
+    }
+
+    /* Fade out days from other months */
+    .fc-day-other .fc-daygrid-day-number {
+        color: #c0c0c0 !important;
+        opacity: 0.7;
+    }
+
+    .fc-blue-circle .fc-daygrid-day-number {
+        background: #339af0 !important;
+        color: #fff !important;
+        border-radius: 50% !important;
+        font-weight: 600;
+        box-shadow: 0 0 0 2px #e3f0fb;
+        transition: background 0.2s;
+    }
+
+    /* Hide default event lines under the date number */
+    .fc-daygrid-event-harness {
+        display: none !important;
     }
 
     .weather-day-card {
@@ -400,21 +770,47 @@ Dashboard
     document.addEventListener('DOMContentLoaded', function () {
         var calendarEl = document.getElementById('calendar');
         if (calendarEl) {
+            var events = JSON.parse('{{ calendar_events|tojson|safe }}');
+
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
-                height: 350,
+                height: 330,
                 headerToolbar: {
-                    start: 'today',
-                    center: 'title',
+                    start: 'title',
+                    center: '',
                     end: 'prev,next'
                 },
                 buttonText: {
                     today: 'Today'
                 },
-                events: []
+                events: events,
+                eventDisplay: 'auto',
+                dayHeaders: true,
+                dayHeaderFormat: { weekday: 'narrow' },
+                eventDidMount: function (info) {
+                    // Find the day cell
+                    var dayCell = info.el.closest('.fc-daygrid-day');
+                    if (dayCell) {
+                        dayCell.classList.add('fc-blue-circle');
+                        // Collect all events for this day
+                        var dateStr = info.event.startStr;
+                        var eventsForDay = info.view.calendar.getEvents().filter(function (ev) {
+                            return ev.startStr === dateStr;
+                        });
+                        // Combine tooltips
+                        var tooltip = eventsForDay.map(function (ev) {
+                            return ev.extendedProps.tooltip;
+                        }).join('\n');
+                        // Set tooltip on the day cell (not just the event)
+                        dayCell.setAttribute('title', tooltip);
+                    }
+                },
+                eventContent: function (arg) {
+                    return false;
+                }
             });
+
             calendar.render();
-            // Custom: Update the Today button to show the day of week
             function updateTodayButton() {
                 var todayBtn = calendarEl.querySelector('.fc-today-button');
                 if (todayBtn) {
@@ -424,9 +820,36 @@ Dashboard
                 }
             }
             updateTodayButton();
-            // Also update after navigation (in case user clicks prev/next)
             calendar.on('datesSet', updateTodayButton);
 
+        }
+    });
+
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const exerciseType = document.querySelector('[name="exercise_type"]');
+        const metric = document.querySelector('[name="metric"]');
+        const unit = document.querySelector('[name="unit"]');
+        const metricsByType = JSON.parse('{{ metrics_by_type|tojson|safe }}');
+        if (exerciseType && metric && unit) {
+            exerciseType.addEventListener('change', function () {
+                const metrics = metricsByType[this.value];
+                metric.innerHTML = '';
+                metrics.forEach(function (m) {
+                    const opt = document.createElement('option');
+                    opt.value = m[0];
+                    opt.textContent = m[0].replace('_', ' ').toUpperCase();
+                    metric.appendChild(opt);
+                });
+                unit.value = metrics[0][1];
+            });
+            metric.addEventListener('change', function () {
+                const metrics = metricsByType[exerciseType.value];
+                const selected = metrics.find(m => m[0] === this.value);
+                if (selected) unit.value = selected[1];
+            });
         }
     });
 </script>

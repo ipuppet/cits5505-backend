@@ -8,10 +8,6 @@ from server.blueprints.user.forms import (
     UserInfoForm,
 )
 import server.blueprints.user.logic as user_logic
-from werkzeug.utils import secure_filename
-import os
-from server.models import db, User
-
 
 user_bp = Blueprint("user", __name__, template_folder="templates")
 
@@ -60,14 +56,13 @@ def register():
     password = form.password.data
     email = form.email.data
     nickname = form.nickname.data
-    date_of_birth=form.date_of_birth.data
-    sex=form.sex.data
-    
+    date_of_birth = form.date_of_birth.data
+    sex = form.sex.data
 
     try:
-        user_logic.register(username, password, email, nickname,date_of_birth=date_of_birth,
-            sex=sex
-            )
+        user_logic.register(username, password, email, nickname, date_of_birth=date_of_birth,
+                            sex=sex
+                            )
         flash(f"Registration successful {nickname}!", "success")
         return redirect(url_for("index.index"))
     except Exception as e:
@@ -132,20 +127,17 @@ def index():
 def search_user(username):
     return user_logic.search_user(username)
 
+
 @user_bp.route("/upload_avatar", methods=["POST"])
 @login_required
 def upload_avatar():
     file = request.files.get("avatar")
     if file and file.filename:
-        filename = secure_filename(file.filename)
-        avatar_folder = os.path.join(current_app.static_folder, "avatars")
-        os.makedirs(avatar_folder, exist_ok=True)
-        file_path = os.path.join(avatar_folder, filename)
-        file.save(file_path)
-        # Save relative path to DB (e.g. "avatars/filename.png")
-        user = g.user
-        user.avatar = f"avatars/{filename}"
-        db.session.commit()
+        try:
+            user_logic.update_avatar(file)
+        except Exception as e:
+            flash(str(e), "danger")
+            return redirect(url_for("dashboard.index"))
         flash("Avatar updated!", "success")
     else:
         flash("No file selected.", "danger")

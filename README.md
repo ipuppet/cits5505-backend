@@ -172,6 +172,7 @@ This project uses [Flask-Migrate](https://flask-migrate.readthedocs.io/en/latest
 To create a new migration, use the following command:
 
 ```bash
+flask db upgrade # upgrade the database to the latest version before creating a new migration
 flask db migrate -m "migration message"
 ```
 

@@ -1,9 +1,8 @@
 import os
 from flask import Flask
-from flask import g, session
-import pytz
 
 from server.models import db, migrate,User
+from server.utils.context_processors import inject_pytz
 from server.utils.mail import mail
 
 def create_app(config_class=None):
@@ -14,11 +13,6 @@ def create_app(config_class=None):
         env = os.getenv("FLASK_ENV", "production")
         config_class = f"server.config.{env.capitalize()}Config"
     app.config.from_object(config_class)
-     # Inject Perth timezone into templates
-    @app.context_processor
-    def inject_perth_timezone():
-        return dict(perth=pytz.timezone('Australia/Perth'))
-
     # Ensure the instance folder and config file exist
     try:
         if not os.path.exists(app.instance_path):
@@ -35,6 +29,9 @@ def create_app(config_class=None):
     except OSError:
         pass
     app.config.from_pyfile("config.py", silent=True)
+
+    # Initialize the context processors
+    app.context_processor(inject_pytz)
 
     # Initialize the database
     db.init_app(app)
