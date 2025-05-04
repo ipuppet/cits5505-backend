@@ -318,7 +318,8 @@ Dashboard
                         {% if goals %}
                         <ul class="list-group">
                             {% for goal in goals %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <li
+                                class="list-group-item d-flex justify-content-between align-items-center position-relative goal-item">
                                 <span>
                                     <strong>{{ goal.description }}</strong>
                                     <br>
@@ -329,8 +330,19 @@ Dashboard
                                     <br>
                                     Target: {{ goal.target_value }} {{ goal.unit }}
                                 </span>
-                                <span class="badge bg-primary rounded-pill">
-                                    {{ goal.current_value }} / {{ goal.target_value }}
+                                <span class="d-flex flex-column align-items-end">
+                                    <span class="badge bg-primary rounded-pill mb-2">
+                                        {{ goal.current_value }} / {{ goal.target_value }}
+                                    </span>
+                                    <form method="POST" action="{{ url_for('dashboard.delete_goal', id=goal.id) }}"
+                                        onsubmit="return confirm('Are you sure you want to give up this goal?');"
+                                        class="delete-goal-form">
+                                        <button type="submit"
+                                            class="badge rounded-pill bg-white text-danger border border-danger give-up-badge-btn"
+                                            style="font-size: 0.8rem;" title="Give Up Goal">
+                                            Give Up
+                                        </button>
+                                    </form>
                                 </span>
                             </li>
                             {% endfor %}
@@ -504,6 +516,41 @@ Dashboard
     .schedule-item:hover {
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         background: #fffde7;
+    }
+
+    .goal-item {
+        transition: background 0.2s;
+    }
+
+    .goal-item:hover {
+        background: #fffde7 !important;
+        /* light yellow */
+    }
+
+    .goal-item .delete-goal-form {
+        display: none;
+    }
+
+    .goal-item:hover .delete-goal-form {
+        display: block;
+    }
+
+    .give-up-badge-btn {
+        cursor: pointer;
+        font-weight: 500;
+        padding: 0.2em 0.7em;
+        margin-bottom: 0.1rem;
+        margin-right: 0.1rem;
+        background: #fff;
+        color: #dc3545 !important;
+        border: 1.5px solid #dc3545 !important;
+        transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    .give-up-badge-btn:hover {
+        background: #ffe066 !important;
+        color: #b30000 !important;
+        border-color: #b30000 !important;
     }
 
     /* Make the calendar more compact and modern */

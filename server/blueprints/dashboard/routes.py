@@ -139,3 +139,33 @@ def edit_schedule(id):
     db.session.commit()
     flash("Schedule updated.", "success")
     return redirect(url_for('dashboard.index'))
+
+@dashboard_bp.route("/delete_goal/<int:id>", methods=["POST"])
+@login_required
+def delete_goal(id):
+    goal = Goal.query.get_or_404(id)
+    user_id = session.get("user_id")
+    if goal.user_id != user_id:
+        flash("Unauthorized", "danger")
+        return redirect(url_for('dashboard.index'))
+    db.session.delete(goal)
+    db.session.commit()
+    flash("Goal deleted.", "success")
+    return redirect(url_for('dashboard.index'))
+
+@dashboard_bp.route("/edit_goal/<int:id>", methods=["POST"])
+@login_required
+def edit_goal(id):
+    goal = Goal.query.get_or_404(id)
+    user_id = session.get("user_id")
+    if goal.user_id != user_id:
+        flash("Unauthorized", "danger")
+        return redirect(url_for('dashboard.index'))
+    goal.description = request.form["description"]
+    goal.exercise_type = request.form["exercise_type"]
+    goal.metric = request.form["metric"]
+    goal.target_value = request.form["target_value"]
+    goal.unit = request.form["unit"]
+    db.session.commit()
+    flash("Goal updated.", "success")
+    return redirect(url_for('dashboard.index'))
