@@ -19,7 +19,7 @@ def get_shared(share_id: uuid.UUID) -> Share:
             raise ValueError("Share not found")
         return share
     except SQLAlchemyError as e:
-        raise ValueError(f"Error retrieving share: {str(e)}")
+        raise RuntimeError(f"Error retrieving share: {str(e)}")
 
 
 def create_share(
@@ -49,7 +49,7 @@ def create_share(
         return share
     except SQLAlchemyError as e:
         db.session.rollback()
-        raise ValueError(f"Error creating share: {str(e)}")
+        raise RuntimeError(f"Error creating share: {str(e)}")
 
 
 def delete_share(share_id: uuid.UUID):
@@ -68,4 +68,4 @@ def delete_share(share_id: uuid.UUID):
         db.session.commit()
     except SQLAlchemyError as e:
         db.session.rollback()
-        raise ValueError(f"Error deleting share: {str(e)}")
+        raise RuntimeError(f"Error deleting share: {str(e)}")

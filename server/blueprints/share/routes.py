@@ -33,7 +33,7 @@ def shared(share_id):
 @share_bp.route("/create", methods=["POST"])
 @login_required
 def create_share():
-    share_form = ShareForm(request.form)
+    share_form = ShareForm()
     if not share_form.validate():
         flash("Form validation failed. Please correct the errors and try again.", "danger")
         return render_template("share/create.html", form=share_form)

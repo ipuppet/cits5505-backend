@@ -1,64 +1,207 @@
 {% extends "base.html" %}
 
 {% block title %}
-Browse
-{% endblock %}
-
-{% block content %}
-<div class="exercise-bg"></div>
-
-<div class="container mt-5 position-relative">
-    <h4 class="mb-4">Upload your data</h4>
-    <div>Only csv files with the same format and column names as the following file example are supported:</div>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Daily calories intake(whole number)</th>
-                <th>Daily calories burn(whole number)</th>
-                <th>Weight(kg)</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>2000</td>
-                <td>1500</td>
-                <td>70</td>
-            </tr>
-            <tr>
-                <td>2500</td>
-                <td>2000</td>
-                <td>75</td>
-            </tr>
-            <tr>
-                <td>3000</td>
-                <td>2500</td>
-                <td>80</td>
-            </tr>
-        </tbody>
-    </table>
-    <form action="" method="post" enctype="multipart/form-data">
-        <label for="file" class="form-label h6">Upload your file</label>
-        <input type="file" class="form-control mb-2" name="file" id="file" accept=".csv">
-        <div class="text-center">
-            <button type="submit" class="btn btn-primary mt-2">Submit</button>
-        </div>
-    </form>
-</div>
+    Browse
 {% endblock %}
 
 {% block css %}
-<style>
-    .exercise-bg {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: -1;
-        background: url('{{ url_for("static", filename="frontend/towfiqu-barbhuiya-J6g_szOtMF4-unsplash.jpg") }}') center center/cover no-repeat;
-        filter: blur(2px);
-    }
-</style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/browse/index.css') }}"/>
 {% endblock %}
+
+{% block content %}
+    <div class="modal fade" id="exerciseModal" tabindex="-1" aria-labelledby="exerciseModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exerciseModalLabel">Add Exercise Data</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{{ url_for('browse.exercise') }}" id="exerciseForm"
+                          onsubmit="exerciseSubmit()">
+                        {{ exercise_form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ exercise_form.type.label(class="form-label") }}
+                            {{ exercise_form.type(class="form-select", onchange="exerciseTypeChange()") }}
+                        </div>
+                        <div id="exerciseFormContainer"></div>
+                        <div class="d-none">
+                            {{ exercise_form.metrics.label() }}
+                            {{ exercise_form.metrics() }}
+                        </div>
+                        {{ exercise_form.submit(class="btn btn-primary") }}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="bodyMeasurementModal" tabindex="-1" aria-labelledby="bodyMeasurementModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="bodyMeasurementModalLabel">Add Body Measurement Data</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{{ url_for('browse.body_measurement') }}"
+                          id="bodyMeasurementForm">
+                        {{ body_measurement_form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ body_measurement_form.type.label(class="form-label") }}
+                            {{ body_measurement_form.type(class="form-select", onchange="bodyMeasurementTypeChange()") }}
+                        </div>
+                        <div class="mb-3">
+                            {{ body_measurement_form.value.label(class="form-label") }}
+                            {{ body_measurement_form.value(class="form-control") }}
+                        </div>
+                        <div class="mb-3">
+                            {{ body_measurement_form.unit.label(class="form-label") }}
+                            {{ body_measurement_form.unit(class="form-select") }}
+                        </div>
+                        {{ body_measurement_form.submit(class="btn btn-primary") }}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title">Browse</h5>
+            <div class="btn-group" role="group" aria-label="Browse data">
+                <input type="radio" class="btn-check" name="dataset" id="browseExercise" autocomplete="off" checked>
+                <label class="btn btn-outline-primary btn-sm" for="browseExercise">Exercise</label>
+                <input type="radio" class="btn-check" name="dataset" id="browseBodyMeasurement" autocomplete="off">
+                <label class="btn btn-outline-primary btn-sm" for="browseBodyMeasurement">Body Measurement</label>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" onclick="showModal()">
+                Add new data
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    <select class="form-select" aria-label="Sport types" id="browseTableTypeSelect"
+                            onchange="browseTableChange(this.value)">
+                    </select>
+                </div>
+            </div>
+            <table class="table table-striped table-hover">
+                <thead id="browseTableHeader"></thead>
+                <tbody id="browseTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+
 {% block js %}
+    <script src="{{ url_for('static', filename='js/browse/index.js') }}"></script>
+    <script>
+        const ExercisesMetrics = {{ exercise_metrics|tojson }}
+        const ExercisesTypes = {{ exercise_types|tojson }}
+        const BodyMeasurementUnits = {{ body_measurement_units|tojson }}
+        const BodyMeasurementTypes = {{ body_measurement_types|tojson }}
+        const UserExercises = {{ g.user.exercises_to_list()|tojson }}
+        const UserBodyMeasurements = {{ g.user.body_measurements_to_list()|tojson }}
+
+        const Dataset = {headers: undefined, data: undefined}
+
+        const ExerciseModalModal = new bootstrap.Modal("#exerciseModal")
+        const BodyMeasurementModal = new bootstrap.Modal("#bodyMeasurementModal")
+
+        /**
+         * Update the exercise metrics based on the selected type.
+         */
+        function exerciseTypeChange() {
+            const container = document.querySelector("#exerciseFormContainer")
+            container.innerHTML = ""
+            const selectedType = document.querySelector("#exerciseForm").type.value
+            const selectedMetrics = ExercisesMetrics[selectedType]
+            for (const metric of selectedMetrics) {
+                const div = document.createElement("div")
+                div.className = "mb-3"
+                const label = document.createElement("label")
+                label.className = "form-label"
+                label.textContent = toReadable(metric)
+                div.appendChild(label)
+                const input = document.createElement("input")
+                input.className = "form-control"
+                input.name = metric
+                div.appendChild(input)
+                container.appendChild(div)
+            }
+        }
+
+        function exerciseSubmit() {
+            const form = document.querySelector("#exerciseForm")
+            const type = form.type.value
+            const metrics = ExercisesMetrics[type]
+            const data = {}
+            for (const metric of metrics) {
+                data[metric] = form[metric].value
+            }
+            form.metrics.value = JSON.stringify(data)
+        }
+
+        /**
+         * Update the body measurement unit select options based on the selected type.
+         */
+        function bodyMeasurementTypeChange() {
+            const selectedType = document.querySelector("#bodyMeasurementForm").type.value
+            const selectedUnit = BodyMeasurementUnits[selectedType]
+            const unitSelect = document.querySelector("#bodyMeasurementForm").unit
+            unitSelect.innerHTML = ""
+            for (const unit of selectedUnit) {
+                const option = document.createElement("option")
+                option.value = unit
+                option.textContent = unit
+                unitSelect.appendChild(option)
+            }
+        }
+
+        function showModal() {
+            const selectedDataset = document.querySelector("input[name=\"dataset\"]:checked").id
+            if (selectedDataset === "browseBodyMeasurement") {
+                bodyMeasurementTypeChange()
+                BodyMeasurementModal.show()
+            } else {
+                exerciseTypeChange()
+                ExerciseModalModal.show()
+            }
+        }
+
+        /**
+         * Update the browse table data.
+         */
+        function browseTableChange(type) {
+            const headers = Dataset.headers(type)
+            const data = Dataset.data(type)
+            updateBrowseTable(headers, data)
+        }
+
+        /**
+         * Update the browse table data based on the selected type(exercise or body measurement).
+         */
+        function browseDatasetChange(dateset = "browseExercise") {
+            if (dateset === "browseExercise") {
+                Dataset.headers = type => ExercisesMetrics[type].concat(["created_at"])
+                Dataset.data = type => UserExercises.filter(exercise => exercise.type === type)
+                updateBrowseTableOptions(ExercisesTypes)
+            } else if (dateset === "browseBodyMeasurement") {
+                Dataset.headers = () => ["value", "unit", "created_at"]
+                Dataset.data = type => UserBodyMeasurements.filter(bodyMeasurement => bodyMeasurement.type === type)
+                updateBrowseTableOptions(BodyMeasurementTypes)
+            }
+            browseTableChange(document.querySelector("#browseTableTypeSelect").value)
+        }
+
+        // Initialize
+        browseDatasetChange()
+        document.querySelectorAll("input[name=\"dataset\"]").forEach(radio => {
+            radio.addEventListener("change", function () {
+                browseDatasetChange(this.id)
+            })
+        })
+    </script>
 {% endblock %}
