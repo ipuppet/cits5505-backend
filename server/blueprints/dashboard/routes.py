@@ -35,13 +35,12 @@ def index():
     else:
         selected_type = exercise_type_choices[0][0]
 
-    metrics = METRICS_REQUIREMENTS[ExerciseType[selected_type]]
-    metric_choices = [(m[0], m[0].replace("_", " ").capitalize()) for m in metrics]
-
     schedule_form = ScheduleExerciseForm()
     goal_form = GoalForm()
-    goal_form.exercise_type.choices = exercise_type_choices
-    goal_form.metric.choices = metric_choices
+    goal_form.exercise_type.choices = [(et.name, et.value) for et in ExerciseType]
+    selected_type = goal_form.exercise_type.data or goal_form.exercise_type.choices[0][0]
+    metrics = METRICS_REQUIREMENTS[ExerciseType[selected_type]]
+    goal_form.metric.choices = [(m[0], m[0].replace("_", " ").capitalize()) for m in metrics]
 
     # Set unit if metric is selected
     if request.method == "POST" and "metric" in request.form:
@@ -65,6 +64,7 @@ def index():
         elif goal_form.submit.data and goal_form.validate_on_submit():
             goal = Goal(
                 user_id=user.id,
+                exercise_type=goal_form.exercise_type.data,
                 description=goal_form.description.data,
                 target_value=goal_form.target_value.data,
                 current_value=0,

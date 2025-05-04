@@ -191,7 +191,8 @@ Dashboard
                                     <div class="flex-grow-1">
                                         <div class="fw-bold" style="font-size:1.1rem;">
                                             {{ (ex.exercise_type.value if ex.exercise_type is not string else
-                                            ex.exercise_type).capitalize() }}
+                                            ex.exercise_type).replace('_', ' ').capitalize() }}
+
 
                                         </div>
                                         <div class="text-muted small">
@@ -321,6 +322,11 @@ Dashboard
                                 <span>
                                     <strong>{{ goal.description }}</strong>
                                     <br>
+                                    <span class="text-muted">
+                                        {{ (goal.exercise_type.value if goal.exercise_type is not string else
+                                        goal.exercise_type).replace('_', ' ').capitalize() }}
+                                    </span>
+                                    <br>
                                     Target: {{ goal.target_value }} {{ goal.unit }}
                                 </span>
                                 <span class="badge bg-primary rounded-pill">
@@ -346,6 +352,8 @@ Dashboard
                                         aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
+                                    <div class="mb-2">{{ goal_form.description.label }} {{
+                                        goal_form.description(class="form-control") }}</div>
                                     <div class="mb-2">{{ goal_form.exercise_type.label }} {{
                                         goal_form.exercise_type(class="form-select") }}</div>
                                     <div class="mb-2">{{ goal_form.metric.label }} {{
@@ -354,8 +362,7 @@ Dashboard
                                         goal_form.target_value(class="form-control") }}</div>
                                     <div class="mb-2">{{ goal_form.unit.label }} {{ goal_form.unit(class="form-control",
                                         readonly=True) }}</div>
-                                    <div class="mb-2">{{ goal_form.description.label }} {{
-                                        goal_form.description(class="form-control") }}</div>
+
                                     <div class="modal-footer">
                                         <button type="submit" class="btn btn-primary">{{ goal_form.submit(class="btn
                                             btn-primary") }}</button>
