@@ -4,6 +4,8 @@ from server.blueprints.dashboard.logic import fetch_weather_forecast
 from server.models import ScheduledExercise, Goal, db,ExerciseType
 from server.blueprints.dashboard.forms import ScheduleExerciseForm, GoalForm
 from datetime import datetime, timedelta
+import pytz
+from datetime import datetime
 
 METRICS_REQUIREMENTS = {
     ExerciseType.RUNNING: [("distance_km", "km"), ("duration", "min")],
@@ -21,17 +23,8 @@ def get_next_date_for_day(day_name):
     delta = (target_idx - today_idx) % 7
     return today + timedelta(days=delta)
 
-<<<<<<< HEAD
 
-# <<<<<<< HEAD
-
-@dashboard_bp.route("/dashboard", methods=["GET", "POST"])
-# =======
-# @dashboard_bp.route("/", methods=["GET"])
-# >>>>>>> 78f5ef41f81d91b12f819b002c260a5e5ce20d2b
-=======
 @dashboard_bp.route("/", methods=["GET", "POST"])
->>>>>>> 1d25740efe641ee7e26af86c284976eacff24e96
 @login_required
 def index():
     user = g.user
@@ -108,18 +101,24 @@ def index():
 ]
     metrics_by_type = {et.name: METRICS_REQUIREMENTS[et] for et in ExerciseType}
 
+    tz=pytz.timezone(session.get('timezone','UTC'))
     return render_template(
         "dashboard/index.html",
         weather_forecast=weather_forecast,
         scheduled_exercises=scheduled_exercises,
         goals=goals,
         calendar_events=calendar_events,
-        now=datetime.now(), 
+        now=datetime.now(tz), 
         form=schedule_form,
         goal_form=goal_form,
         metrics_by_type=metrics_by_type
     )
     
+@dashboard_bp.route('/set-timezone',methods=['POST'])
+def set_timezone():
+    timezone=request.json.get('timezone')
+    session['timezone']=timezone
+    return '',204
 
 @dashboard_bp.route("/delete_schedule/<int:id>", methods=["POST"])
 @login_required

@@ -58,15 +58,17 @@ Dashboard
                                     <div class="row mb-2">
                                         <div class="col-5 text-muted"><strong>Created At:</strong></div>
                                         <div class="col-7">
-                                            {{ g.user.created_at.astimezone(perth).strftime('%Y-%m-%d %H:%M') if
-                                            g.user.created_at else 'N/A' }}
+                                            <!-- {{ g.user.created_at.astimezone(perth).strftime('%Y-%m-%d %H:%M') if
+                                            g.user.created_at else 'N/A' }} -->
+                                            {{now.strftime('%Y-%m-%d %H:%M')}}
                                         </div>
                                     </div>
                                     <div class="row mb-2">
                                         <div class="col-5 text-muted"><strong>Last Login:</strong></div>
                                         <div class="col-7">
-                                            {{ g.user.last_login.astimezone(perth).strftime('%Y-%m-%d %H:%M') if
-                                            g.user.last_login else 'N/A' }}
+                                            <!-- {{ g.user.last_login.astimezone(perth).strftime('%Y-%m-%d %H:%M') if
+                                            g.user.last_login else 'N/A' }} -->
+                                            {{now.strftime('%Y-%m-%d %H:%M')}}
                                         </div>
                                     </div>
                                 </div>
@@ -852,5 +854,13 @@ Dashboard
             });
         }
     });
+</script>
+<script>
+    const timezone=Intl.DateTimeFormat().resolvedOptions().timeZone;
+    fetch('/dashboard/set-timezone',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({timezone})
+    })
 </script>
 {% endblock %}
