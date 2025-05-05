@@ -155,6 +155,12 @@ Run with debug mode (real-time reload changes):
 flask run --debug
 ```
 
+If there are any database migrations, you need to run the following command to upgrade the database:
+
+```bash
+flask db upgrade
+```
+
 ## Running tests
 
 To run the tests, use the following command:

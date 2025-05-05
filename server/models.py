@@ -153,7 +153,7 @@ METRICS_REQUIREMENTS = {
     ExerciseType.RUNNING: ["distance_km", "duration_min"],
     ExerciseType.SWIMMING: ["distance_m", "duration_min"],
     ExerciseType.WEIGHTLIFTING: ["weight_kg", "sets", "reps"],
-    ExerciseType.YOGA: ["duration"],
+    ExerciseType.YOGA: ["duration_min"],
 }
 
 
