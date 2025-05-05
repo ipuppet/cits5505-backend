@@ -153,7 +153,7 @@ METRICS_REQUIREMENTS = {
     ExerciseType.RUNNING: ["distance_km", "duration_min"],
     ExerciseType.SWIMMING: ["distance_m", "duration_min"],
     ExerciseType.WEIGHTLIFTING: ["weight_kg", "sets", "reps"],
-    ExerciseType.YOGA: ["duration"],
+    ExerciseType.YOGA: ["duration_min"],
 }
 
 
@@ -210,27 +210,7 @@ BODY_MEASUREMENT_UNITS = {
     BodyMeasurementType.BODY_FAT: ["%"],
 }
 
-class ScheduledExercise(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    exercise_type = db.Column(db.Enum(ExerciseType), nullable=False)
-    scheduled_time = db.Column(db.Time, nullable=False)
-    note = db.Column(db.Text, nullable=True)
-    day_of_week = db.Column(db.String(10), nullable=False)  # e.g. "Monday", "Tuesday", etc.
 
-    user = db.relationship("User", backref="scheduled_exercises")
-    
-class Goal(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    description = db.Column(db.String(256), nullable=False)
-    target_value = db.Column(db.Float, nullable=False)
-    current_value = db.Column(db.Float, nullable=False, default=0)
-    unit = db.Column(db.String(32), nullable=True)  # e.g. "kg", "km", "min"
-    created_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
-
-    user = db.relationship("User", backref="goals")
-    
 class BodyMeasurement(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
