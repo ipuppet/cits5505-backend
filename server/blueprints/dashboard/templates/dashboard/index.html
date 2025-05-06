@@ -119,23 +119,37 @@ Dashboard
                                 </div>
                                 <div class="card-body p-3">
                                     {% if achievements %}
-                                    <div class="d-flex flex-wrap gap-3 justify-content-center">
-                                        {% for ach in achievements %}
-                                        <div class="achievement-card d-flex flex-column align-items-center p-3">
-                                            <i class="bi bi-trophy-fill text-warning" style="font-size: 2rem;"></i>
-                                            <span class="mt-2" style="font-weight: 500;">{{ ach }}</span>
+                                    <div id="achievements-list">
+                                        {% set icons = {
+                                        'running': '🏃',
+                                        'cycling': '🚴',
+                                        'swimming': '🏊',
+                                        'weight_lifting': '🏋️',
+                                        'yoga': '🧘'
+                                        } %}
+                                        {% for ex_type, milestones in achievements.items() %}
+                                        <div class="mb-2">
+                                            <strong>{{ icons[ex_type] }} {{ ex_type.replace('_', ' ').capitalize()
+                                                }}</strong>:
+                                            {% for milestone in ACHIEVEMENTS[ex_type] %}
+                                            {% if milestone in milestones %}
+                                            <span class="badge bg-success">{{ milestone }}</span>
+                                            {% else %}
+                                            <span class="badge bg-secondary">{{ milestone }}</span>
+                                            {% endif %}
+                                            {% endfor %}
                                         </div>
                                         {% endfor %}
                                     </div>
                                     {% else %}
                                     <div class="text-muted text-center">No achievements yet. Start logging your
-                                        activities!
-                                    </div>
+                                        activities!</div>
                                     {% endif %}
                                 </div>
                             </div>
                         </div>
                         <!-- Achievements Card END -->
+
 
                         <div class="col-md-12">
                             <div class="card chart-card shadow-sm border-0 mb-4">
@@ -191,7 +205,8 @@ Dashboard
                                     <div class="flex-grow-1">
                                         <div class="fw-bold" style="font-size:1.1rem;">
                                             {{ (ex.exercise_type.value if ex.exercise_type is not string else
-                                            ex.exercise_type).capitalize() }}
+                                            ex.exercise_type).replace('_', ' ').capitalize() }}
+
 
                                         </div>
                                         <div class="text-muted small">
@@ -317,20 +332,79 @@ Dashboard
                         {% if goals %}
                         <ul class="list-group">
                             {% for goal in goals %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <li
+                                class="list-group-item d-flex justify-content-between align-items-center position-relative goal-item">
                                 <span>
                                     <strong>{{ goal.description }}</strong>
                                     <br>
+                                    <span class="text-muted">
+                                        {{ (goal.exercise_type.value if goal.exercise_type is not string else
+                                        goal.exercise_type).replace('_', ' ').capitalize() }}
+                                    </span>
+                                    <br>
                                     Target: {{ goal.target_value }} {{ goal.unit }}
                                 </span>
-                                <span class="badge bg-primary rounded-pill">
-                                    {{ goal.current_value }} / {{ goal.target_value }}
+                                <span class="d-flex flex-column align-items-end">
+                                    <span class="badge bg-primary rounded-pill mb-2">
+                                        {{ goal.current_value }} / {{ goal.target_value }}
+                                    </span>
+                                    <form method="POST" action="{{ url_for('dashboard.delete_goal', id=goal.id) }}"
+                                        onsubmit="return confirm('Are you sure you want to give up this goal?');"
+                                        class="delete-goal-form">
+                                        <button type="submit"
+                                            class="badge rounded-pill bg-white text-danger border border-danger give-up-badge-btn"
+                                            style="font-size: 0.8rem;" title="Give Up Goal">
+                                            Give Up
+                                        </button>
+                                    </form>
                                 </span>
                             </li>
                             {% endfor %}
                         </ul>
                         {% else %}
                         <div class="text-muted">No goals set yet.</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Exercise Log Card -->
+                <div class="card chart-card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                        <strong>Exercise Log</strong>
+                    </div>
+                    <div class="card-body p-3">
+                        {% if exercises %}
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Type</th>
+                                    <th>Date</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ex in exercises[:10] %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ ex.type.value.replace('_', ' ').capitalize() }}</td>
+                                    <td>{{ ex.created_at.strftime('%Y/%m/%d') if ex.created_at else 'N/A' }}</td>
+                                    </td>
+                                    <td>
+                                        {% if ex.metrics %}
+                                        {% for key, value in ex.metrics.items() %}
+                                        {{ key.replace('_', ' ').capitalize() }}: {{ value }}<br>
+                                        {% endfor %}
+                                        {% else %}
+                                        N/A
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <div class="text-muted text-center">No exercise data yet.</div>
                         {% endif %}
                     </div>
                 </div>
@@ -346,6 +420,8 @@ Dashboard
                                         aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
+                                    <div class="mb-2">{{ goal_form.description.label }} {{
+                                        goal_form.description(class="form-control") }}</div>
                                     <div class="mb-2">{{ goal_form.exercise_type.label }} {{
                                         goal_form.exercise_type(class="form-select") }}</div>
                                     <div class="mb-2">{{ goal_form.metric.label }} {{
@@ -354,8 +430,7 @@ Dashboard
                                         goal_form.target_value(class="form-control") }}</div>
                                     <div class="mb-2">{{ goal_form.unit.label }} {{ goal_form.unit(class="form-control",
                                         readonly=True) }}</div>
-                                    <div class="mb-2">{{ goal_form.description.label }} {{
-                                        goal_form.description(class="form-control") }}</div>
+
                                     <div class="modal-footer">
                                         <button type="submit" class="btn btn-primary">{{ goal_form.submit(class="btn
                                             btn-primary") }}</button>
@@ -497,6 +572,41 @@ Dashboard
     .schedule-item:hover {
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         background: #fffde7;
+    }
+
+    .goal-item {
+        transition: background 0.2s;
+    }
+
+    .goal-item:hover {
+        background: #fffde7 !important;
+        /* light yellow */
+    }
+
+    .goal-item .delete-goal-form {
+        display: none;
+    }
+
+    .goal-item:hover .delete-goal-form {
+        display: block;
+    }
+
+    .give-up-badge-btn {
+        cursor: pointer;
+        font-weight: 500;
+        padding: 0.2em 0.7em;
+        margin-bottom: 0.1rem;
+        margin-right: 0.1rem;
+        background: #fff;
+        color: #dc3545 !important;
+        border: 1.5px solid #dc3545 !important;
+        transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    .give-up-badge-btn:hover {
+        background: #ffe066 !important;
+        color: #b30000 !important;
+        border-color: #b30000 !important;
     }
 
     /* Make the calendar more compact and modern */
