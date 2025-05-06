@@ -26,6 +26,25 @@ Share Data
                                     <div class="form-text">Hold Ctrl (Windows) or Command (Mac) to select multiple friends.</div>
                                 </div>
                                 <div class="mb-3">
+                                    <label for="chartType" class="form-label">Chart to Share</label>
+                                    <select id="chartType" class="form-select" required>
+                                        <option value="" disabled selected>Please select a chart</option>
+                                        <option value="calories_burned">Calories Burned</option>
+                                        <option value="weight_trend">Weight Trend</option>
+                                        <option value="calorie_intake">Calorie Intake</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Time Range</label>
+                                    <div>
+                                        <input type="radio" id="days7" name="shareDays" value="7" checked>
+                                        <label for="days7">Last 7 days</label>
+                                        <input type="radio" id="days14" name="shareDays" value="14">
+                                        <label for="days14">Last 14 days</label>
+                                    </div>
+                                </div>
+                                <div id="chartPreview" class="my-3"></div>
+                                <div class="mb-3">
                                     <label for="note" class="form-label">Optional Message</label>
                                     <textarea class="form-control" id="note" rows="2" placeholder="Write a short message..."></textarea>
                                 </div>
@@ -191,10 +210,20 @@ Share Data
     document.getElementById('friendShareForm').addEventListener('submit', function (e) {
         e.preventDefault();
         const selectedFriends = Array.from(document.getElementById('friendSelect').selectedOptions).map(opt => opt.value);
-        if (selectedFriends.length > 0) {
+        const chartType = document.getElementById('chartType').value;
+        const shareDays = document.querySelector('input[name="shareDays"]:checked').value;
+        const note = document.getElementById('note').value;
+        if (selectedFriends.length > 0 && chartType && shareDays) {
+            // You can submit these data to backend here
+            console.log({
+                selectedFriends,
+                chartType,
+                shareDays,
+                note
+            });
             document.getElementById('sendStatus').style.display = "block";
         } else {
-            alert("Please select at least one friend to share with.");
+            alert("Please select friends, chart and time range!");
         }
     });
 
@@ -208,30 +237,24 @@ Share Data
 
     // Add search functionality for friends
     document.getElementById('searchFriend').addEventListener('input', function() {
-        const filter = this.value.toLowerCase();
-        const options = document.getElementById('friendSelect').options;
-        for (let i = 0; i < options.length; i++) {
-            const option = options[i];
-            if (option.text.toLowerCase().includes(filter)) {
-                option.style.display = '';
-            } else {
-                option.style.display = 'none';
-            }
-        }
-    });
-
-    // Fetch and render friends list from backend
-    fetch('/share/api/friends')
-        .then(response => response.json())
-        .then(data => {
-            const friendSelect = document.getElementById('friendSelect');
-            data.forEach(friend => {
-                const option = document.createElement('option');
-                option.value = friend.id;
-                option.text = friend.name;
-                friendSelect.appendChild(option);
+        const username = this.value.trim();
+        const friendSelect = document.getElementById('friendSelect');
+        // 清空下拉框
+        friendSelect.innerHTML = '';
+        if (!username) return;
+        fetch(`/user/${encodeURIComponent(username)}`)
+            .then(res => res.json())
+            .then(res => {
+                if (res.code === 1 && Array.isArray(res.data)) {
+                    res.data.forEach(user => {
+                        const option = document.createElement('option');
+                        option.value = user.id;
+                        option.text = user.nickname ? `${user.nickname}（${user.username}）` : user.username;
+                        friendSelect.appendChild(option);
+                    });
+                }
             });
-        });
+    });
 
     // Fetch and render share records from backend
     fetch('/api/share-records')
