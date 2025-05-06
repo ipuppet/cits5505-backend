@@ -23,7 +23,7 @@ def get_user_totals(user):
         "weight_lifting": 0,
         "yoga": 0,
     }
-    exercises = Exercise.query.filter_by(user_id=user.id).all()
+    exercises = g.user.exercises
     for ex in exercises:
         t = ex.type.value if hasattr(ex.type, "value") else ex.type
         if t == "cycling":
