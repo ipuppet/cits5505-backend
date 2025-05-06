@@ -13,12 +13,7 @@ def  create_app(config_class=None):
         env = os.getenv("FLASK_ENV", "production")
         config_class = f"server.config.{env.capitalize()}Config"
     app.config.from_object(config_class)
-# <<<<<<< HEAD
-
-#    # Ensure the instance folder and config file exist
-# =======
     # Ensure the instance folder and config file exist
-# >>>>>>> 78f5ef41f81d91b12f819b002c260a5e5ce20d2b
     try:
         if not os.path.exists(app.instance_path):
             os.makedirs(app.instance_path)
