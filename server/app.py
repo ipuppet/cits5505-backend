@@ -28,7 +28,7 @@ def  create_app(config_class=None):
                 )
     except OSError:
         pass
-    print("Instance path:", app.instance_path)
+    
     app.config.from_pyfile("config.py", silent=True)
 
     # Initialize the context processors

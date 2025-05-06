@@ -5,7 +5,6 @@ from server.models import ScheduledExercise, Goal, db,ExerciseType
 from server.blueprints.dashboard.forms import ScheduleExerciseForm, GoalForm
 from datetime import datetime, timedelta
 import pytz
-from datetime import datetime
 
 METRICS_REQUIREMENTS = {
     ExerciseType.RUNNING: [("distance_km", "km"), ("duration", "min")],
