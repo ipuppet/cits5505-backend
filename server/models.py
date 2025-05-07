@@ -50,6 +50,13 @@ class User(UserMixin, db.Model):
         cascade="all, delete-orphan",
         order_by="BodyMeasurement.created_at.desc()",
     )
+    calorie_intakes = db.relationship(
+        "CalorieIntake",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+        order_by="CalorieIntake.created_at.desc()",
+    )
     achievements = db.relationship(
         "Achievement",
         backref="user",
