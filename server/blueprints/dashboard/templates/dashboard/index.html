@@ -203,8 +203,7 @@ Dashboard
                                     </button>
                                     <div class="flex-grow-1">
                                         <div class="fw-bold" style="font-size:1.1rem;">
-                                            {{ (ex.exercise_type.value if ex.exercise_type is not string else
-                                            ex.exercise_type).replace('_', ' ').capitalize() }}
+                                            {{ ex.exercise_type }}
 
 
                                         </div>
@@ -337,8 +336,7 @@ Dashboard
                                     <strong>{{ goal.description }}</strong>
                                     <br>
                                     <span class="text-muted">
-                                        {{ (goal.exercise_type.value if goal.exercise_type is not string else
-                                        goal.exercise_type).replace('_', ' ').capitalize() }}
+                                        {{ goal.exercise_type }}
                                     </span>
                                     <br>
                                     Target: {{ goal.target_value }} {{ goal.unit }}
