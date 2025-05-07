@@ -12,7 +12,7 @@ Dashboard
         <div class="col-12">
             <div class="row">
 
-                {% if g.user %}
+                {% if current_user.is_authenticated %}
                 <!-- User Info Left -->
                 <div class="col-lg-3 mb-4">
                     <div class="card shadow-lg border-0 h-100">
@@ -20,11 +20,11 @@ Dashboard
                             <form id="avatar-form" action="{{ url_for('user.upload_avatar') }}" method="post"
                                 enctype="multipart/form-data" class="mt-2 mb-3 text-center">
                                 <label for="avatar" style="cursor:pointer; display:block;">
-                                    {% if g.user.avatar %}
-                                    <img src="{{ url_for('static', filename=g.user.avatar) }}" alt="Avatar"
+                                    {% if current_user.avatar %}
+                                    <img src="{{ url_for('static', filename=current_user.avatar) }}" alt="Avatar"
                                         class="rounded-circle shadow mb-3" width="96" height="96" id="avatar-img">
                                     {% else %}
-                                    <img src="https://ui-avatars.com/api/?name={{ g.user.nickname|default('User') }}&size=96&background=0D8ABC&color=fff"
+                                    <img src="https://ui-avatars.com/api/?name={{ current_user.nickname|default('User') }}&size=96&background=0D8ABC&color=fff"
                                         alt="Default Avatar" class="rounded-circle shadow mb-3" width="96" height="96"
                                         id="avatar-img">
                                     {% endif %}
@@ -32,7 +32,7 @@ Dashboard
                                 <input type="file" name="avatar" id="avatar" accept="image/*" style="display:none"
                                     required>
                             </form>
-                            <h2 class="card-title mb-1 text-center" id="greeting-line"><strong>{{ g.user.nickname
+                            <h2 class="card-title mb-1 text-center" id="greeting-line"><strong>{{ current_user.nickname
                                     }}</strong></h2>
                             <div class="card mb-3 shadow-sm border-0">
                                 <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
@@ -41,34 +41,32 @@ Dashboard
                                 <div class="card-body p-3">
                                     <div class="row mb-2">
                                         <div class="col-5 text-muted"><strong>Username:</strong></div>
-                                        <div class="col-7">{{ g.user.username }}</div>
+                                        <div class="col-7">{{ current_user.username }}</div>
                                     </div>
                                     <div class="row mb-2">
                                         <div class="col-5 text-muted"><strong>Email:</strong></div>
-                                        <div class="col-7">{{ g.user.email }}</div>
+                                        <div class="col-7">{{ current_user.email }}</div>
                                     </div>
                                     <div class="row mb-2">
                                         <div class="col-5 text-muted"><strong>Date of Birth:</strong></div>
-                                        <div class="col-7">{{ g.user.date_of_birth or 'N/A' }}</div>
+                                        <div class="col-7">{{ current_user.date_of_birth or 'N/A' }}</div>
                                     </div>
                                     <div class="row mb-2">
                                         <div class="col-5 text-muted"><strong>Sex:</strong></div>
-                                        <div class="col-7">{{ g.user.sex or 'N/A' }}</div>
+                                        <div class="col-7">{{ current_user.sex or 'N/A' }}</div>
                                     </div>
                                     <div class="row mb-2">
                                         <div class="col-5 text-muted"><strong>Created At:</strong></div>
                                         <div class="col-7">
-                                            <!-- {{ g.user.created_at.astimezone(perth).strftime('%Y-%m-%d %H:%M') if
-                                            g.user.created_at else 'N/A' }} -->
-                                            {{g.localTime.strftime('%Y-%m-%d %H:%M')}}
+                                            {{ current_user.created_at.astimezone(perth).strftime('%Y-%m-%d %H:%M') if
+                                            current_user.created_at else 'N/A' }}
                                         </div>
                                     </div>
                                     <div class="row mb-2">
                                         <div class="col-5 text-muted"><strong>Last Login:</strong></div>
                                         <div class="col-7">
-                                            <!-- {{ g.user.last_login.astimezone(perth).strftime('%Y-%m-%d %H:%M') if
-                                            g.user.last_login else 'N/A' }} -->
-                                            {{now.strftime('%Y-%m-%d %H:%M')}}
+                                            {{ current_user.last_login.astimezone(perth).strftime('%Y-%m-%d %H:%M') if
+                                            current_user.last_login else 'N/A' }}
                                         </div>
                                     </div>
                                 </div>
@@ -123,22 +121,42 @@ Dashboard
                                     {% if achievements %}
                                     <div id="achievements-list">
                                         {% set icons = {
-                                        'running': '🏃',
-                                        'cycling': '🚴',
-                                        'swimming': '🏊',
-                                        'weight_lifting': '🏋️',
-                                        'yoga': '🧘'
+                                        'running': '🏃‍♂️',
+                                        'cycling': '🚴‍♀️',
+                                        'swimming': '🏊‍♂️',
+                                        'weight_lifting': '🏋️‍♂️',
+                                        'yoga': '🧘‍♂️'
                                         } %}
-                                        {% for achievement in achievements %}
-                                        <div class="mb-2">
-                                            <strong>{{ icons[achievement.exercise_type.value] }} {{ achievement.exercise_type }}</strong>:
-                                            {% for milestone in ACHIEVEMENTS[achievement.exercise_type] %}
-                                            {% if milestone == achievement.milestone %}
-                                            <span class="badge bg-success">{{ milestone }}</span>
-                                            {% else %}
-                                            <span class="badge bg-secondary">{{ milestone }}</span>
-                                            {% endif %}
-                                            {% endfor %}
+                                        {% set icon_colors = {
+                                        'running': '#ffb700',
+                                        'cycling': '#00b894',
+                                        'swimming': '#0984e3',
+                                        'weight_lifting': '#636e72',
+                                        'yoga': '#a29bfe'
+                                        } %}
+                                        {% set badge_classes = ['badge-bronze', 'badge-silver', 'badge-gold'] %}
+                                        {% set badge_labels = ['Bronze', 'Silver', 'Gold'] %}
+                                        {% for ex_type, milestones in ACHIEVEMENTS.items() %}
+                                        <div class="mb-2 d-flex align-items-center">
+                                            <span class="achievement-icon me-2"
+                                                style="background: {{ icon_colors[ex_type.value] }};">
+                                                {{ icons[ex_type.value] }}
+                                            </span>
+                                            <strong style="font-size:1.1em;">{{ ex_type }}</strong>:
+                                            <span class="ms-2">
+                                                {% for milestone in milestones %}
+                                                {% set idx = loop.index0 %}
+                                                {% set badge_class = badge_classes[idx] %}
+                                                {% set badge_label = badge_labels[idx] %}
+                                                {% if milestone in achievements[ex_type] %}
+                                                <span class="badge {{ badge_class }} me-1" title="{{ badge_label }}">{{
+                                                    badge_label }} {{ milestone }}</span>
+                                                {% else %}
+                                                <span class="badge badge-locked me-1" title="{{ badge_label }}">{{
+                                                    badge_label }} {{ milestone }}</span>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </span>
                                         </div>
                                         {% endfor %}
                                     </div>
@@ -560,6 +578,26 @@ Dashboard
         color: #0d6efd;
     }
 
+    .achievement-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.3em;
+        height: 2.3em;
+        border-radius: 50%;
+        font-size: 1.5em;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+        color: #fff;
+        margin-right: 0.5em;
+        border: 2.5px solid #fff;
+        transition: transform 0.2s;
+    }
+
+    .achievement-icon:hover {
+        transform: scale(1.1) rotate(-6deg);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+    }
+
     .schedule-item {
         border-radius: 1.2rem;
         padding: 0.7rem 1rem;
@@ -773,6 +811,38 @@ Dashboard
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
         background: #e9f5ff;
     }
+
+    .badge-bronze {
+        background: linear-gradient(90deg, #cd7f32 60%, #b87333 100%);
+        color: #fff;
+        border: 1.5px solid #b87333;
+        font-weight: 600;
+        box-shadow: 0 1px 4px rgba(205, 127, 50, 0.08);
+    }
+
+    .badge-silver {
+        background: linear-gradient(90deg, #c0c0c0 60%, #a9a9a9 100%);
+        color: #fff;
+        border: 1.5px solid #a9a9a9;
+        font-weight: 600;
+        box-shadow: 0 1px 4px rgba(192, 192, 192, 0.08);
+    }
+
+    .badge-gold {
+        background: linear-gradient(90deg, #ffd700 60%, #ffb700 100%);
+        color: #222;
+        border: 1.5px solid #ffb700;
+        font-weight: 700;
+        box-shadow: 0 1px 4px rgba(255, 215, 0, 0.12);
+    }
+
+    .badge-locked {
+        background: transparent;
+        color: #bbb;
+        border: 1.5px dashed #bbb;
+        font-weight: 600;
+        opacity: 0.5;
+    }
 </style>
 {% endblock %}
 
@@ -804,7 +874,7 @@ Dashboard
                 greeting = "Good night";
                 emoji = "🌙";
             }
-            greetingLine.innerHTML = `<span>${emoji} ${greeting}, <strong>{{ g.user.nickname }}</strong></span>`;
+            greetingLine.innerHTML = `<span>${emoji} ${greeting}, <strong>{{ current_user.nickname }}</strong></span>`;
         }
     });
 </script>
