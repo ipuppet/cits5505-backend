@@ -121,22 +121,42 @@ Dashboard
                                     {% if achievements %}
                                     <div id="achievements-list">
                                         {% set icons = {
-                                        'running': '🏃',
-                                        'cycling': '🚴',
-                                        'swimming': '🏊',
-                                        'weight_lifting': '🏋️',
-                                        'yoga': '🧘'
+                                        'running': '🏃‍♂️',
+                                        'cycling': '🚴‍♀️',
+                                        'swimming': '🏊‍♂️',
+                                        'weight_lifting': '🏋️‍♂️',
+                                        'yoga': '🧘‍♂️'
                                         } %}
-                                        {% for achievement in achievements %}
-                                        <div class="mb-2">
-                                            <strong>{{ icons[achievement.exercise_type.value] }} {{ achievement.exercise_type }}</strong>:
-                                            {% for milestone in ACHIEVEMENTS[achievement.exercise_type] %}
-                                            {% if milestone == achievement.milestone %}
-                                            <span class="badge bg-success">{{ milestone }}</span>
-                                            {% else %}
-                                            <span class="badge bg-secondary">{{ milestone }}</span>
-                                            {% endif %}
-                                            {% endfor %}
+                                        {% set icon_colors = {
+                                        'running': '#ffb700',
+                                        'cycling': '#00b894',
+                                        'swimming': '#0984e3',
+                                        'weight_lifting': '#636e72',
+                                        'yoga': '#a29bfe'
+                                        } %}
+                                        {% set badge_classes = ['badge-bronze', 'badge-silver', 'badge-gold'] %}
+                                        {% set badge_labels = ['Bronze', 'Silver', 'Gold'] %}
+                                        {% for ex_type, milestones in ACHIEVEMENTS.items() %}
+                                        <div class="mb-2 d-flex align-items-center">
+                                            <span class="achievement-icon me-2"
+                                                style="background: {{ icon_colors[ex_type.value] }};">
+                                                {{ icons[ex_type.value] }}
+                                            </span>
+                                            <strong style="font-size:1.1em;">{{ ex_type }}</strong>:
+                                            <span class="ms-2">
+                                                {% for milestone in milestones %}
+                                                {% set idx = loop.index0 %}
+                                                {% set badge_class = badge_classes[idx] %}
+                                                {% set badge_label = badge_labels[idx] %}
+                                                {% if milestone in achievements[ex_type] %}
+                                                <span class="badge {{ badge_class }} me-1" title="{{ badge_label }}">{{
+                                                    badge_label }} {{ milestone }}</span>
+                                                {% else %}
+                                                <span class="badge badge-locked me-1" title="{{ badge_label }}">{{
+                                                    badge_label }} {{ milestone }}</span>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </span>
                                         </div>
                                         {% endfor %}
                                     </div>
@@ -558,6 +578,26 @@ Dashboard
         color: #0d6efd;
     }
 
+    .achievement-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.3em;
+        height: 2.3em;
+        border-radius: 50%;
+        font-size: 1.5em;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+        color: #fff;
+        margin-right: 0.5em;
+        border: 2.5px solid #fff;
+        transition: transform 0.2s;
+    }
+
+    .achievement-icon:hover {
+        transform: scale(1.1) rotate(-6deg);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+    }
+
     .schedule-item {
         border-radius: 1.2rem;
         padding: 0.7rem 1rem;
@@ -770,6 +810,38 @@ Dashboard
     .weather-day-card:hover {
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
         background: #e9f5ff;
+    }
+
+    .badge-bronze {
+        background: linear-gradient(90deg, #cd7f32 60%, #b87333 100%);
+        color: #fff;
+        border: 1.5px solid #b87333;
+        font-weight: 600;
+        box-shadow: 0 1px 4px rgba(205, 127, 50, 0.08);
+    }
+
+    .badge-silver {
+        background: linear-gradient(90deg, #c0c0c0 60%, #a9a9a9 100%);
+        color: #fff;
+        border: 1.5px solid #a9a9a9;
+        font-weight: 600;
+        box-shadow: 0 1px 4px rgba(192, 192, 192, 0.08);
+    }
+
+    .badge-gold {
+        background: linear-gradient(90deg, #ffd700 60%, #ffb700 100%);
+        color: #222;
+        border: 1.5px solid #ffb700;
+        font-weight: 700;
+        box-shadow: 0 1px 4px rgba(255, 215, 0, 0.12);
+    }
+
+    .badge-locked {
+        background: transparent;
+        color: #bbb;
+        border: 1.5px dashed #bbb;
+        font-weight: 600;
+        opacity: 0.5;
     }
 </style>
 {% endblock %}
