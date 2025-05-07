@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, flash, redirect, url_for,g
+from flask import Blueprint, render_template, flash, redirect, url_for, g
 
 from server.utils.decorators import login_required
 from server.blueprints.browse.forms import ExerciseForm, BodyMeasurementForm
@@ -6,37 +6,7 @@ import server.blueprints.browse.logic as logic
 
 browse_bp = Blueprint("browse", __name__, template_folder="templates")
 
-ACHIEVEMENTS = {
-    "cycling": [100, 1000, 10000],         # in km
-    "running": [50, 500, 5000],            # in km
-    "swimming": [10, 100, 1000],           # in km
-    "weight_lifting": [1000, 10000, 100000], # in kg
-    "yoga": [10, 100, 1000],               # in minutes
-}
 
-def get_user_totals(user):
-    from server.models import Exercise
-    totals = {
-        "cycling": 0,
-        "running": 0,
-        "swimming": 0,
-        "weight_lifting": 0,
-        "yoga": 0,
-    }
-    exercises = g.user.exercises
-    for ex in exercises:
-        t = ex.type.value if hasattr(ex.type, "value") else ex.type
-        if t == "cycling":
-            totals["cycling"] += float(ex.metrics.get("distance_km", 0))
-        elif t == "running":
-            totals["running"] += float(ex.metrics.get("distance_km", 0))
-        elif t == "swimming":
-            totals["swimming"] += float(ex.metrics.get("distance_m", 0)) / 1000  # m to km
-        elif t == "weight_lifting":
-            totals["weight_lifting"] += float(ex.metrics.get("weight_kg", 0)) * int(ex.metrics.get("reps", 1)) * int(ex.metrics.get("sets", 1))
-        elif t == "yoga":
-            totals["yoga"] += float(ex.metrics.get("duration_min", 0))
-    return totals
 @browse_bp.route("/", methods=["GET"])
 @login_required
 def index():
@@ -61,16 +31,12 @@ def exercise():
         exercise_type = exercise_form.type.data
         metrics = exercise_form.metrics.data
         try:
-            logic.add_exercise_data(exercise_type, metrics)
+            achievement = logic.add_exercise_data(exercise_type, metrics)
+            if achievement:
+                flash(
+                    f"🎉 Congratulations! You reached the {achievement.milestone} milestone in {achievement.exercise_type}!",
+                    "success")
             flash("Exercise data added successfully!", "success")
-             # --- Achievement check ---
-            user = g.user
-            totals = get_user_totals(user)
-            milestones = ACHIEVEMENTS.get(exercise_type, [])
-            for milestone in reversed(milestones):
-                if totals[exercise_type] >= milestone:
-                    flash(f"🎉 Congratulations! You reached the {milestone} milestone in {exercise_type.replace('_', ' ').capitalize()}!", "success")
-                    break
         except Exception as e:
             flash(f"Error adding exercise data: {str(e)}", "danger")
     else:

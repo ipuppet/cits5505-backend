@@ -34,14 +34,55 @@ class User(db.Model):
     )
 
     exercises = db.relationship(
-        "Exercise", backref="user", lazy=True, cascade="all, delete-orphan"
+        "Exercise",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+        order_by="Exercise.created_at.desc()",
     )
-    body_measurements = db.relationship("BodyMeasurement", backref="user", lazy=True)
+    body_measurements = db.relationship(
+        "BodyMeasurement",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+        order_by="BodyMeasurement.created_at.desc()",
+    )
+    achievements = db.relationship(
+        "Achievement",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+        order_by="Achievement.achieved_at.desc()",
+    )
+    scheduled_exercises = db.relationship(
+        "ScheduledExercise",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+        order_by="ScheduledExercise.scheduled_time.desc()",
+    )
+    goals = db.relationship(
+        "Goal",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+        order_by="Goal.created_at.desc()",
+    )
     shares_sent = db.relationship(
-        "Share", foreign_keys="Share.sender_id", backref="sender", lazy=True
+        "Share",
+        foreign_keys="Share.sender_id",
+        lazy="dynamic",
+        backref="sender",
+        cascade="all, delete-orphan",
+        order_by="Share.created_at.desc()",
     )
     shares_received = db.relationship(
-        "Share", foreign_keys="Share.receiver_id", backref="receiver", lazy=True
+        "Share",
+        foreign_keys="Share.receiver_id",
+        lazy="dynamic",
+        backref="receiver",
+        cascade="all, delete-orphan",
+        order_by="Share.created_at.desc()",
     )
 
     def to_dict(self) -> dict:
@@ -56,7 +97,7 @@ class User(db.Model):
 
     def exercises_to_list(self) -> list:
         exercises = []
-        for exercise in self.exercises:
+        for exercise in self.exercises.all():
             exercises.append({
                 'type': exercise.type.name,
                 **exercise.metrics,
@@ -66,7 +107,7 @@ class User(db.Model):
 
     def body_measurements_to_list(self) -> list:
         body_measurements = []
-        for measurement in self.body_measurements:
+        for measurement in self.body_measurements.all():
             body_measurements.append({
                 'type': measurement.type.name,
                 'value': measurement.value,
@@ -189,10 +230,39 @@ class Exercise(db.Model):
         return db.session.get(Exercise, int(exercise_id))
 
     @staticmethod
-    def get_by_user(user_id: int):
+    def get_by_user(user_id: int, **kwargs):
         if not user_id:
             raise ValueError("User ID cannot be empty")
-        return db.session.query(Exercise).filter_by(user_id=user_id).all()
+        return db.session.query(Exercise).filter_by(user_id=user_id, **kwargs).order_by(
+            Exercise.created_at.desc()).all()
+
+
+ACHIEVEMENTS = {
+    ExerciseType.CYCLING: [100, 1000, 10000],  # in km
+    ExerciseType.RUNNING: [50, 500, 5000],  # in km
+    ExerciseType.SWIMMING: [10, 100, 1000],  # in km
+    ExerciseType.WEIGHTLIFTING: [1000, 10000, 100000],  # in kg
+    ExerciseType.YOGA: [10, 100, 1000],  # in minutes
+}
+
+
+class Achievement(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    exercise_type = db.Column(db.Enum(ExerciseType), nullable=False)
+    milestone = db.Column(db.Integer, nullable=False)
+    achieved_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=db.func.current_timestamp(),
+    )
+
+    @staticmethod
+    def get_by_user(user_id: int, **kwargs):
+        if not user_id:
+            raise ValueError("User ID cannot be empty")
+        return db.session.query(Achievement).filter_by(user_id=user_id, **kwargs).order_by(
+            Achievement.achieved_at.desc()).all()
 
 
 class BodyMeasurementType(Enum):
@@ -209,7 +279,8 @@ BODY_MEASUREMENT_UNITS = {
     BodyMeasurementType.HEIGHT: ["cm", "inches"],
     BodyMeasurementType.BODY_FAT: ["%"],
 }
-    
+
+
 class BodyMeasurement(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
@@ -244,6 +315,7 @@ class BodyMeasurement(db.Model):
             raise ValueError("User ID cannot be empty")
         return db.session.query(BodyMeasurement).filter_by(user_id=user_id).all()
 
+
 class ScheduledExercise(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
@@ -252,8 +324,7 @@ class ScheduledExercise(db.Model):
     note = db.Column(db.Text, nullable=True)
     day_of_week = db.Column(db.String(10), nullable=False)  # e.g. "Monday", "Tuesday", etc.
 
-    user = db.relationship("User", backref="scheduled_exercises")
-    
+
 class Goal(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
@@ -265,7 +336,6 @@ class Goal(db.Model):
     unit = db.Column(db.String(32), nullable=True)  # e.g. "kg", "km", "min"
     created_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
 
-    user = db.relationship("User", backref="goals")
 
 class Share(db.Model):
     id = db.Column(db.Uuid, primary_key=True, default=uuid.uuid4)

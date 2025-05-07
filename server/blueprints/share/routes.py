@@ -4,6 +4,7 @@ from flask import Blueprint, render_template, request, g, flash
 from server.blueprints.share.forms import ShareForm
 from server.utils.decorators import login_required, api_response
 import server.blueprints.share.logic as logic
+import server.blueprints.browse.logic as browse_logic
 
 share_bp = Blueprint("share", __name__, template_folder="templates")
 
@@ -11,7 +12,11 @@ share_bp = Blueprint("share", __name__, template_folder="templates")
 @share_bp.route("/", methods=["GET"])
 @login_required
 def index():
-    return render_template("share/index.html")
+    return render_template(
+        "share/index.html",
+        exercise_types=browse_logic.get_exercise_types(),
+        body_measurement_types=browse_logic.get_body_measurement_types(),
+    )
 
 
 @share_bp.route("/<uuid:share_id>", methods=["GET", "DELETE"])
