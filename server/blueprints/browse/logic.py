@@ -1,4 +1,4 @@
-from flask import g
+from flask_login import current_user
 from sqlalchemy.exc import SQLAlchemyError
 from server.models import db, Exercise, ExerciseType, METRICS_REQUIREMENTS, BodyMeasurement, BodyMeasurementType, \
     BODY_MEASUREMENT_UNITS, ACHIEVEMENTS, Achievement
@@ -19,20 +19,20 @@ def add_exercise_data(exercise_type, metrics) -> Achievement | None:
     try:
         exercise_type = ExerciseType[exercise_type]
         new_exercise = Exercise(
-            user_id=g.user.id,
+            user_id=current_user.id,
             type=exercise_type,
             metrics=metrics,
         )
         db.session.add(new_exercise)
         # Check achievements
-        exercises = g.user.exercises.filter_by(type=exercise_type).all()
+        exercises = current_user.exercises.filter_by(type=exercise_type).all()
         total = sum(float(ex.metrics.get(METRICS_REQUIREMENTS[exercise_type][0], 0)) for ex in exercises)
-        achievements = g.user.achievements.filter_by(exercise_type=exercise_type).all()
+        achievements = current_user.achievements.filter_by(exercise_type=exercise_type).all()
         new_achievement = None
         for milestone in ACHIEVEMENTS[exercise_type]:
             if total >= milestone and not any(a.milestone == milestone for a in achievements):
                 new_achievement = Achievement(
-                    user_id=g.user.id,
+                    user_id=current_user.id,
                     exercise_type=exercise_type,
                     milestone=milestone,
                 )
@@ -61,7 +61,7 @@ def get_body_measurement_units() -> dict:
 def add_body_measurement_data(body_measurement_type, value, unit):
     try:
         new_body_measurement = BodyMeasurement(
-            user_id=g.user.id,
+            user_id=current_user.id,
             type=BodyMeasurementType[body_measurement_type],
             value=value,
             unit=unit,

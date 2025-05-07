@@ -1,9 +1,10 @@
-from flask import Blueprint, render_template, g, redirect, url_for, flash, session, request
-from server.utils.decorators import login_required
+from flask import Blueprint, render_template, redirect, url_for, flash, session, request
+from flask_login import login_required, current_user
+from datetime import datetime, timedelta
+
 from server.blueprints.dashboard.logic import fetch_weather_forecast
 from server.models import ScheduledExercise, Goal, db, ExerciseType, ACHIEVEMENTS
 from server.blueprints.dashboard.forms import ScheduleExerciseForm, GoalForm
-from datetime import datetime, timedelta
 
 METRICS_REQUIREMENTS = {
     ExerciseType.RUNNING: [("distance_km", "km"), ("duration", "min")],
@@ -28,8 +29,6 @@ def get_next_date_for_day(day_name):
 @dashboard_bp.route("/", methods=["GET", "POST"])
 @login_required
 def index():
-    user = g.user
-
     # --- Set up choices for GoalForm before instantiation ---
     exercise_type_choices = [(et.name, et.value) for et in ExerciseType]
     selected_type = None
@@ -48,8 +47,8 @@ def index():
 
     # --- Achievements logic ---
     # Example: fetch all exercises and measurements for this user
-    achievements = user.achievements.all()
-    exercises = user.exercises.all()
+    achievements = current_user.achievements.all()
+    exercises = current_user.exercises.all()
 
     # Set unit if metric is selected
     if request.method == "POST" and "metric" in request.form:
@@ -60,7 +59,7 @@ def index():
     if request.method == "POST":
         if schedule_form.submit.data and schedule_form.validate_on_submit():
             new_ex = ScheduledExercise(
-                user_id=user.id,
+                user_id=current_user.id,
                 day_of_week=schedule_form.day_of_week.data,
                 exercise_type=schedule_form.exercise_type.data,
                 scheduled_time=schedule_form.scheduled_time.data,
@@ -72,7 +71,7 @@ def index():
             return redirect(url_for('dashboard.index'))
         elif goal_form.submit.data and goal_form.validate_on_submit():
             goal = Goal(
-                user_id=user.id,
+                user_id=current_user.id,
                 exercise_type=goal_form.exercise_type.data,
                 description=goal_form.description.data,
                 target_value=goal_form.target_value.data,
@@ -86,12 +85,12 @@ def index():
 
     # --- sorting date  here ---
     DAYS_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-    scheduled_exercises = user.scheduled_exercises.all()
+    scheduled_exercises = current_user.scheduled_exercises.all()
     scheduled_exercises.sort(
         key=lambda ex: (DAYS_ORDER.index(ex.day_of_week), ex.scheduled_time)
     )
     # ----------------------------------------
-    goals = user.goals.all()
+    goals = current_user.goals.all()
     weather_forecast = fetch_weather_forecast("Perth", days=5)
     calendar_events = [
         {

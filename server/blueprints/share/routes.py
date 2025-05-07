@@ -1,8 +1,8 @@
-import uuid
-from flask import Blueprint, render_template, request, g, flash
+from flask import Blueprint, render_template, request, flash
+from flask_login import login_required, current_user
 
 from server.blueprints.share.forms import ShareForm
-from server.utils.decorators import login_required, api_response
+from server.utils.decorators import api_response
 import server.blueprints.share.logic as logic
 import server.blueprints.browse.logic as browse_logic
 
@@ -45,7 +45,7 @@ def create_share():
     share = None
     try:
         share = logic.create_share(
-            sender_id=g.user.id,
+            sender_id=current_user.id,
             receiver_id=share_form.receiver_id.data,
             scope=share_form.scope.data,
         )
