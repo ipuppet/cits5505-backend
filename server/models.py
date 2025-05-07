@@ -229,12 +229,6 @@ class Exercise(db.Model):
         return metrics
 
     @staticmethod
-    def get(exercise_id: int):
-        if not exercise_id:
-            raise ValueError("ID cannot be empty")
-        return db.session.get(Exercise, int(exercise_id))
-
-    @staticmethod
     def get_by_user(user_id: int, **kwargs):
         if not user_id:
             raise ValueError("User ID cannot be empty")
@@ -309,16 +303,31 @@ class BodyMeasurement(db.Model):
         return unit
 
     @staticmethod
-    def get(body_measurement_id: int):
-        if not body_measurement_id:
-            raise ValueError("ID cannot be empty")
-        return db.session.get(BodyMeasurement, int(body_measurement_id))
-
-    @staticmethod
-    def get_by_user(user_id: int):
+    def get_by_user(user_id: int, **kwargs):
         if not user_id:
             raise ValueError("User ID cannot be empty")
-        return db.session.query(BodyMeasurement).filter_by(user_id=user_id).all()
+        return db.session.query(BodyMeasurement).filter_by(user_id=user_id, **kwargs).order_by(
+            BodyMeasurement.created_at.desc()).all()
+
+
+class CalorieIntake(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    calories = db.Column(db.Float, nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    created_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=db.func.current_timestamp(),
+        index=True,
+    )
+
+    @staticmethod
+    def get_by_user(user_id: int, **kwargs):
+        if not user_id:
+            raise ValueError("User ID cannot be empty")
+        return db.session.query(CalorieIntake).filter_by(user_id=user_id, **kwargs).order_by(
+            CalorieIntake.created_at.desc()).all()
 
 
 class ScheduledExercise(db.Model):

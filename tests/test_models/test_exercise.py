@@ -62,9 +62,9 @@ class TestExerciseModel:
         session.commit()
 
         # Test valid get
-        result = Exercise.get(exercise.id)
+        result = Exercise.query.get(exercise.id)
         assert result.id == exercise.id
 
         # Test invalid ID
         with pytest.raises(ValueError):
-            Exercise.get("invalid_id")
+            Exercise.query.get("invalid_id")
