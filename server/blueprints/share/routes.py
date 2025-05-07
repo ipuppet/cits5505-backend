@@ -1,9 +1,9 @@
-import uuid
-from flask import Blueprint, render_template, request, g, flash
+from flask import Blueprint, render_template, request, flash
+from flask_login import login_required, current_user
 
 from server.blueprints.share.forms import ShareForm
-from server.utils.decorators import login_required, api_response
-import server.blueprints.share.logic as logic
+from server.utils.decorators import api_response
+import server.blueprints.share.logic as share_logic
 import server.blueprints.browse.logic as browse_logic
 
 share_bp = Blueprint("share", __name__, template_folder="templates")
@@ -27,9 +27,9 @@ def shared(share_id):
         raise ValueError("Share ID is required.")
     # Handle DELETE request
     if request.method == "DELETE":
-        return logic.delete_share(share_id)
+        return share_logic.delete_share(share_id)
     # Handle GET request
-    share = logic.get_shared(share_id)
+    share = share_logic.get_shared(share_id)
     if not share:
         raise ValueError("Share not found.")
     return share
@@ -44,8 +44,8 @@ def create_share():
         return render_template("share/create.html", form=share_form)
     share = None
     try:
-        share = logic.create_share(
-            sender_id=g.user.id,
+        share = share_logic.create_share(
+            sender_id=current_user.id,
             receiver_id=share_form.receiver_id.data,
             scope=share_form.scope.data,
         )

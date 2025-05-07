@@ -4,6 +4,9 @@ from enum import Enum
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy.orm import validates
+from flask_login import UserMixin
+
+from server.utils.login_manager import login_manager
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -16,7 +19,7 @@ class UserConflictError(ValueError):
         super().__init__(f"User with this {field} already exists: {value}")
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.Text, nullable=False, unique=True)
     password = db.Column(db.Text, nullable=False)
@@ -125,10 +128,12 @@ class User(db.Model):
             raise ValueError("User not found")
         return user
 
+    def get_id(self) -> str:
+        return self.email
+
     @staticmethod
+    @login_manager.user_loader
     def get_by_email(email: str) -> "User":
-        if not email:
-            raise ValueError("Email cannot be empty")
         return db.session.query(User).filter_by(email=email).first()
 
     @staticmethod

@@ -13,11 +13,11 @@
 {% block overlap_content %}
     <div class="big-screen">
         <h1>Your personal sport tracker</h1>
-        {% if g.user %}
+        {% if current_user.is_authenticated %}
             <div class="start-button">
                 <button class="btn btn-light" onclick="toDashboard()">Open dashboard</button>
             </div>
-            <p>Welcome back, {{ g.user.nickname }}!</p>
+            <p>Welcome back, {{ current_user.nickname }}!</p>
         {% else %}
             <div class="start-button">
                 <button class="btn btn-light" onclick="toRegister()">Get started for free</button>

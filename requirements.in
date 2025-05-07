@@ -10,3 +10,4 @@ Flask-Testing
 python-dotenv
 requests
 pytz
+flask-login
