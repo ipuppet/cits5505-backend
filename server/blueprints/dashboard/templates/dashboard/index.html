@@ -60,7 +60,7 @@ Dashboard
                                         <div class="col-7">
                                             <!-- {{ g.user.created_at.astimezone(perth).strftime('%Y-%m-%d %H:%M') if
                                             g.user.created_at else 'N/A' }} -->
-                                            {{now.strftime('%Y-%m-%d %H:%M')}}
+                                            {{g.localTime.strftime('%Y-%m-%d %H:%M')}}
                                         </div>
                                     </div>
                                     <div class="row mb-2">
@@ -963,11 +963,13 @@ Dashboard
     });
 </script>
 <script>
-    const timezone=Intl.DateTimeFormat().resolvedOptions().timeZone;
-    fetch('/dashboard/set-timezone',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({timezone})
+    const timeZone=Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const localTime=Intl.DateTimeFormat('en-US',{
+        timeZone:timeZone,
+        hour:"2-digit",
+        minute:"2-digit",
+        second:"2-digit",
+        hour12:true
     })
 </script>
 {% endblock %}
