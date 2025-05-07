@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import SelectField, SubmitField, FloatField
+from wtforms import SelectField, SubmitField, FloatField, StringField
 from wtforms.validators import ValidationError, DataRequired, Optional
 
 from server.utils.wtforms_custom import JSONField
@@ -29,4 +29,10 @@ class BodyMeasurementForm(FlaskForm):
         })],
         validators=[DataRequired()],
     )
+    submit = SubmitField("Submit")
+
+
+class CalorieIntakeForm(FlaskForm):
+    calories = FloatField("Calories", validators=[DataRequired()])
+    description = StringField("Description", validators=[Optional()])
     submit = SubmitField("Submit")

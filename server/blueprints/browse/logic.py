@@ -1,7 +1,7 @@
 from flask_login import current_user
 from sqlalchemy.exc import SQLAlchemyError
 from server.models import db, Exercise, ExerciseType, METRICS_REQUIREMENTS, BodyMeasurement, BodyMeasurementType, \
-    BODY_MEASUREMENT_UNITS, ACHIEVEMENTS, Achievement
+    BODY_MEASUREMENT_UNITS, ACHIEVEMENTS, Achievement, CalorieIntake
 
 
 def get_exercise_types() -> dict:
@@ -71,6 +71,23 @@ def add_body_measurement_data(body_measurement_type, value, unit):
     except SQLAlchemyError as e:
         db.session.rollback()
         raise RuntimeError(f"Error adding body measurement data: {str(e)}")
+    except Exception as e:
+        db.session.rollback()
+        raise RuntimeError(f"Unexpected error: {str(e)}")
+
+
+def add_calorie_intake_data(calories, description):
+    try:
+        new_calorie_intake = CalorieIntake(
+            user_id=current_user.id,
+            calories=calories,
+            description=description,
+        )
+        db.session.add(new_calorie_intake)
+        db.session.commit()
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise RuntimeError(f"Error adding calorie intake data: {str(e)}")
     except Exception as e:
         db.session.rollback()
         raise RuntimeError(f"Unexpected error: {str(e)}")
