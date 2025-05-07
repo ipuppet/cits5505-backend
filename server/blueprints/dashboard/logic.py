@@ -1,5 +1,8 @@
 import requests
 from datetime import datetime, timezone
+from flask_login import current_user
+
+from server.models import ACHIEVEMENTS
 
 
 def fetch_weather_forecast(city, days=5):
@@ -26,3 +29,16 @@ def fetch_weather_forecast(city, days=5):
             })
             seen_dates.add(date_str)
     return weather_forecast
+
+
+def get_all_achievements() -> dict:
+    return ACHIEVEMENTS
+
+
+def get_achievements_dict() -> dict:
+    achievements = {}
+    for achievement in current_user.achievements:
+        if achievement.exercise_type not in achievements:
+            achievements[achievement.exercise_type] = []
+        achievements[achievement.exercise_type].append(achievement.milestone)
+    return achievements

@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, session,
 from flask_login import login_required, current_user
 from datetime import datetime, timedelta
 
-from server.blueprints.dashboard.logic import fetch_weather_forecast
+from server.blueprints.dashboard import logic
 from server.models import ScheduledExercise, Goal, db, ExerciseType, ACHIEVEMENTS
 from server.blueprints.dashboard.forms import ScheduleExerciseForm, GoalForm
 
@@ -47,7 +47,7 @@ def index():
 
     # --- Achievements logic ---
     # Example: fetch all exercises and measurements for this user
-    achievements = current_user.achievements.all()
+    achievements = logic.get_achievements_dict()
     exercises = current_user.exercises.all()
 
     # Set unit if metric is selected
@@ -91,7 +91,7 @@ def index():
     )
     # ----------------------------------------
     goals = current_user.goals.all()
-    weather_forecast = fetch_weather_forecast("Perth", days=5)
+    weather_forecast = logic.fetch_weather_forecast("Perth", days=5)
     calendar_events = [
         {
             "title": "",
@@ -117,7 +117,7 @@ def index():
         goal_form=goal_form,
         metrics_by_type=metrics_by_type,
         achievements=achievements,
-        ACHIEVEMENTS=ACHIEVEMENTS,
+        ACHIEVEMENTS=logic.get_all_achievements(),
         exercises=exercises
     )
 

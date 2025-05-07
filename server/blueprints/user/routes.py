@@ -8,7 +8,7 @@ from server.blueprints.user.forms import (
     LoginForm,
     UserInfoForm,
 )
-import server.blueprints.user.logic as user_logic
+from server.blueprints.user import logic
 
 user_bp = Blueprint("user", __name__, template_folder="templates")
 
@@ -21,7 +21,7 @@ def login():
         return redirect(url_for("index.index"))
 
     try:
-        user_logic.login(
+        logic.login(
             form.email.data,
             form.password.data,
             form.remember_me.data,
@@ -35,7 +35,7 @@ def login():
 
 @user_bp.route("/logout")
 def logout():
-    user_logic.logout()
+    logic.logout()
     flash("You have been logged out.", "success")
     return redirect(url_for("index.index"))
 
@@ -52,7 +52,7 @@ def register():
         return redirect(url_for("user.register"))
 
     try:
-        user_logic.register(
+        logic.register(
             form.username.data,
             form.password.data,
             form.email.data,
@@ -81,7 +81,7 @@ def password():
 
     new_password = form.password.data
     try:
-        user_logic.reset_password(new_password)
+        logic.reset_password(new_password)
         flash(
             "Password reset successful! Please log in with your new password.",
             "success",
@@ -108,7 +108,7 @@ def index():
     nickname = form.nickname.data
 
     try:
-        user_logic.update_user(username, email, nickname)
+        logic.update_user(username, email, nickname)
         flash("User information updated successfully!", "success")
         return redirect(url_for("user.update_user"))
     except Exception as e:
@@ -120,7 +120,7 @@ def index():
 @login_required
 @api_response
 def search_user(username):
-    return user_logic.search_user(username)
+    return logic.search_user(username)
 
 
 @user_bp.route("/upload_avatar", methods=["POST"])
@@ -129,7 +129,7 @@ def upload_avatar():
     file = request.files.get("avatar")
     if file and file.filename:
         try:
-            user_logic.update_avatar(file)
+            logic.update_avatar(file)
         except Exception as e:
             flash(str(e), "danger")
             return redirect(url_for("dashboard.index"))
