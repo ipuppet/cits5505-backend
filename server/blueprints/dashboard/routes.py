@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from datetime import datetime, timedelta
 
 from server.blueprints.dashboard import logic
-from server.models import ScheduledExercise, Goal, db, ExerciseType, ACHIEVEMENTS
+from server.models import ScheduledExercise, Goal, db, ExerciseType, ACHIEVEMENTS,CalorieIntake
 from server.blueprints.dashboard.forms import ScheduleExerciseForm, GoalForm
 
 METRICS_REQUIREMENTS = {
@@ -32,6 +32,10 @@ def index():
     # --- Set up choices for GoalForm before instantiation ---
     exercise_type_choices = [(et.name, et.value) for et in ExerciseType]
     selected_type = None
+    calorie_intakes = CalorieIntake.query.filter_by(user_id=current_user.id).order_by(CalorieIntake.created_at.asc()).all()
+    intake_labels = [ci.created_at.strftime('%b %d') for ci in calorie_intakes]
+    intake_data = [ci.calories for ci in calorie_intakes]
+
 
     if request.method == "POST":
         selected_type = request.form.get("exercise_type") or exercise_type_choices[0][0]
@@ -118,7 +122,10 @@ def index():
         metrics_by_type=metrics_by_type,
         achievements=achievements,
         ACHIEVEMENTS=logic.get_all_achievements(),
-        exercises=exercises
+        calorie_intakes=calorie_intakes,
+        exercises=exercises,
+        intake_labels=intake_labels,
+        intake_data=intake_data
     )
 
 
