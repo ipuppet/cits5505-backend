@@ -50,6 +50,13 @@ class User(UserMixin, db.Model):
         cascade="all, delete-orphan",
         order_by="BodyMeasurement.created_at.desc()",
     )
+    calorie_intakes = db.relationship(
+        "CalorieIntake",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+        order_by="CalorieIntake.created_at.desc()",
+    )
     achievements = db.relationship(
         "Achievement",
         backref="user",
@@ -118,6 +125,16 @@ class User(UserMixin, db.Model):
                 'created_at': measurement.created_at,
             })
         return body_measurements
+
+    def calorie_intakes_to_list(self) -> list:
+        calorie_intakes = []
+        for intake in self.calorie_intakes.all():
+            calorie_intakes.append({
+                'calories': intake.calories,
+                'description': intake.description,
+                'created_at': intake.created_at,
+            })
+        return calorie_intakes
 
     @staticmethod
     def get(user_id: int) -> "User":
