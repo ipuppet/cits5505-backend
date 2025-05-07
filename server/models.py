@@ -126,6 +126,16 @@ class User(UserMixin, db.Model):
             })
         return body_measurements
 
+    def calorie_intakes_to_list(self) -> list:
+        calorie_intakes = []
+        for intake in self.calorie_intakes.all():
+            calorie_intakes.append({
+                'calories': intake.calories,
+                'description': intake.description,
+                'created_at': intake.created_at,
+            })
+        return calorie_intakes
+
     @staticmethod
     def get(user_id: int) -> "User":
         if not user_id:
