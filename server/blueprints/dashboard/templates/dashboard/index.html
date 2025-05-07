@@ -127,12 +127,11 @@ Dashboard
                                         'weight_lifting': '🏋️',
                                         'yoga': '🧘'
                                         } %}
-                                        {% for ex_type, milestones in achievements.items() %}
+                                        {% for achievement in achievements %}
                                         <div class="mb-2">
-                                            <strong>{{ icons[ex_type] }} {{ ex_type.replace('_', ' ').capitalize()
-                                                }}</strong>:
-                                            {% for milestone in ACHIEVEMENTS[ex_type] %}
-                                            {% if milestone in milestones %}
+                                            <strong>{{ icons[achievement.exercise_type.value] }} {{ achievement.exercise_type }}</strong>:
+                                            {% for milestone in ACHIEVEMENTS[achievement.exercise_type] %}
+                                            {% if milestone == achievement.milestone %}
                                             <span class="badge bg-success">{{ milestone }}</span>
                                             {% else %}
                                             <span class="badge bg-secondary">{{ milestone }}</span>
@@ -204,8 +203,7 @@ Dashboard
                                     </button>
                                     <div class="flex-grow-1">
                                         <div class="fw-bold" style="font-size:1.1rem;">
-                                            {{ (ex.exercise_type.value if ex.exercise_type is not string else
-                                            ex.exercise_type).replace('_', ' ').capitalize() }}
+                                            {{ ex.exercise_type }}
 
 
                                         </div>
@@ -338,8 +336,7 @@ Dashboard
                                     <strong>{{ goal.description }}</strong>
                                     <br>
                                     <span class="text-muted">
-                                        {{ (goal.exercise_type.value if goal.exercise_type is not string else
-                                        goal.exercise_type).replace('_', ' ').capitalize() }}
+                                        {{ goal.exercise_type }}
                                     </span>
                                     <br>
                                     Target: {{ goal.target_value }} {{ goal.unit }}
@@ -387,7 +384,7 @@ Dashboard
                                 {% for ex in exercises[:10] %}
                                 <tr>
                                     <td>{{ loop.index }}</td>
-                                    <td>{{ ex.type.value.replace('_', ' ').capitalize() }}</td>
+                                    <td>{{ ex.type }}</td>
                                     <td>{{ ex.created_at.strftime('%Y/%m/%d') if ex.created_at else 'N/A' }}</td>
                                     </td>
                                     <td>
