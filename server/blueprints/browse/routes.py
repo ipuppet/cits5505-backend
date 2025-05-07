@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, flash, redirect, url_for, g
+from flask_login import login_required
 
-from server.utils.decorators import login_required
+from server.blueprints.browse import logic
 from server.blueprints.browse.forms import ExerciseForm, BodyMeasurementForm
-import server.blueprints.browse.logic as logic
 
 browse_bp = Blueprint("browse", __name__, template_folder="templates")
 

@@ -107,8 +107,8 @@ Browse
     const ExercisesTypes = {{ exercise_types| tojson }}
     const BodyMeasurementUnits = {{ body_measurement_units| tojson }}
     const BodyMeasurementTypes = {{ body_measurement_types| tojson }}
-    const UserExercises = {{ g.user.exercises_to_list() | tojson }}
-    const UserBodyMeasurements = {{ g.user.body_measurements_to_list() | tojson }}
+    const UserExercises = {{ current_user.exercises_to_list() | tojson }}
+    const UserBodyMeasurements = {{ current_user.body_measurements_to_list() | tojson }}
 
     const Dataset = { headers: undefined, data: undefined }
 

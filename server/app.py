@@ -1,9 +1,11 @@
 import os
 from flask import Flask
 
-from server.models import db, migrate,User
+from server.models import db, migrate
 from server.utils.context_processors import inject_pytz
 from server.utils.mail import mail
+from server.utils.login_manager import login_manager
+
 
 def create_app(config_class=None):
     # Create and configure the app
@@ -38,6 +40,9 @@ def create_app(config_class=None):
     migrate.init_app(app, db)
     with app.app_context():
         db.create_all()
+
+    # Initialize the login manager
+    login_manager.init_app(app)
 
     # Initialize Flask-Mail
     mail.init_app(app)
