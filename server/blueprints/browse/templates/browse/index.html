@@ -9,13 +9,6 @@
 {% endblock %}
 
 {% block content %}
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }} mt-2">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
     <div class="modal fade" id="exerciseModal" tabindex="-1" aria-labelledby="exerciseModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -85,6 +78,10 @@
                         <div class="mb-3">
                             {{ calorie_intake_form.calories.label(class="form-label") }}
                             {{ calorie_intake_form.calories(class="form-control") }}
+                        </div>
+                        <div class="mb-3">
+                            {{ calorie_intake_form.unit.label(class="form-label") }}
+                            {{ calorie_intake_form.unit(class="form-select") }}
                         </div>
                         <div class="mb-3">
                             {{ calorie_intake_form.description.label(class="form-label") }}
@@ -225,7 +222,7 @@
                 Dataset.data = type => convertTimezone(UserExercises.filter(exercise => exercise.type === type))
                 updateBrowseTableOptions(ExercisesTypes)
             } else if (dateset === "browseCalorieIntake") {
-                Dataset.headers = () => ["calories", "description", "created_at"]
+                Dataset.headers = () => ["calories", "unit", "description", "created_at"]
                 Dataset.data = () => convertTimezone(UserCalorieIntakes)
                 updateBrowseTableOptions(["calories"])
             } else if (dateset === "browseBodyMeasurement") {
