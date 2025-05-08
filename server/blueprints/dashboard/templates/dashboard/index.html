@@ -12,7 +12,7 @@ Dashboard
         <div class="col-12">
             <div class="row">
 
-                {% if g.user %}
+                {% if current_user.is_authenticated %}
                 <!-- User Info Left -->
                 <div class="col-lg-3 mb-4">
                     <div class="card shadow-lg border-0 h-100">
@@ -20,11 +20,11 @@ Dashboard
                             <form id="avatar-form" action="{{ url_for('user.upload_avatar') }}" method="post"
                                 enctype="multipart/form-data" class="mt-2 mb-3 text-center">
                                 <label for="avatar" style="cursor:pointer; display:block;">
-                                    {% if g.user.avatar %}
-                                    <img src="{{ url_for('static', filename=g.user.avatar) }}" alt="Avatar"
+                                    {% if current_user.avatar %}
+                                    <img src="{{ url_for('static', filename=current_user.avatar) }}" alt="Avatar"
                                         class="rounded-circle shadow mb-3" width="96" height="96" id="avatar-img">
                                     {% else %}
-                                    <img src="https://ui-avatars.com/api/?name={{ g.user.nickname|default('User') }}&size=96&background=0D8ABC&color=fff"
+                                    <img src="https://ui-avatars.com/api/?name={{ current_user.nickname|default('User') }}&size=96&background=0D8ABC&color=fff"
                                         alt="Default Avatar" class="rounded-circle shadow mb-3" width="96" height="96"
                                         id="avatar-img">
                                     {% endif %}
@@ -32,7 +32,7 @@ Dashboard
                                 <input type="file" name="avatar" id="avatar" accept="image/*" style="display:none"
                                     required>
                             </form>
-                            <h2 class="card-title mb-1 text-center" id="greeting-line"><strong>{{ g.user.nickname
+                            <h2 class="card-title mb-1 text-center" id="greeting-line"><strong>{{ current_user.nickname
                                     }}</strong></h2>
                             <div class="card mb-3 shadow-sm border-0">
                                 <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
@@ -41,32 +41,32 @@ Dashboard
                                 <div class="card-body p-3">
                                     <div class="row mb-2">
                                         <div class="col-5 text-muted"><strong>Username:</strong></div>
-                                        <div class="col-7">{{ g.user.username }}</div>
+                                        <div class="col-7">{{ current_user.username }}</div>
                                     </div>
                                     <div class="row mb-2">
                                         <div class="col-5 text-muted"><strong>Email:</strong></div>
-                                        <div class="col-7">{{ g.user.email }}</div>
+                                        <div class="col-7">{{ current_user.email }}</div>
                                     </div>
                                     <div class="row mb-2">
                                         <div class="col-5 text-muted"><strong>Date of Birth:</strong></div>
-                                        <div class="col-7">{{ g.user.date_of_birth or 'N/A' }}</div>
+                                        <div class="col-7">{{ current_user.date_of_birth or 'N/A' }}</div>
                                     </div>
                                     <div class="row mb-2">
                                         <div class="col-5 text-muted"><strong>Sex:</strong></div>
-                                        <div class="col-7">{{ g.user.sex or 'N/A' }}</div>
+                                        <div class="col-7">{{ current_user.sex or 'N/A' }}</div>
                                     </div>
                                     <div class="row mb-2">
                                         <div class="col-5 text-muted"><strong>Created At:</strong></div>
                                         <div class="col-7">
-                                            {{ g.user.created_at.astimezone(perth).strftime('%Y-%m-%d %H:%M') if
-                                            g.user.created_at else 'N/A' }}
+                                            {{ current_user.created_at.astimezone(perth).strftime('%Y-%m-%d %H:%M') if
+                                            current_user.created_at else 'N/A' }}
                                         </div>
                                     </div>
                                     <div class="row mb-2">
                                         <div class="col-5 text-muted"><strong>Last Login:</strong></div>
                                         <div class="col-7">
-                                            {{ g.user.last_login.astimezone(perth).strftime('%Y-%m-%d %H:%M') if
-                                            g.user.last_login else 'N/A' }}
+                                            {{ current_user.last_login.astimezone(perth).strftime('%Y-%m-%d %H:%M') if
+                                            current_user.last_login else 'N/A' }}
                                         </div>
                                     </div>
                                 </div>
@@ -109,51 +109,103 @@ Dashboard
                     </div>
                 </div>
                 <!-- Charts Right -->
-                <!-- 第二列：中间列 -->
+                <!-- Achievements Card START -->
                 <div class="col-lg-5 mb-4">
-                    <!-- 成就卡片 -->
-                    <div class="card chart-card shadow-sm border-0 mb-4">
-                        <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
-                            <strong>Achievements</strong>
-                        </div>
-                        <div class="card-body p-3">
-                            {% if achievements %}
-                            <div class="d-flex flex-wrap gap-3 justify-content-center">
-                                {% for ach in achievements %}
-                                <div class="achievement-card d-flex flex-column align-items-center p-3">
-                                    <i class="bi bi-trophy-fill text-warning" style="font-size: 2rem;"></i>
-                                    <span class="mt-2" style="font-weight: 500;">{{ ach }}</span>
+                    <div class="row g-4">
+                        <div class="col-md-12">
+                            <div class="card chart-card shadow-sm border-0 mb-4">
+                                <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                                    <strong>Achievements</strong>
                                 </div>
-                                {% endfor %}
+                                <div class="card-body p-3">
+                                    {% if achievements %}
+                                    <div id="achievements-list">
+                                        {% set icons = {
+                                        'running': '🏃‍♂️',
+                                        'cycling': '🚴‍♀️',
+                                        'swimming': '🏊‍♂️',
+                                        'weight_lifting': '🏋️‍♂️',
+                                        'yoga': '🧘‍♂️'
+                                        } %}
+                                        {% set icon_colors = {
+                                        'running': '#ffb700',
+                                        'cycling': '#00b894',
+                                        'swimming': '#0984e3',
+                                        'weight_lifting': '#636e72',
+                                        'yoga': '#a29bfe'
+                                        } %}
+                                        {% set badge_classes = ['badge-bronze', 'badge-silver', 'badge-gold'] %}
+                                        {% set badge_labels = ['Bronze', 'Silver', 'Gold'] %}
+                                        {% for ex_type, milestones in ACHIEVEMENTS.items() %}
+                                        <div class="mb-2 d-flex align-items-center">
+                                            <span class="achievement-icon me-2"
+                                                style="background: {{ icon_colors[ex_type.value] }};">
+                                                {{ icons[ex_type.value] }}
+                                            </span>
+                                            <strong style="font-size:1.1em;">{{ ex_type }}</strong>:
+                                            <span class="ms-2">
+                                                {% for milestone in milestones %}
+                                                {% set idx = loop.index0 %}
+                                                {% set badge_class = badge_classes[idx] %}
+                                                {% set badge_label = badge_labels[idx] %}
+                                                {% if milestone in achievements[ex_type] %}
+                                                <span class="badge {{ badge_class }} me-1" title="{{ badge_label }}">{{
+                                                    badge_label }} {{ milestone }}</span>
+                                                {% else %}
+                                                <span class="badge badge-locked me-1" title="{{ badge_label }}">{{
+                                                    badge_label }} {{ milestone }}</span>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </span>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% else %}
+                                    <div class="text-muted text-center">No achievements yet. Start logging your
+                                        activities!</div>
+                                    {% endif %}
+                                </div>
                             </div>
-                            {% else %}
-                            <div class="text-muted text-center">No achievements yet. Start logging your activities!</div>
-                            {% endif %}
                         </div>
-                    </div>
-                    <!-- Weight Trend 图表 -->
-                    <div class="card chart-card shadow-sm border-0 mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title text-center">Weight Trend</h5>
-                            <canvas id="weightChart"></canvas>
+                        <!-- Achievements Card END -->
+
+
+                        <div class="col-md-12">
+                            <div class="card chart-card shadow-sm border-0 mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title text-center">Calories Burned</h5>
+                                    <canvas id="exerciseChart"></canvas>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <!-- Calorie Intake 图表 -->
-                    <div class="card chart-card shadow-sm border-0 mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title text-center">Calorie Intake</h5>
-                            <canvas id="intakeChart"></canvas>
+                        <div class="col-md-12">
+                            <div class="card chart-card shadow-sm border-0 mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title text-center">Calorie Intake</h5>
+                                    <canvas id="intakeChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card chart-card shadow-sm border-0">
+                                <div class="card-body">
+                                    <h5 class="card-title text-center">Weight Trend</h5>
+                                    <canvas id="weightChart"></canvas>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 第三列：右边列 -->
+                <!-- Right: Schedule & Goals -->
                 <div class="col-lg-4 mb-4">
-                    <!-- My Schedule -->
+                    <!-- Schedule Card -->
                     <div class="card shadow-sm border-0 mb-4">
                         <div class="card-header bg-light d-flex justify-content-between align-items-center">
                             <strong>My Schedule</strong>
-                            <button class="btn btn-circle btn-add" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
+                            <!-- Add Button (opens modal) -->
+                            <button class="btn btn-circle btn-add" data-bs-toggle="modal"
+                                data-bs-target="#addScheduleModal">
                                 <i class="bi bi-plus"></i>
                             </button>
                         </div>
@@ -165,36 +217,48 @@ Dashboard
                             <ul class="list-unstyled">
                                 {% for ex in scheduled_exercises %}
                                 <li class="schedule-item d-flex align-items-start mb-3">
+                                    <!-- Check/complete button (optional, add logic as needed) -->
                                     <button class="btn btn-check me-3" title="Mark as done">
                                         <i class="bi bi-circle"></i>
                                     </button>
                                     <div class="flex-grow-1">
                                         <div class="fw-bold" style="font-size:1.1rem;">
-                                            {{ (ex.exercise_type.value if ex.exercise_type is not string else ex.exercise_type).capitalize() }}
+                                            {{ ex.exercise_type }}
+
+
                                         </div>
                                         <div class="text-muted small">
                                             {{ ex.scheduled_time.strftime('%I:%M %p').lstrip('0') }}
                                             {% if ex.note %} &mdash; {{ ex.note }}{% endif %}
                                         </div>
                                     </div>
-                                    <button class="btn btn-edit ms-2" title="Edit" data-bs-toggle="modal" data-bs-target="#editScheduleModal-{{ ex.id }}">
+                                    <!-- Edit button (opens modal, implement logic as needed) -->
+                                    <!-- Edit button -->
+                                    <button class="btn btn-edit ms-2" title="Edit" data-bs-toggle="modal"
+                                        data-bs-target="#editScheduleModal-{{ ex.id }}">
                                         <i class="bi bi-three-dots"></i>
                                     </button>
-                                    <div class="modal fade" id="editScheduleModal-{{ ex.id }}" tabindex="-1" aria-labelledby="editScheduleModalLabel-{{ ex.id }}" aria-hidden="true">
+                                    <!-- Edit Modal for each schedule item -->
+                                    <div class="modal fade" id="editScheduleModal-{{ ex.id }}" tabindex="-1"
+                                        aria-labelledby="editScheduleModalLabel-{{ ex.id }}" aria-hidden="true">
                                         <div class="modal-dialog">
                                             <div class="modal-content">
-                                                <form method="POST" action="{{ url_for('dashboard.edit_schedule', id=ex.id) }}">
+                                                <form method="POST"
+                                                    action="{{ url_for('dashboard.edit_schedule', id=ex.id) }}">
                                                     {{ form.hidden_tag() }}
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title" id="editScheduleModalLabel-{{ ex.id }}">Edit or Delete Exercise</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        <h5 class="modal-title" id="editScheduleModalLabel-{{ ex.id }}">
+                                                            Edit or Delete Exercise</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body">
                                                         <div class="mb-2">
                                                             <label>Day</label>
                                                             <select name="day_of_week" class="form-select">
                                                                 {% for val, label in form.day_of_week.choices %}
-                                                                <option value="{{ val }}" {% if ex.day_of_week==val %}selected{% endif %}>{{ label }}</option>
+                                                                <option value="{{ val }}" {% if ex.day_of_week==val
+                                                                    %}selected{% endif %}>{{ label }}</option>
                                                                 {% endfor %}
                                                             </select>
                                                         </div>
@@ -202,71 +266,44 @@ Dashboard
                                                             <label>Exercise</label>
                                                             <select name="exercise_type" class="form-select">
                                                                 {% for val, label in form.exercise_type.choices %}
-                                                                <option value="{{ val }}" {% if ex.exercise_type.value==val or ex.exercise_type==val %}selected{% endif %}>{{ label }}</option>
+                                                                <option value="{{ val }}" {% if
+                                                                    ex.exercise_type.value==val or ex.exercise_type==val
+                                                                    %}selected{% endif %}>{{ label }}</option>
                                                                 {% endfor %}
                                                             </select>
                                                         </div>
                                                         <div class="mb-2">
                                                             <label>Time</label>
-                                                            <input type="time" name="scheduled_time" class="form-control" value="{{ ex.scheduled_time.strftime('%H:%M') }}">
+                                                            <input type="time" name="scheduled_time"
+                                                                class="form-control"
+                                                                value="{{ ex.scheduled_time.strftime('%H:%M') }}">
                                                         </div>
                                                         <div class="mb-2">
                                                             <label>Note</label>
-                                                            <input type="text" name="note" class="form-control" value="{{ ex.note }}">
+                                                            <input type="text" name="note" class="form-control"
+                                                                value="{{ ex.note }}">
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer d-flex justify-content-between">
-                                                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                                                        <button type="submit" class="btn btn-primary">Save
+                                                            Changes</button>
                                                 </form>
-                                                <form method="POST" action="{{ url_for('dashboard.delete_schedule', id=ex.id) }}" onsubmit="return confirm('Delete this schedule?');">
+                                                <form method="POST"
+                                                    action="{{ url_for('dashboard.delete_schedule', id=ex.id) }}"
+                                                    onsubmit="return confirm('Delete this schedule?');">
                                                     <button type="submit" class="btn btn-danger">Delete</button>
                                                 </form>
                                             </div>
+
                                         </div>
                                     </div>
-                                </li>
-                                {% endfor %}
-                            </ul>
-                            {% else %}
-                            <div class="text-muted">No scheduled exercises.</div>
-                            {% endif %}
                         </div>
-                    </div>
-                    <!-- My Goals -->
-                    <div class="card shadow-sm border-0 mb-4">
-                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                            <strong>My Goals</strong>
-                            <button class="btn btn-circle btn-add" data-bs-toggle="modal" data-bs-target="#addGoalModal">
-                                <i class="bi bi-plus"></i>
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            {% if goals %}
-                            <ul class="list-group">
-                                {% for goal in goals %}
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>
-                                        <strong>{{ goal.description }}</strong>
-                                        <br>
-                                        Target: {{ goal.target_value }} {{ goal.unit }}
-                                    </span>
-                                    <span class="badge bg-primary rounded-pill">
-                                        {{ goal.current_value }} / {{ goal.target_value }}
-                                    </span>
-                                </li>
-                                {% endfor %}
-                            </ul>
-                            {% else %}
-                            <div class="text-muted">No goals set yet.</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <!-- Calories Burned 图表 -->
-                    <div class="card chart-card shadow-sm border-0 mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title text-center">Calories Burned</h5>
-                            <canvas id="exerciseChart"></canvas>
-                        </div>
+
+                        {% endfor %}
+                        </ul>
+                        {% else %}
+                        <div class="text-muted">No scheduled exercises.</div>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -300,6 +337,94 @@ Dashboard
                         </div>
                     </div>
                 </div>
+                <!-- Goals Card -->
+                <!-- Goals List Card -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <strong>My Goals</strong>
+                        <button class="btn btn-circle btn-add" data-bs-toggle="modal" data-bs-target="#addGoalModal">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        {% if goals %}
+                        <ul class="list-group">
+                            {% for goal in goals %}
+                            <li
+                                class="list-group-item d-flex justify-content-between align-items-center position-relative goal-item">
+                                <span>
+                                    <strong>{{ goal.description }}</strong>
+                                    <br>
+                                    <span class="text-muted">
+                                        {{ goal.exercise_type }}
+                                    </span>
+                                    <br>
+                                    Target: {{ goal.target_value }} {{ goal.unit }}
+                                </span>
+                                <span class="d-flex flex-column align-items-end">
+                                    <span class="badge bg-primary rounded-pill mb-2">
+                                        {{ goal.current_value }} / {{ goal.target_value }}
+                                    </span>
+                                    <form method="POST" action="{{ url_for('dashboard.delete_goal', id=goal.id) }}"
+                                        onsubmit="return confirm('Are you sure you want to give up this goal?');"
+                                        class="delete-goal-form">
+                                        <button type="submit"
+                                            class="badge rounded-pill bg-white text-danger border border-danger give-up-badge-btn"
+                                            style="font-size: 0.8rem;" title="Give Up Goal">
+                                            Give Up
+                                        </button>
+                                    </form>
+                                </span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <div class="text-muted">No goals set yet.</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Exercise Log Card -->
+                <div class="card chart-card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                        <strong>Exercise Log</strong>
+                    </div>
+                    <div class="card-body p-3">
+                        {% if exercises %}
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Type</th>
+                                    <th>Date</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ex in exercises[:10] %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ ex.type }}</td>
+                                    <td>{{ ex.created_at.strftime('%Y/%m/%d') if ex.created_at else 'N/A' }}</td>
+                                    </td>
+                                    <td>
+                                        {% if ex.metrics %}
+                                        {% for key, value in ex.metrics.items() %}
+                                        {{ key.replace('_', ' ').capitalize() }}: {{ value }}<br>
+                                        {% endfor %}
+                                        {% else %}
+                                        N/A
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <div class="text-muted text-center">No exercise data yet.</div>
+                        {% endif %}
+                    </div>
+                </div>
                 <!-- Add Goal Modal -->
                 <div class="modal fade" id="addGoalModal" tabindex="-1" aria-labelledby="addGoalModalLabel"
                     aria-hidden="true">
@@ -312,6 +437,8 @@ Dashboard
                                         aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
+                                    <div class="mb-2">{{ goal_form.description.label }} {{
+                                        goal_form.description(class="form-control") }}</div>
                                     <div class="mb-2">{{ goal_form.exercise_type.label }} {{
                                         goal_form.exercise_type(class="form-select") }}</div>
                                     <div class="mb-2">{{ goal_form.metric.label }} {{
@@ -320,8 +447,7 @@ Dashboard
                                         goal_form.target_value(class="form-control") }}</div>
                                     <div class="mb-2">{{ goal_form.unit.label }} {{ goal_form.unit(class="form-control",
                                         readonly=True) }}</div>
-                                    <div class="mb-2">{{ goal_form.description.label }} {{
-                                        goal_form.description(class="form-control") }}</div>
+
                                     <div class="modal-footer">
                                         <button type="submit" class="btn btn-primary">{{ goal_form.submit(class="btn
                                             btn-primary") }}</button>
@@ -331,28 +457,9 @@ Dashboard
                     </div>
                 </div>
 
-                <!-- 在 Share Records 部分添加可视化卡片 -->
-                <div class="share-container">
-                    <h4 class="section-title">Shared Data Visualization</h4>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="card chart-card shadow-sm border-0 mb-4">
-                                <div class="card-body">
-                                    <h5 class="card-title text-center">Exercise Data</h5>
-                                    <canvas id="sharedExerciseChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card chart-card shadow-sm border-0 mb-4">
-                                <div class="card-body">
-                                    <h5 class="card-title text-center">Body Measurements</h5>
-                                    <canvas id="sharedBodyChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
+
+
 
                 {% else %}
                 <div class="alert alert-info text-center">
@@ -471,6 +578,26 @@ Dashboard
         color: #0d6efd;
     }
 
+    .achievement-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.3em;
+        height: 2.3em;
+        border-radius: 50%;
+        font-size: 1.5em;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+        color: #fff;
+        margin-right: 0.5em;
+        border: 2.5px solid #fff;
+        transition: transform 0.2s;
+    }
+
+    .achievement-icon:hover {
+        transform: scale(1.1) rotate(-6deg);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+    }
+
     .schedule-item {
         border-radius: 1.2rem;
         padding: 0.7rem 1rem;
@@ -482,6 +609,41 @@ Dashboard
     .schedule-item:hover {
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         background: #fffde7;
+    }
+
+    .goal-item {
+        transition: background 0.2s;
+    }
+
+    .goal-item:hover {
+        background: #fffde7 !important;
+        /* light yellow */
+    }
+
+    .goal-item .delete-goal-form {
+        display: none;
+    }
+
+    .goal-item:hover .delete-goal-form {
+        display: block;
+    }
+
+    .give-up-badge-btn {
+        cursor: pointer;
+        font-weight: 500;
+        padding: 0.2em 0.7em;
+        margin-bottom: 0.1rem;
+        margin-right: 0.1rem;
+        background: #fff;
+        color: #dc3545 !important;
+        border: 1.5px solid #dc3545 !important;
+        transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    .give-up-badge-btn:hover {
+        background: #ffe066 !important;
+        color: #b30000 !important;
+        border-color: #b30000 !important;
     }
 
     /* Make the calendar more compact and modern */
@@ -650,13 +812,36 @@ Dashboard
         background: #e9f5ff;
     }
 
-    .share-container {
-        width: 80%;
-        margin: 2rem auto;
-        background-color: #f8f9fa;
-        padding: 2rem;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    .badge-bronze {
+        background: linear-gradient(90deg, #cd7f32 60%, #b87333 100%);
+        color: #fff;
+        border: 1.5px solid #b87333;
+        font-weight: 600;
+        box-shadow: 0 1px 4px rgba(205, 127, 50, 0.08);
+    }
+
+    .badge-silver {
+        background: linear-gradient(90deg, #c0c0c0 60%, #a9a9a9 100%);
+        color: #fff;
+        border: 1.5px solid #a9a9a9;
+        font-weight: 600;
+        box-shadow: 0 1px 4px rgba(192, 192, 192, 0.08);
+    }
+
+    .badge-gold {
+        background: linear-gradient(90deg, #ffd700 60%, #ffb700 100%);
+        color: #222;
+        border: 1.5px solid #ffb700;
+        font-weight: 700;
+        box-shadow: 0 1px 4px rgba(255, 215, 0, 0.12);
+    }
+
+    .badge-locked {
+        background: transparent;
+        color: #bbb;
+        border: 1.5px dashed #bbb;
+        font-weight: 600;
+        opacity: 0.5;
     }
 </style>
 {% endblock %}
@@ -689,7 +874,7 @@ Dashboard
                 greeting = "Good night";
                 emoji = "🌙";
             }
-            greetingLine.innerHTML = `<span>${emoji} ${greeting}, <strong>{{ g.user.nickname }}</strong></span>`;
+            greetingLine.innerHTML = `<span>${emoji} ${greeting}, <strong>{{ current_user.nickname }}</strong></span>`;
         }
     });
 </script>
@@ -846,129 +1031,5 @@ Dashboard
             });
         }
     });
-</script>
-
-<script>
-// 获取共享数据并渲染图表
-function renderSharedData(shareId) {
-    fetch(`/share/${shareId}/data`)
-        .then(response => response.json())
-        .then(data => {
-            const exercises = data.exercises;
-            const measurements = data.body_measurements;
-            const sharedBy = data.shared_by;
-
-            // 处理运动数据
-            const exerciseData = processExerciseData(exercises);
-            renderExerciseChart(exerciseData, sharedBy);
-
-            // 处理体重数据
-            const bodyData = processBodyData(measurements);
-            renderBodyChart(bodyData, sharedBy);
-        });
-}
-
-// 处理运动数据，按日期分组
-function processExerciseData(exercises) {
-    const groupedData = {};
-    exercises.forEach(exercise => {
-        const date = new Date(exercise.created_at).toLocaleDateString();
-        if (!groupedData[date]) {
-            groupedData[date] = {
-                calories: 0,
-                distance: 0,
-                duration: 0
-            };
-        }
-        // 累加当天的运动数据
-        if (exercise.calories) groupedData[date].calories += exercise.calories;
-        if (exercise.distance) groupedData[date].distance += exercise.distance;
-        if (exercise.duration) groupedData[date].duration += exercise.duration;
-    });
-    return groupedData;
-}
-
-// 处理体重数据，按日期排序
-function processBodyData(measurements) {
-    return measurements
-        .filter(m => m.type === 'weight')
-        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-}
-
-// 渲染运动数据图表
-function renderExerciseChart(data, sharedBy) {
-    const dates = Object.keys(data);
-    const calories = dates.map(date => data[date].calories);
-    
-    new Chart(document.getElementById('sharedExerciseChart'), {
-        type: 'bar',
-        data: {
-            labels: dates,
-            datasets: [{
-                label: `Calories Burned (Shared by ${sharedBy})`,
-                data: calories,
-                backgroundColor: 'rgba(255, 99, 132, 0.6)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Calories'
-                    }
-                }
-            }
-        }
-    });
-}
-
-// 渲染体重数据图表
-function renderBodyChart(data, sharedBy) {
-    const dates = data.map(m => new Date(m.created_at).toLocaleDateString());
-    const weights = data.map(m => m.value);
-    
-    new Chart(document.getElementById('sharedBodyChart'), {
-        type: 'line',
-        data: {
-            labels: dates,
-            datasets: [{
-                label: `Weight Trend (Shared by ${sharedBy})`,
-                data: weights,
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                fill: false,
-                tension: 0.3,
-                pointRadius: 5,
-                pointBackgroundColor: 'rgba(54, 162, 235, 1)'
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: false,
-                    title: {
-                        display: true,
-                        text: 'Weight (kg)'
-                    }
-                }
-            }
-        }
-    });
-}
-
-// 当页面加载时，如果URL中包含share_id，则加载共享数据
-document.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const shareId = urlParams.get('share_id');
-    if (shareId) {
-        renderSharedData(shareId);
-    }
-});
 </script>
 {% endblock %}
