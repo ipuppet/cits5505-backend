@@ -27,6 +27,9 @@
       margin: 0 auto;
       height: 80px;
     }
+    .card {
+      margin-bottom: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -91,10 +94,7 @@
       <div class="mb-3">
         <label for="friendSelect" class="form-label">Select Friends</label>
         <select id="friendSelect" class="form-select" multiple required>
-          <option value="alice">Alice</option>
-          <option value="bob">Bob</option>
-          <option value="charlie">Charlie</option>
-          <option value="diana">Diana</option>
+          <!-- 好友列表由后端动态渲染 -->
         </select>
         <div class="form-text">Hold Ctrl (Windows) or Command (Mac) to select multiple friends.</div>
       </div>
@@ -115,6 +115,25 @@
       <button class="btn btn-outline-secondary btn-copy" onclick="copyLink()">Copy</button>
     </div>
     <div class="text-muted mt-2">This link grants access to your analysis summary.</div>
+  </div>
+
+  <!-- Section 3: Share Records -->
+  <div class="share-container">
+    <h4 class="section-title">Share Records</h4>
+    <div class="row">
+      <div class="col-md-6">
+        <h5>Sent Shares</h5>
+        <div id="shareSent" class="card">
+          <!-- 发送记录由后端动态渲染 -->
+        </div>
+      </div>
+      <div class="col-md-6">
+        <h5>Received Shares</h5>
+        <div id="shareReceived" class="card">
+          <!-- 接收记录由后端动态渲染 -->
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -151,6 +170,60 @@
       }
     }
   });
+
+  // 从后端获取好友列表并渲染
+  fetch('/api/friends')
+    .then(response => response.json())
+    .then(data => {
+      const friendSelect = document.getElementById('friendSelect');
+      data.forEach(friend => {
+        const option = document.createElement('option');
+        option.value = friend.id;
+        option.text = friend.name;
+        friendSelect.appendChild(option);
+      });
+    });
+
+  // 从后端获取分享记录并渲染
+  fetch('/api/share-records')
+    .then(response => response.json())
+    .then(data => {
+      const shareSent = document.getElementById('shareSent');
+      const shareReceived = document.getElementById('shareReceived');
+      data.share_sent.forEach(record => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="card-body">
+            <h5 class="card-title">${record.receiver_name}</h5>
+            <p class="card-text">${record.message}</p>
+            <button class="btn btn-danger" onclick="deleteShareRecord(${record.id})">Delete</button>
+          </div>
+        `;
+        shareSent.appendChild(card);
+      });
+      data.share_received.forEach(record => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="card-body">
+            <h5 class="card-title">${record.sender_name}</h5>
+            <p class="card-text">${record.message}</p>
+          </div>
+        `;
+        shareReceived.appendChild(card);
+      });
+    });
+
+  function deleteShareRecord(id) {
+    fetch(`/api/share-records/${id}`, { method: 'DELETE' })
+      .then(response => response.json())
+      .then(data => {
+        alert('Share record deleted successfully.');
+        // 重新加载分享记录
+        location.reload();
+      });
+  }
 </script>
 
 <!-- Bootstrap bundle JS -->

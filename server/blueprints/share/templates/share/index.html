@@ -5,80 +5,193 @@ Share Data
 {% endblock %}
 
 {% block content %}
-<div class="mainstr mt-5">
-    <!-- Section 1: Share with registered friends -->
-    <div class="share-container">
-        <h4 class="section-title">Share with Friends</h4>
-        <!-- Search box for filtering users -->
-        <div class="mb-3">
-            <input type="text" id="searchFriend" class="form-control" placeholder="Search friends...">
+<div class="container py-5">
+    <div class="row justify-content-center align-items-start">
+        <div class="col-lg-5 mb-4">
+            <div class="card shadow-sm border-0" style="border-radius: 1rem;">
+                <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                    <h4 class="mb-0">Share with Friends</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <input type="text" id="searchFriend" class="form-control" placeholder="Search friends...">
+                    </div>
+                    <form id="friendShareForm" action="{{ url_for('share.create_share') }}" method="post" onsubmit="updateScopeHidden()">
+                        <input type="hidden" name="csrf_token" value="">
+                        <div class="mb-3">
+                            <label for="friendacSelect" class="form-label">Select Friends</label>
+                            <select id="friendacSelect" class="form-select" name="receiver_id" required>
+                                <option value="" hidden>Select a friend</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="chartType" class="form-label">Exercise Type</label>
+                            <select id="chartType" class="form-select" required>
+                                <option value="" disabled selected>Please select an exercise type</option>
+                                <option value="cycling">Cycling</option>
+                                <option value="running">Running</option>
+                                <option value="swimming">Swimming</option>
+                                <option value="weight_lifting">Weight Lifting</option>
+                                <option value="yoga">Yoga</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Time Range</label>
+                            <div>
+                                <input type="radio" id="days7" name="shareDays" value="7" checked>
+                                <label for="days7">Last 7 days</label>
+                                <input type="radio" id="days14" name="shareDays" value="14">
+                                <label for="days14">Last 14 days</label>
+                            </div>
+                        </div>
+                        <div id="chartPreview" class="my-3"></div>
+                        <input type="hidden" id="scopeHidden" name="scope" value='{"exercise_type":"","days":7,"data_type":"exercise"}'>
+                        <button type="submit" class="btn btn-primary">Share Data</button>
+                    </form>
+                    <div id="sendStatus" class="mt-3 text-success" style="display:none;">Data shared successfully with selected friends.</div>
+                </div>
+            </div>
         </div>
-        <form id="friendShareForm">
-            <div class="mb-3">
-                <label for="friendSelect" class="form-label">Select Friends</label>
-                <select id="friendSelect" class="form-select" multiple required>
-                    <option value="alice">Alice</option>
-                    <option value="bob">Bob</option>
-                    <option value="charlie">Charlie</option>
-                    <option value="diana">Diana</option>
-                </select>
-                <div class="form-text">Hold Ctrl (Windows) or Command (Mac) to select multiple friends.</div>
+        <!-- Right Column: Generate Link + Share Records -->
+        <div class="col-lg-7 mb-4 d-flex flex-column gap-4">
+            <div class="card shadow-sm border-0" style="border-radius: 1rem;">
+                <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                    <h4 class="mb-0">Generate Shareable Link</h4>
+                </div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="shareLink" value="https://yourdomain.com/share/ABC123" readonly>
+                        <button class="btn btn-outline-secondary btn-copy" onclick="copyLink()">Copy</button>
+                    </div>
+                    <div class="text-muted mt-2">This link grants access to your analysis summary.</div>
+                </div>
             </div>
-            <div class="mb-3">
-                <label for="note" class="form-label">Optional Message</label>
-                <textarea class="form-control" id="note" rows="2" placeholder="Write a short message..."></textarea>
+            <div class="card shadow-sm border-0" style="border-radius: 1rem;">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center" style="border-radius: 1rem 1rem 0 0;">
+                    <h4 class="mb-0">Share Records</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12 mb-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Sent Shares</h5>
+                                <button class="btn btn-circle btn-add" data-bs-toggle="modal" data-bs-target="#sentSharesModal">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                            </div>
+                            <div id="shareSent"></div>
+                            <div id="sentCountText" class="text-muted mt-2">You have shared 0 records.</div>
+                        </div>
+                        <hr class="my-2" style="border-top: 1px solid #e0e7ef; opacity: 1;">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Received Shares</h5>
+                                <button class="btn btn-circle btn-add" data-bs-toggle="modal" data-bs-target="#receivedSharesModal">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                            </div>
+                            <div id="shareReceived"></div>
+                            <div id="receivedCountText" class="text-muted mt-2">You have received 0 records.</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary">Share Data</button>
-        </form>
-        <div id="sendStatus" class="mt-3 text-success" style="display:none;">Data shared successfully with selected
-            friends.</div>
+        </div>
     </div>
+</div>
 
-    <!-- Section 2: Generate shareable link -->
-    <div class="share-container">
-        <h4 class="section-title">Generate Shareable Link</h4>
-        <div class="input-group">
-            <input type="text" class="form-control" id="shareLink" value="https://yourdomain.com/share/ABC123" readonly>
-            <button class="btn btn-outline-secondary btn-copy" onclick="copyLink()">Copy</button>
+<!-- Sent Shares Modal -->
+<div class="modal fade" id="sentSharesModal" tabindex="-1" aria-labelledby="sentSharesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sentSharesModalLabel">All Sent Shares</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="sentSharesDetail"></div>
+            </div>
         </div>
-        <div class="text-muted mt-2">This link grants access to your analysis summary.</div>
+    </div>
+</div>
+<!-- Received Shares Modal -->
+<div class="modal fade" id="receivedSharesModal" tabindex="-1" aria-labelledby="receivedSharesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="receivedSharesModalLabel">All Received Shares</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="receivedSharesDetail"></div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
 
 {% block css %}
 <style>
-    .share-container {
-        width: 80%;
-        margin: 2rem auto;
-        background-color: #f8f9fa;
-        padding: 2rem;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    body {
+        background: #292a2c51 !important;
+        font-size: 1.05rem;
+        font-family: 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
     }
-
-    .section-title {
-        margin-bottom: 1.5rem;
+    .card {
+        border-radius: 1rem !important;
+        margin-bottom: 1rem;
     }
-
+    .card-header.bg-light {
+        background: #f8fafc !important;
+        font-size: 1.15rem;
+        font-weight: 600;
+        border-bottom: 1px solid #e0e7ef;
+        letter-spacing: 0.01em;
+    }
+    .btn-circle {
+        width: 2.2rem;
+        height: 2.2rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff86a;
+        color: #222;
+        border: none;
+        font-size: 1.3rem;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        transition: background 0.2s;
+    }
+    .btn-circle:hover {
+        background: #ffe066;
+    }
+    .btn-add {
+        background: #fff86a;
+        color: #222;
+    }
     .btn-copy {
+        font-size: 1rem;
         margin-left: 1rem;
+    }
+    .card h4, .card h5 {
+        font-size: 1.15rem;
+        font-weight: 600;
+    }
+    .form-control, .form-select {
+        border-radius: 0.7rem;
+    }
+    .form-text {
+        color: #888;
+    }
+    .input-group .form-control {
+        font-size: 1rem;
     }
 </style>
 {% endblock %}
 
 {% block js %}
+{{ super() }}
 <script>
-    document.getElementById('friendShareForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-        const selectedFriends = Array.from(document.getElementById('friendSelect').selectedOptions).map(opt => opt.value);
-        if (selectedFriends.length > 0) {
-            document.getElementById('sendStatus').style.display = "block";
-        } else {
-            alert("Please select at least one friend to share with.");
-        }
-    });
-
     function copyLink() {
         const copyText = document.getElementById("shareLink");
         copyText.select();
@@ -88,17 +201,116 @@ Share Data
     }
 
     // Add search functionality for friends
-    document.getElementById('searchFriend').addEventListener('input', function () {
-        const filter = this.value.toLowerCase();
-        const options = document.getElementById('friendSelect').options;
-        for (let i = 0; i < options.length; i++) {
-            const option = options[i];
-            if (option.text.toLowerCase().includes(filter)) {
-                option.style.display = '';
-            } else {
-                option.style.display = 'none';
+    document.getElementById('searchFriend').addEventListener('input', function() {
+        const username = this.value.trim();
+        const friendSelect = document.getElementById('friendacSelect');
+        // Clear dropdown box
+        friendSelect.innerHTML = '';
+        if (!username) return;
+        fetch(`/user/${encodeURIComponent(username)}`)
+            .then(res => res.json())
+            .then(res => {
+                if (res.code === 1 && Array.isArray(res.data)) {
+                    res.data.forEach(user => {
+                        const option = document.createElement('option');
+                        option.value = user.id;
+                        option.text = user.nickname ? `${user.nickname}（${user.username}）` : user.username;
+                        friendSelect.appendChild(option);
+                    });
+                }
+            });
+    });
+
+    // Fetch and render share records from backend
+    fetch('/static/share/share_records.json')
+        .then(response => response.json())
+        .then(data => {
+            const shareSent = document.getElementById('shareSent');
+            const shareReceived = document.getElementById('shareReceived');
+            shareSent.innerHTML = '';
+            shareReceived.innerHTML = '';
+            data.share_sent.forEach(record => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-body">
+                        <h5 class="card-title">${record.receiver_name}</h5>
+                        <p class="card-text">${record.message}</p>
+                        <button class="btn btn-danger" onclick="deleteShareRecord(${record.id})">Delete</button>
+                    </div>
+                `;
+                shareSent.appendChild(card);
+            });
+            data.share_received.forEach(record => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-body">
+                        <h5 class="card-title">${record.sender_name}</h5>
+                        <p class="card-text">${record.message}</p>
+                    </div>
+                `;
+                shareReceived.appendChild(card);
+            });
+            // Update share count text dynamically
+            const sentCountText = document.getElementById('sentCountText');
+            if (sentCountText) {
+                sentCountText.textContent = `You have successfully shared ${data.share_sent.length} records.`;
             }
-        }
+            const receivedCountText = document.getElementById('receivedCountText');
+            if (receivedCountText) {
+                receivedCountText.textContent = `You have received ${data.share_received.length} records.`;
+            }
+        });
+
+    function deleteShareRecord(id) {
+        fetch('/share/' + id, { method: 'DELETE' })
+            .then(response => response.json())
+            .then(data => {
+                alert('Share record deleted successfully.');
+                // Reload share records
+                location.reload();
+            });
+    }
+
+    // Expand all Sent Shares/Received Shares
+    function renderSharesDetail(type, data) {
+        let html = '';
+        data.forEach(record => {
+            html += `<div class="card mb-2"><div class="card-body">
+                <h6 class="card-title">${type === 'sent' ? record.receiver_name : record.sender_name}</h6>
+                <p class="card-text">${record.message}</p>
+                <div class="text-muted small">${record.time || ''}</div>
+            </div></div>`;
+        });
+        document.getElementById(type === 'sent' ? 'sentSharesDetail' : 'receivedSharesDetail').innerHTML = html;
+    }
+
+    // Listen for modal display and load data dynamically
+    const sentModal = document.getElementById('sentSharesModal');
+    sentModal && sentModal.addEventListener('show.bs.modal', function () {
+        fetch('/static/share/share_records.json')
+            .then(response => response.json())
+            .then(data => renderSharesDetail('sent', data.share_sent));
+    });
+    const receivedModal = document.getElementById('receivedSharesModal');
+    receivedModal && receivedModal.addEventListener('show.bs.modal', function () {
+        fetch('/static/share/share_records.json')
+            .then(response => response.json())
+            .then(data => renderSharesDetail('received', data.share_received));
+    });
+
+    // Add updateScopeHidden function and event binding
+    function updateScopeHidden() {
+        var chartType = document.getElementById('chartType').value;
+        var days = document.querySelector('input[name="shareDays"]:checked').value;
+        var scope = { exercise_type: chartType, days: Number(days), data_type: 'exercise' };
+        document.getElementById('scopeHidden').value = JSON.stringify(scope);
+    }
+    document.getElementById('chartType').addEventListener('change', updateScopeHidden);
+    var radios = document.querySelectorAll('input[name="shareDays"]');
+    radios.forEach(function(radio) {
+        radio.addEventListener('change', updateScopeHidden);
     });
 </script>
 {% endblock %}
