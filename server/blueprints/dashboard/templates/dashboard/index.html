@@ -897,16 +897,18 @@ Dashboard
 
     const labels = getLast14DaysLabels();
 
-    const burned = [300, 500, 450, 600, 700, 400, 500, 550, 620, 700, 600, 580, 640, 670];
     const weight = [70.0, 69.9, 69.8, 69.7, 69.6, 69.5, 69.4, 69.3, 69.2, 69.1, 69.0, 68.9, 68.8, 68.7];
+
+    const burnedLabels = {{ burned_labels | tojson }};
+    const burnedData = {{ burned_data | tojson }};
 
     new Chart(document.getElementById('exerciseChart'), {
         type: 'bar',
         data: {
-            labels: labels,
+            labels: burnedLabels,
             datasets: [{
                 label: 'Calories Burned',
-                data: burned,
+                data: burnedData,
                 backgroundColor: 'rgba(75, 192, 192, 0.6)',
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
@@ -914,7 +916,6 @@ Dashboard
         },
         options: { responsive: true, scales: { y: { beginAtZero: true } } }
     });
-
     new Chart(document.getElementById('intakeChart'), {
         type: 'bar',
         data: {
