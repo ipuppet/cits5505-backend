@@ -2,7 +2,11 @@ from flask import Blueprint, render_template, flash, redirect, url_for, g
 from flask_login import login_required
 
 from server.blueprints.browse import logic
-from server.blueprints.browse.forms import ExerciseForm, BodyMeasurementForm, CalorieIntakeForm
+from server.blueprints.browse.forms import (
+    ExerciseForm,
+    BodyMeasurementForm,
+    CalorieIntakeForm,
+)
 
 browse_bp = Blueprint("browse", __name__, template_folder="templates")
 
@@ -38,7 +42,8 @@ def exercise():
             if achievement:
                 flash(
                     f"🎉 Congratulations! You reached the {achievement.milestone} milestone in {achievement.exercise_type}!",
-                    "success")
+                    "success",
+                )
             flash("Exercise data added successfully!", "success")
         except Exception as e:
             flash(f"Error adding exercise data: {str(e)}", "danger")
@@ -74,6 +79,7 @@ def calorie_intake():
         try:
             logic.add_calorie_intake_data(
                 calorie_intake_form.calories.data,
+                calorie_intake_form.unit.data,
                 calorie_intake_form.description.data,
             )
             flash("Calorie intake data added successfully!", "success")

@@ -3,12 +3,20 @@ from wtforms import SelectField, SubmitField, FloatField, StringField
 from wtforms.validators import ValidationError, DataRequired, Optional
 
 from server.utils.wtforms_custom import JSONField
-from server.models import ExerciseType, BodyMeasurementType, BODY_MEASUREMENT_UNITS
+from server.models import (
+    ExerciseType,
+    BodyMeasurementType,
+    BODY_MEASUREMENT_UNITS,
+    CALORIE_INTAKE_UNITS,
+)
 
 
 class ExerciseForm(FlaskForm):
-    type = SelectField("Type", choices=[(e.name, str(e)) for e in ExerciseType],
-                       validators=[DataRequired()])
+    type = SelectField(
+        "Type",
+        choices=[(e.name, str(e)) for e in ExerciseType],
+        validators=[DataRequired()],
+    )
     metrics = JSONField("metrics", validators=[Optional()])
     submit = SubmitField("Submit")
 
@@ -18,15 +26,20 @@ class ExerciseForm(FlaskForm):
 
 
 class BodyMeasurementForm(FlaskForm):
-    type = SelectField("Type", choices=[(e.name, str(e)) for e in BodyMeasurementType],
-                       validators=[DataRequired()])
+    type = SelectField(
+        "Type",
+        choices=[(e.name, str(e)) for e in BodyMeasurementType],
+        validators=[DataRequired()],
+    )
     value = FloatField("Value", validators=[DataRequired()])
     unit = SelectField(
         "Unit",
-        choices=[(unit, unit) for unit in sorted({
-            unit for units in BODY_MEASUREMENT_UNITS.values()
-            for unit in units
-        })],
+        choices=[
+            (unit, unit)
+            for unit in sorted(
+                {unit for units in BODY_MEASUREMENT_UNITS.values() for unit in units}
+            )
+        ],
         validators=[DataRequired()],
     )
     submit = SubmitField("Submit")
@@ -35,4 +48,9 @@ class BodyMeasurementForm(FlaskForm):
 class CalorieIntakeForm(FlaskForm):
     calories = FloatField("Calories", validators=[DataRequired()])
     description = StringField("Description", validators=[Optional()])
+    unit = SelectField(
+        "Unit",
+        choices=[(unit, unit) for unit in CALORIE_INTAKE_UNITS],
+        validators=[DataRequired()],
+    )
     submit = SubmitField("Submit")
