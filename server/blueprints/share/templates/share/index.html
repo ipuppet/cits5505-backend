@@ -17,7 +17,7 @@ Share Data
                         <input type="text" id="searchFriend" class="form-control" placeholder="Search friends...">
                     </div>
                     <form id="friendShareForm" action="{{ url_for('share.create_share') }}" method="post" onsubmit="updateScopeHidden()">
-                        {{ csrf_token() }}
+                        <input type="hidden" name="csrf_token" value="">
                         <div class="mb-3">
                             <label for="friendacSelect" class="form-label">Select Friends</label>
                             <select id="friendacSelect" class="form-select" name="receiver_id" required>
@@ -204,7 +204,7 @@ Share Data
     document.getElementById('searchFriend').addEventListener('input', function() {
         const username = this.value.trim();
         const friendSelect = document.getElementById('friendacSelect');
-        // 清空下拉框
+        // Clear dropdown box
         friendSelect.innerHTML = '';
         if (!username) return;
         fetch(`/user/${encodeURIComponent(username)}`)
@@ -252,7 +252,7 @@ Share Data
                 `;
                 shareReceived.appendChild(card);
             });
-            // 动态更新分享数量文本
+            // Update share count text dynamically
             const sentCountText = document.getElementById('sentCountText');
             if (sentCountText) {
                 sentCountText.textContent = `You have successfully shared ${data.share_sent.length} records.`;
@@ -268,12 +268,12 @@ Share Data
             .then(response => response.json())
             .then(data => {
                 alert('Share record deleted successfully.');
-                // 重新加载分享记录
+                // Reload share records
                 location.reload();
             });
     }
 
-    // 展开全部Sent Shares/Received Shares
+    // Expand all Sent Shares/Received Shares
     function renderSharesDetail(type, data) {
         let html = '';
         data.forEach(record => {
@@ -286,7 +286,7 @@ Share Data
         document.getElementById(type === 'sent' ? 'sentSharesDetail' : 'receivedSharesDetail').innerHTML = html;
     }
 
-    // 监听modal弹窗显示，动态加载数据
+    // Listen for modal display and load data dynamically
     const sentModal = document.getElementById('sentSharesModal');
     sentModal && sentModal.addEventListener('show.bs.modal', function () {
         fetch('/static/share/share_records.json')
@@ -300,7 +300,7 @@ Share Data
             .then(data => renderSharesDetail('received', data.share_received));
     });
 
-    // 添加 updateScopeHidden 函数及事件绑定
+    // Add updateScopeHidden function and event binding
     function updateScopeHidden() {
         var chartType = document.getElementById('chartType').value;
         var days = document.querySelector('input[name="shareDays"]:checked').value;
