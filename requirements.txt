@@ -8,6 +8,8 @@ alembic==1.15.2
     # via flask-migrate
 bcrypt==4.3.0
     # via -r requirements.in
+black==25.1.0
+    # via -r requirements.in
 blinker==1.9.0
     # via
     #   flask
@@ -17,7 +19,9 @@ certifi==2025.4.26
 charset-normalizer==3.4.1
     # via requests
 click==8.1.8
-    # via flask
+    # via
+    #   black
+    #   flask
 dnspython==2.7.0
     # via email-validator
 email-validator==2.2.0
@@ -65,8 +69,16 @@ markupsafe==3.0.2
     #   mako
     #   werkzeug
     #   wtforms
+mypy-extensions==1.1.0
+    # via black
 packaging==25.0
-    # via pytest
+    # via
+    #   black
+    #   pytest
+pathspec==0.12.1
+    # via black
+platformdirs==4.3.8
+    # via black
 pluggy==1.5.0
     # via pytest
 pytest==8.3.5
