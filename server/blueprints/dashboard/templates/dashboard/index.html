@@ -897,8 +897,7 @@ Dashboard
 
     const labels = getLast14DaysLabels();
 
-    const weight = [70.0, 69.9, 69.8, 69.7, 69.6, 69.5, 69.4, 69.3, 69.2, 69.1, 69.0, 68.9, 68.8, 68.7];
-
+    const weight = {{ weight_data | tojson }};
     const burnedLabels = {{ burned_labels | tojson }};
     const burnedData = {{ burned_data | tojson }};
 
@@ -946,7 +945,12 @@ Dashboard
                 pointBackgroundColor: 'rgba(54, 162, 235, 1)'
             }]
         },
-        options: { responsive: true, scales: { y: { beginAtZero: false, title: { display: true, text: 'kg' } } } }
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: false, title: { display: true, text: 'kg' } } },
+            spanGaps: true // <-- Move spanGaps here
+        }
+
     });
 </script>
 <script>

@@ -7,7 +7,10 @@ from collections import defaultdict
 from server.blueprints.dashboard import logic
 from server.models import ScheduledExercise, Goal, db, ExerciseType, ACHIEVEMENTS, CalorieIntake, BodyMeasurement, BodyMeasurementType
 from server.blueprints.dashboard.forms import ScheduleExerciseForm, GoalForm
-
+from datetime import datetime, timedelta
+import pytz
+# Set your timezone, e.g., Perth
+PERTH_TZ = pytz.timezone("Australia/Perth")
 METRICS_REQUIREMENTS = {
     ExerciseType.RUNNING: [("distance_km", "km"), ("duration", "min")],
     ExerciseType.CYCLING: [("distance_km", "km"), ("duration", "min")],
@@ -49,10 +52,13 @@ def index():
 # Group and sum by date
     intake_by_date = defaultdict(int)
     for ci in calorie_intakes:
-        date_str = ci.created_at.strftime('%b %d')
+    # Convert to Perth timezone if not already aware
+        if ci.created_at.tzinfo is None:
+            ci_time = pytz.utc.localize(ci.created_at).astimezone(PERTH_TZ)
+        else:
+            ci_time = ci.created_at.astimezone(PERTH_TZ)
+        date_str = ci_time.strftime('%b %d')
         intake_by_date[date_str] += ci.calories  # or ci.amount, depending on your model
-
-# Prepare data for chart
     intake_labels = list(intake_by_date.keys())
     intake_data = list(intake_by_date.values())
 
@@ -88,16 +94,17 @@ def index():
             duration = (sets * reps * 4) / 60  # duration in minutes
         else:
             duration = float(ex.metrics.get("duration_min", 0))
-        print(f"DEBUG: ex_type={ex_type}, duration={duration}, weight_kg={weight_kg}")
         burned = calculate_calories_burned(ex_type, duration, weight_kg)
-        print(f"DEBUG: burned={burned}")
-        date_str = ex.created_at.strftime('%b %d')
+        if ex.created_at.tzinfo is None:
+            ex_time = pytz.utc.localize(ex.created_at).astimezone(PERTH_TZ)
+        else:
+            ex_time = ex.created_at.astimezone(PERTH_TZ)
+        date_str = ex_time.strftime('%b %d')
         burned_by_date[date_str] += burned
 
     burned_labels = list(burned_by_date.keys())
     burned_data = list(burned_by_date.values())
     # --- Achievements logic ---
-    # Example: fetch all exercises and measurements for this user
     achievements = logic.get_achievements_dict()
 
     # Set unit if metric is selected
@@ -155,7 +162,34 @@ def index():
         for ex in scheduled_exercises
     ]
     metrics_by_type = {et.name: METRICS_REQUIREMENTS[et] for et in ExerciseType}
-
+    # Get all weight measurements for the current user
+    weight_measurements = (
+        BodyMeasurement.query
+        .filter_by(user_id=current_user.id, type=BodyMeasurementType.WEIGHT)
+        .order_by(BodyMeasurement.created_at.asc())
+        .all()
+    )
+    weight_labels = []
+    weight_by_date = {}
+    for bm in weight_measurements:
+    # Convert to Perth timezone if not already aware
+        if bm.created_at.tzinfo is None:
+         bm_time = pytz.utc.localize(bm.created_at).astimezone(PERTH_TZ)
+        else:
+            bm_time = bm.created_at.astimezone(PERTH_TZ)
+        label = bm_time.strftime('%b %d')
+        weight_labels.append(label)
+        weight_by_date[label] = bm.value
+# Build last 14 days labels (to match getLast14DaysLabels)
+    today = datetime.now(PERTH_TZ)    
+    weight_data = []
+    for i in range(13, -1, -1):
+        day = today - timedelta(days=i)
+        label = day.strftime('%b %d')
+        weight_labels.append(label)
+    # Only show value if entry exists for that day, else null
+        value = weight_by_date.get(label, None)
+        weight_data.append(value)
     return render_template(
         "dashboard/index.html",
         weather_forecast=weather_forecast,
@@ -172,8 +206,10 @@ def index():
         exercises=exercises,
         intake_labels=intake_labels,
         intake_data=intake_data,
-        burned_labels=burned_labels,      # <-- add this
-        burned_data=burned_data  
+        burned_labels=burned_labels,     
+        burned_data=burned_data,
+        weight_labels=weight_labels,
+        weight_data=weight_data  
     )
 
 
