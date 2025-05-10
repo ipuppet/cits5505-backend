@@ -2,17 +2,19 @@ from flask import Blueprint, render_template, redirect, url_for, flash, session,
 from flask_login import login_required, current_user
 from datetime import datetime, timedelta
 from collections import defaultdict
-
-
+import json
 from server.blueprints.dashboard import logic
 from server.models import ScheduledExercise, Goal, db, ExerciseType, ACHIEVEMENTS, CalorieIntake, BodyMeasurement, BodyMeasurementType
-from server.blueprints.dashboard.forms import ScheduleExerciseForm, GoalForm
-
+from server.blueprints.dashboard.forms import ScheduleExerciseForm, GoalForm,WeightForm
+from datetime import datetime, timedelta
+import pytz
+# Set your timezone, e.g., Perth
+PERTH_TZ = pytz.timezone("Australia/Perth")
 METRICS_REQUIREMENTS = {
     ExerciseType.RUNNING: [("distance_km", "km"), ("duration", "min")],
     ExerciseType.CYCLING: [("distance_km", "km"), ("duration", "min")],
     ExerciseType.SWIMMING: [("distance_m", "m"), ("duration", "min")],
-    ExerciseType.WEIGHTLIFTING: [("weight_kg", "kg"), ("sets", "sets"), ("reps", "reps")],
+    ExerciseType.WEIGHTLIFTING: [("weight_kg", "kg")],
     ExerciseType.YOGA: [("duration", "min")],
 }
 
@@ -25,7 +27,11 @@ MET_VALUES = {
     "weight_lifting": 6.0,
     "yoga": 3.0,
 }
-
+def calculate_bmi(weight_kg, height_cm):
+    if not weight_kg or not height_cm:
+        return None
+    height_m = height_cm / 100
+    return round(weight_kg / (height_m ** 2), 1)
 def calculate_calories_burned(ex_type, duration_min, user_weight_kg):
     met = MET_VALUES.get(ex_type, 6.0)  # default MET if not found
     return round(0.0175 * met * user_weight_kg * duration_min, 2)
@@ -36,7 +42,27 @@ def get_next_date_for_day(day_name):
     target_idx = days.index(day_name)
     delta = (target_idx - today_idx) % 7
     return today + timedelta(days=delta)
+def get_goal_current_value(user, goal):
+    # Map exercise type to the metric key in metrics JSON
+    metric_map = {
+        "CYCLING": "distance_km",
+        "RUNNING": "distance_km",
+        "SWIMMING": "distance_m",
+        "WEIGHTLIFTING": "weight_kg",
+        "YOGA": "duration_min",
+    }
+    metric_key = metric_map.get(goal.exercise_type.name)
+    if not metric_key:
+        return 0
 
+    # Get all exercises of this type for the user
+    exercises = user.exercises.filter_by(type=goal.exercise_type).all()
+    total = 0.0
+    for ex in exercises:
+        metrics = ex.metrics if isinstance(ex.metrics, dict) else json.loads(ex.metrics)
+        value = float(metrics.get(metric_key, 0))
+        total += value
+    return total
 
 @dashboard_bp.route("/", methods=["GET", "POST"])
 @login_required
@@ -49,26 +75,30 @@ def index():
 # Group and sum by date
     intake_by_date = defaultdict(int)
     for ci in calorie_intakes:
-        date_str = ci.created_at.strftime('%b %d')
+    # Convert to Perth timezone if not already aware
+        if ci.created_at.tzinfo is None:
+            ci_time = pytz.utc.localize(ci.created_at).astimezone(PERTH_TZ)
+        else:
+            ci_time = ci.created_at.astimezone(PERTH_TZ)
+        date_str = ci_time.strftime('%b %d')
         intake_by_date[date_str] += ci.calories  # or ci.amount, depending on your model
-
-# Prepare data for chart
     intake_labels = list(intake_by_date.keys())
     intake_data = list(intake_by_date.values())
 
-
-    if request.method == "POST":
-        selected_type = request.form.get("exercise_type") or exercise_type_choices[0][0]
-    else:
-        selected_type = exercise_type_choices[0][0]
-
+    weight_form = WeightForm()
     schedule_form = ScheduleExerciseForm()
     goal_form = GoalForm()
     goal_form.exercise_type.choices = [(et.name, et.value) for et in ExerciseType]
-    selected_type = goal_form.exercise_type.data or goal_form.exercise_type.choices[0][0]
+
+# Use POSTed value if present, else use form data, else default
+    # Always get the selected type from form data, POST, or default
+    selected_type = (
+        request.form.get("exercise_type")
+        or goal_form.exercise_type.data
+        or goal_form.exercise_type.choices[0][0]
+    )
     metrics = METRICS_REQUIREMENTS[ExerciseType[selected_type]]
-    goal_form.metric.choices = [(m[0], m[0].replace("_", " ").capitalize()) for m in metrics]
-    # Get latest weight (or use a default)
+    goal_form.metric.choices = [(m[0], m[0][0].upper() + m[0][1:]) for m in metrics]    # Get latest weight (or use a default)
     latest_weight = (
         BodyMeasurement.query.filter_by(user_id=current_user.id, type=BodyMeasurementType.WEIGHT)
         .order_by(BodyMeasurement.created_at.desc())
@@ -76,6 +106,9 @@ def index():
     )
     weight_kg = latest_weight.value if latest_weight else 70  # default 70kg
     exercises = current_user.exercises.all()
+    goals = Goal.query.filter_by(user_id=current_user.id).all()
+    for goal in goals:
+        goal.current_value = get_goal_current_value(current_user, goal)
 
 # Calculate and sum calories burned per day
     burned_by_date = defaultdict(float)
@@ -88,16 +121,17 @@ def index():
             duration = (sets * reps * 4) / 60  # duration in minutes
         else:
             duration = float(ex.metrics.get("duration_min", 0))
-        print(f"DEBUG: ex_type={ex_type}, duration={duration}, weight_kg={weight_kg}")
         burned = calculate_calories_burned(ex_type, duration, weight_kg)
-        print(f"DEBUG: burned={burned}")
-        date_str = ex.created_at.strftime('%b %d')
+        if ex.created_at.tzinfo is None:
+            ex_time = pytz.utc.localize(ex.created_at).astimezone(PERTH_TZ)
+        else:
+            ex_time = ex.created_at.astimezone(PERTH_TZ)
+        date_str = ex_time.strftime('%b %d')
         burned_by_date[date_str] += burned
 
     burned_labels = list(burned_by_date.keys())
     burned_data = list(burned_by_date.values())
     # --- Achievements logic ---
-    # Example: fetch all exercises and measurements for this user
     achievements = logic.get_achievements_dict()
 
     # Set unit if metric is selected
@@ -123,6 +157,7 @@ def index():
             goal = Goal(
                 user_id=current_user.id,
                 exercise_type=goal_form.exercise_type.data,
+                metric=goal_form.metric.data,
                 description=goal_form.description.data,
                 target_value=goal_form.target_value.data,
                 current_value=0,
@@ -131,6 +166,7 @@ def index():
             db.session.add(goal)
             db.session.commit()
             flash("Goal added!", "success")
+            print(goal_form.errors)  # Add this line to see validation errors
             return redirect(url_for("dashboard.index"))
 
     # --- sorting date  here ---
@@ -154,8 +190,65 @@ def index():
         }
         for ex in scheduled_exercises
     ]
+   
     metrics_by_type = {et.name: METRICS_REQUIREMENTS[et] for et in ExerciseType}
+    # Get all weight measurements for the current user
+    weight_measurements = (
+        BodyMeasurement.query
+        .filter_by(user_id=current_user.id, type=BodyMeasurementType.WEIGHT)
+        .order_by(BodyMeasurement.created_at.asc())
+        .all()
+    )
+    weight_labels = []
+    weight_by_date = {}
+    for bm in weight_measurements:
+    # Convert to Perth timezone if not already aware
+        if bm.created_at.tzinfo is None:
+         bm_time = pytz.utc.localize(bm.created_at).astimezone(PERTH_TZ)
+        else:
+            bm_time = bm.created_at.astimezone(PERTH_TZ)
+        label = bm_time.strftime('%b %d')
+        weight_labels.append(label)
+        weight_by_date[label] = bm.value
+# Build last 14 days labels (to match getLast14DaysLabels)
+    today = datetime.now(PERTH_TZ)    
+     # Get latest weight
+    latest_weight = (
+    BodyMeasurement.query.filter_by(user_id=current_user.id, type=BodyMeasurementType.WEIGHT)
+    .order_by(BodyMeasurement.created_at.desc())
+    .first()
+    )
+    # Get latest height
+    latest_height = (
+    BodyMeasurement.query.filter_by(user_id=current_user.id, type=BodyMeasurementType.HEIGHT)
+    .order_by(BodyMeasurement.created_at.desc())
+    .first()
+    )
+    weight_kg = latest_weight.value if latest_weight else None
+    height_cm = latest_height.value if latest_height else None
 
+    bmi = calculate_bmi(weight_kg, height_cm)
+    bmi_category = None
+    if bmi:
+        if bmi < 18.5:
+            bmi_category = "Underweight"
+        elif bmi < 25:
+            bmi_category = "Normal"
+        elif bmi < 30:
+            bmi_category = "Overweight"
+        else:
+            bmi_category = "Obesity"
+    weight_data = []
+    for i in range(13, -1, -1):
+        day = today - timedelta(days=i)
+        label = day.strftime('%b %d')
+        weight_labels.append(label)
+    # Only show value if entry exists for that day, else null
+        value = weight_by_date.get(label, None)
+        weight_data.append(value)
+        print("Latest height:", latest_height.value if latest_height else None)        
+        print("Latest weight:", latest_weight.value if latest_weight else None)
+        print("BMI:", bmi)
     return render_template(
         "dashboard/index.html",
         weather_forecast=weather_forecast,
@@ -170,10 +263,18 @@ def index():
         ACHIEVEMENTS=logic.get_all_achievements(),
         calorie_intakes=calorie_intakes,
         exercises=exercises,
+        bmi=bmi,
+        bmi_category=bmi_category,
         intake_labels=intake_labels,
         intake_data=intake_data,
-        burned_labels=burned_labels,      # <-- add this
-        burned_data=burned_data  
+        burned_labels=burned_labels,     
+        burned_data=burned_data,
+        weight_labels=weight_labels,
+        weight_data=weight_data,
+        weight_form=weight_form
+        
+        
+        
     )
 
 
@@ -238,3 +339,22 @@ def edit_goal(id):
     db.session.commit()
     flash("Goal updated.", "success")
     return redirect(url_for('dashboard.index'))
+@dashboard_bp.route("/edit_weight", methods=["POST"])
+@login_required
+def edit_weight():
+    form = WeightForm()
+    if form.validate_on_submit():
+        new_weight = BodyMeasurement(
+            user_id=current_user.id,
+            type=BodyMeasurementType.WEIGHT,
+            value=form.value.data,
+            unit="kg",  # <-- Add this line
+            created_at=form.date.data,
+        )
+        db.session.add(new_weight)
+        db.session.commit()
+    return redirect(url_for("dashboard.index"))
+
+
+
+
