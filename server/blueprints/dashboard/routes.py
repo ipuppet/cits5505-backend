@@ -5,7 +5,7 @@ from collections import defaultdict
 import json
 from server.blueprints.dashboard import logic
 from server.models import ScheduledExercise, Goal, db, ExerciseType, ACHIEVEMENTS, CalorieIntake, BodyMeasurement, BodyMeasurementType
-from server.blueprints.dashboard.forms import ScheduleExerciseForm, GoalForm
+from server.blueprints.dashboard.forms import ScheduleExerciseForm, GoalForm,WeightForm
 from datetime import datetime, timedelta
 import pytz
 # Set your timezone, e.g., Perth
@@ -14,7 +14,7 @@ METRICS_REQUIREMENTS = {
     ExerciseType.RUNNING: [("distance_km", "km"), ("duration", "min")],
     ExerciseType.CYCLING: [("distance_km", "km"), ("duration", "min")],
     ExerciseType.SWIMMING: [("distance_m", "m"), ("duration", "min")],
-    ExerciseType.WEIGHTLIFTING: [("weight_kg", "kg"), ("sets", "sets"), ("reps", "reps")],
+    ExerciseType.WEIGHTLIFTING: [("weight_kg", "kg")],
     ExerciseType.YOGA: [("duration", "min")],
 }
 
@@ -80,9 +80,7 @@ def index():
     intake_labels = list(intake_by_date.keys())
     intake_data = list(intake_by_date.values())
 
-
-   
-
+    weight_form = WeightForm()
     schedule_form = ScheduleExerciseForm()
     goal_form = GoalForm()
     goal_form.exercise_type.choices = [(et.name, et.value) for et in ExerciseType]
@@ -236,6 +234,7 @@ def index():
         burned_data=burned_data,
         weight_labels=weight_labels,
         weight_data=weight_data,
+        weight_form=weight_form
         
         
     )
@@ -302,3 +301,18 @@ def edit_goal(id):
     db.session.commit()
     flash("Goal updated.", "success")
     return redirect(url_for('dashboard.index'))
+@dashboard_bp.route("/edit_weight", methods=["POST"])
+@login_required
+def edit_weight():
+    form = WeightForm()
+    if form.validate_on_submit():
+        new_weight = BodyMeasurement(
+            user_id=current_user.id,
+            type=BodyMeasurementType.WEIGHT,
+            value=form.value.data,
+            unit="kg",  # <-- Add this line
+            created_at=form.date.data,
+        )
+        db.session.add(new_weight)
+        db.session.commit()
+    return redirect(url_for("dashboard.index"))

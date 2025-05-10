@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import SelectField, TimeField, StringField, SubmitField,FloatField
 from wtforms.validators import DataRequired, NumberRange
 from server.models import ExerciseType
+from wtforms import DecimalField, DateField
 
 
 class ScheduleExerciseForm(FlaskForm):
@@ -25,3 +26,8 @@ class GoalForm(FlaskForm):
     unit = StringField('Unit', validators=[DataRequired()])
     description = StringField('Description', validators=[DataRequired()])
     submit = SubmitField('Add Goal')
+    
+class WeightForm(FlaskForm):
+    value = DecimalField("Weight (kg)", validators=[DataRequired()])
+    date = DateField("Date", validators=[DataRequired()])
+    submit = SubmitField("Save")
