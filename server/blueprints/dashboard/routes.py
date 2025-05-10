@@ -2,8 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, session,
 from flask_login import login_required, current_user
 from datetime import datetime, timedelta
 from collections import defaultdict
-
-
+import json
 from server.blueprints.dashboard import logic
 from server.models import ScheduledExercise, Goal, db, ExerciseType, ACHIEVEMENTS, CalorieIntake, BodyMeasurement, BodyMeasurementType
 from server.blueprints.dashboard.forms import ScheduleExerciseForm, GoalForm
@@ -28,7 +27,6 @@ MET_VALUES = {
     "weight_lifting": 6.0,
     "yoga": 3.0,
 }
-
 def calculate_calories_burned(ex_type, duration_min, user_weight_kg):
     met = MET_VALUES.get(ex_type, 6.0)  # default MET if not found
     return round(0.0175 * met * user_weight_kg * duration_min, 2)
@@ -39,7 +37,27 @@ def get_next_date_for_day(day_name):
     target_idx = days.index(day_name)
     delta = (target_idx - today_idx) % 7
     return today + timedelta(days=delta)
+def get_goal_current_value(user, goal):
+    # Map exercise type to the metric key in metrics JSON
+    metric_map = {
+        "CYCLING": "distance_km",
+        "RUNNING": "distance_km",
+        "SWIMMING": "distance_m",
+        "WEIGHTLIFTING": "weight_kg",
+        "YOGA": "duration_min",
+    }
+    metric_key = metric_map.get(goal.exercise_type.name)
+    if not metric_key:
+        return 0
 
+    # Get all exercises of this type for the user
+    exercises = user.exercises.filter_by(type=goal.exercise_type).all()
+    total = 0.0
+    for ex in exercises:
+        metrics = ex.metrics if isinstance(ex.metrics, dict) else json.loads(ex.metrics)
+        value = float(metrics.get(metric_key, 0))
+        total += value
+    return total
 
 @dashboard_bp.route("/", methods=["GET", "POST"])
 @login_required
@@ -63,18 +81,21 @@ def index():
     intake_data = list(intake_by_date.values())
 
 
-    if request.method == "POST":
-        selected_type = request.form.get("exercise_type") or exercise_type_choices[0][0]
-    else:
-        selected_type = exercise_type_choices[0][0]
+   
 
     schedule_form = ScheduleExerciseForm()
     goal_form = GoalForm()
     goal_form.exercise_type.choices = [(et.name, et.value) for et in ExerciseType]
-    selected_type = goal_form.exercise_type.data or goal_form.exercise_type.choices[0][0]
+
+# Use POSTed value if present, else use form data, else default
+    # Always get the selected type from form data, POST, or default
+    selected_type = (
+        request.form.get("exercise_type")
+        or goal_form.exercise_type.data
+        or goal_form.exercise_type.choices[0][0]
+    )
     metrics = METRICS_REQUIREMENTS[ExerciseType[selected_type]]
-    goal_form.metric.choices = [(m[0], m[0].replace("_", " ").capitalize()) for m in metrics]
-    # Get latest weight (or use a default)
+    goal_form.metric.choices = [(m[0], m[0][0].upper() + m[0][1:]) for m in metrics]    # Get latest weight (or use a default)
     latest_weight = (
         BodyMeasurement.query.filter_by(user_id=current_user.id, type=BodyMeasurementType.WEIGHT)
         .order_by(BodyMeasurement.created_at.desc())
@@ -82,6 +103,9 @@ def index():
     )
     weight_kg = latest_weight.value if latest_weight else 70  # default 70kg
     exercises = current_user.exercises.all()
+    goals = Goal.query.filter_by(user_id=current_user.id).all()
+    for goal in goals:
+        goal.current_value = get_goal_current_value(current_user, goal)
 
 # Calculate and sum calories burned per day
     burned_by_date = defaultdict(float)
@@ -130,6 +154,7 @@ def index():
             goal = Goal(
                 user_id=current_user.id,
                 exercise_type=goal_form.exercise_type.data,
+                metric=goal_form.metric.data,
                 description=goal_form.description.data,
                 target_value=goal_form.target_value.data,
                 current_value=0,
@@ -138,6 +163,7 @@ def index():
             db.session.add(goal)
             db.session.commit()
             flash("Goal added!", "success")
+            print(goal_form.errors)  # Add this line to see validation errors
             return redirect(url_for("dashboard.index"))
 
     # --- sorting date  here ---
@@ -209,7 +235,9 @@ def index():
         burned_labels=burned_labels,     
         burned_data=burned_data,
         weight_labels=weight_labels,
-        weight_data=weight_data  
+        weight_data=weight_data,
+        
+        
     )
 
 

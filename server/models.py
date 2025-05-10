@@ -402,6 +402,7 @@ class Goal(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     description = db.Column(db.String(256), nullable=False)
     exercise_type = db.Column(db.Enum(ExerciseType), nullable=False)
+    metric = db.Column(db.String(64), nullable=False)  # <-- Add this line
 
     target_value = db.Column(db.Float, nullable=False)
     current_value = db.Column(db.Float, nullable=False, default=0)

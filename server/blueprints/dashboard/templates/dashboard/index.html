@@ -1014,33 +1014,42 @@ Dashboard
 
 </script>
 
-
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const exerciseType = document.querySelector('[name="exercise_type"]');
-        const metric = document.querySelector('[name="metric"]');
-        const unit = document.querySelector('[name="unit"]');
-        const metricsByType = JSON.parse('{{ metrics_by_type|tojson|safe }}');
-        if (exerciseType && metric && unit) {
-            exerciseType.addEventListener('change', function () {
-                const metrics = metricsByType[this.value];
+        // Only target the Add Goal modal
+        const addGoalModal = document.getElementById('addGoalModal');
+        if (!addGoalModal) return;
+        addGoalModal.addEventListener('shown.bs.modal', function () {
+            const exerciseType = addGoalModal.querySelector('[name="exercise_type"]');
+            const metric = addGoalModal.querySelector('[name="metric"]');
+            const unit = addGoalModal.querySelector('[name="unit"]');
+            const metricsByType = JSON.parse('{{ metrics_by_type|tojson|safe }}');
+            function updateMetricAndUnit() {
+                const metrics = metricsByType[exerciseType.value] || [];
                 metric.innerHTML = '';
                 metrics.forEach(function (m) {
                     const opt = document.createElement('option');
                     opt.value = m[0];
-                    opt.textContent = m[0].replace('_', ' ').toUpperCase();
-                    metric.appendChild(opt);
+                    opt.textContent = m[0].charAt(0).toUpperCase() + m[0].slice(1); metric.appendChild(opt);
                 });
-                unit.value = metrics[0][1];
-            });
-            metric.addEventListener('change', function () {
-                const metrics = metricsByType[exerciseType.value];
-                const selected = metrics.find(m => m[0] === this.value);
-                if (selected) unit.value = selected[1];
-            });
-        }
+                if (metrics.length > 0) {
+                    unit.value = metrics[0][1];
+                } else {
+                    unit.value = '';
+                }
+            }
+            if (exerciseType && metric && unit) {
+                exerciseType.addEventListener('change', updateMetricAndUnit);
+                metric.addEventListener('change', function () {
+                    const metrics = metricsByType[exerciseType.value] || [];
+                    const selected = metrics.find(m => m[0] === this.value);
+                    if (selected) unit.value = selected[1];
+                });
+                // Run on modal open
+                updateMetricAndUnit();
+            }
+        });
     });
-
 </script>
 
 {% endblock %}
