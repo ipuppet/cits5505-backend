@@ -27,6 +27,11 @@ MET_VALUES = {
     "weight_lifting": 6.0,
     "yoga": 3.0,
 }
+def calculate_bmi(weight_kg, height_cm):
+    if not weight_kg or not height_cm:
+        return None
+    height_m = height_cm / 100
+    return round(weight_kg / (height_m ** 2), 1)
 def calculate_calories_burned(ex_type, duration_min, user_weight_kg):
     met = MET_VALUES.get(ex_type, 6.0)  # default MET if not found
     return round(0.0175 * met * user_weight_kg * duration_min, 2)
@@ -185,6 +190,7 @@ def index():
         }
         for ex in scheduled_exercises
     ]
+   
     metrics_by_type = {et.name: METRICS_REQUIREMENTS[et] for et in ExerciseType}
     # Get all weight measurements for the current user
     weight_measurements = (
@@ -206,6 +212,32 @@ def index():
         weight_by_date[label] = bm.value
 # Build last 14 days labels (to match getLast14DaysLabels)
     today = datetime.now(PERTH_TZ)    
+     # Get latest weight
+    latest_weight = (
+    BodyMeasurement.query.filter_by(user_id=current_user.id, type=BodyMeasurementType.WEIGHT)
+    .order_by(BodyMeasurement.created_at.desc())
+    .first()
+    )
+    # Get latest height
+    latest_height = (
+    BodyMeasurement.query.filter_by(user_id=current_user.id, type=BodyMeasurementType.HEIGHT)
+    .order_by(BodyMeasurement.created_at.desc())
+    .first()
+    )
+    weight_kg = latest_weight.value if latest_weight else None
+    height_cm = latest_height.value if latest_height else None
+
+    bmi = calculate_bmi(weight_kg, height_cm)
+    bmi_category = None
+    if bmi:
+        if bmi < 18.5:
+            bmi_category = "Underweight"
+        elif bmi < 25:
+            bmi_category = "Normal"
+        elif bmi < 30:
+            bmi_category = "Overweight"
+        else:
+            bmi_category = "Obesity"
     weight_data = []
     for i in range(13, -1, -1):
         day = today - timedelta(days=i)
@@ -214,6 +246,9 @@ def index():
     # Only show value if entry exists for that day, else null
         value = weight_by_date.get(label, None)
         weight_data.append(value)
+        print("Latest height:", latest_height.value if latest_height else None)        
+        print("Latest weight:", latest_weight.value if latest_weight else None)
+        print("BMI:", bmi)
     return render_template(
         "dashboard/index.html",
         weather_forecast=weather_forecast,
@@ -228,6 +263,8 @@ def index():
         ACHIEVEMENTS=logic.get_all_achievements(),
         calorie_intakes=calorie_intakes,
         exercises=exercises,
+        bmi=bmi,
+        bmi_category=bmi_category,
         intake_labels=intake_labels,
         intake_data=intake_data,
         burned_labels=burned_labels,     
@@ -235,6 +272,7 @@ def index():
         weight_labels=weight_labels,
         weight_data=weight_data,
         weight_form=weight_form
+        
         
         
     )
@@ -316,3 +354,7 @@ def edit_weight():
         db.session.add(new_weight)
         db.session.commit()
     return redirect(url_for("dashboard.index"))
+
+
+
+

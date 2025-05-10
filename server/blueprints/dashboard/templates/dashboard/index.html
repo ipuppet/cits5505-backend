@@ -219,7 +219,8 @@ Dashboard
                                             </div>
                                             <div class="mb-3">
                                                 {{ weight_form.date.label(class="form-label") }}
-                                                {{ weight_form.date(class="form-control") }}
+                                                {{ weight_form.date(class="form-control", max=now.strftime('%Y-%m-%d'))
+                                                }}
                                             </div>
                                         </div>
                                         <div class="modal-footer">
@@ -438,6 +439,30 @@ Dashboard
                         {% else %}
                         <div class="text-muted">No goals set yet.</div>
                         {% endif %}
+                    </div>
+                </div>
+                <!-- BMI Chart Card -->
+                <div class="card chart-card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-light">
+                        <strong>BMI</strong>
+                    </div>
+                    <div class="card-body text-center">
+                        <div style="font-size:1.3rem;">
+                            Current BMI={{ bmi if bmi is not none else 'N/A' }}
+                        </div>
+                        <div style="color: #bfa000; font-weight:600;">
+                            {{ bmi_category or '' }}
+                        </div>
+                        <div class="bmi-bar-container my-3" style="position:relative; height:48px;">
+                            <canvas id="bmiBar" width="400" height="48"></canvas>
+                        </div>
+                        <div class="d-flex justify-content-between" style="font-size:0.95rem;">
+                            <span>15</span>
+                            <span>18.5</span>
+                            <span>25</span>
+                            <span>30</span>
+                            <span>40</span>
+                        </div>
                     </div>
                 </div>
 
@@ -1106,6 +1131,41 @@ Dashboard
             }
         });
     });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const bmi = {{ bmi| tojson
+    }};
+    const bmiBar = document.getElementById('bmiBar');
+    if (bmiBar) {
+        const ctx = bmiBar.getContext('2d');
+        // Draw colored ranges
+        const ranges = [
+            { min: 15, max: 18.5, color: '#4fc3f7' }, // Underweight
+            { min: 18.5, max: 25, color: '#81c784' }, // Normal
+            { min: 25, max: 30, color: '#ffe066' },   // Overweight
+            { min: 30, max: 40, color: '#ffb74d' }    // Obesity
+        ];
+        const width = bmiBar.width, height = bmiBar.height;
+        ranges.forEach(r => {
+            const x1 = ((r.min - 15) / 25) * width;
+            const x2 = ((r.max - 15) / 25) * width;
+            ctx.fillStyle = r.color;
+            ctx.fillRect(x1, 0, x2 - x1, height);
+        });
+        // Draw pointer for user's BMI if available and in range
+        if (bmi !== null && !isNaN(bmi) && bmi >= 15 && bmi <= 40) {
+            const x = ((bmi - 15) / 25) * width;
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x - 7, height);
+            ctx.lineTo(x + 7, height);
+            ctx.closePath();
+            ctx.fillStyle = '#f44336';
+            ctx.fill();
+        }
+    }
+});
 </script>
 
 {% endblock %}
