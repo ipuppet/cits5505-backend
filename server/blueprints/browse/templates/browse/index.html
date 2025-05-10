@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block css %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/browse/index.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/browse/index.css') }}">
 
 {% endblock %}
 
@@ -199,11 +199,12 @@
         } else if (dateset === "browseBodyMeasurement") {
             Dataset.headers = () => ["value", "unit", "created_at"]
             Dataset.data = type => UserBodyMeasurements.filter(bodyMeasurement => bodyMeasurement.type === type)
+            
             updateBrowseTableOptions(BodyMeasurementTypes)
         }
         browseTableChange(document.querySelector("#browseTableTypeSelect").value)
     }
-
+    
     // Initialize
     browseDatasetChange()
     document.querySelectorAll("input[name=\"dataset\"]").forEach(radio => {

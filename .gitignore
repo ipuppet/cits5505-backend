@@ -15,5 +15,4 @@ dist/
 build/
 *.egg-info/
 
-.DS_Store/
-db.sqlite
+.DS_Store
