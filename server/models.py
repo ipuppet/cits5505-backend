@@ -286,11 +286,11 @@ class Exercise(db.Model):
 
 
 ACHIEVEMENTS = {
-    ExerciseType.CYCLING: [100, 1000, 10000],  # in km
-    ExerciseType.RUNNING: [50, 500, 5000],  # in km
-    ExerciseType.SWIMMING: [10, 100, 1000],  # in km
-    ExerciseType.WEIGHTLIFTING: [1000, 10000, 100000],  # in kg
-    ExerciseType.YOGA: [10, 100, 1000],  # in minutes
+    ExerciseType.CYCLING: [50000, 100000, 200000],  # in m
+    ExerciseType.RUNNING: [10000, 50000, 100000],
+    ExerciseType.SWIMMING: [10000, 50000, 100000],
+    ExerciseType.WEIGHTLIFTING: [50, 100, 200],  # in kg
+    ExerciseType.YOGA: [100, 500, 1000],  # in minutes
 }
 
 

@@ -129,42 +129,55 @@
                                         {% if achievements_by_type %}
                                             <div id="achievements-list">
                                                 {% set icons = {
-                                        'running': '🏃‍♂️',
-                                        'cycling': '🚴‍♀️',
-                                        'swimming': '🏊‍♂️',
-                                        'weight_lifting': '🏋️‍♂️',
-                                        'yoga': '🧘‍♂️'
-                                        } %}
+                                                'running': '🏃‍♂️',
+                                                'cycling': '🚴‍♀️',
+                                                'swimming': '🏊‍♂️',
+                                                'weight_lifting': '🏋️‍♂️',
+                                                'yoga': '🧘‍♂️'
+                                                } %}
                                                 {% set icon_colors = {
-                                        'running': '#ffb700',
-                                        'cycling': '#00b894',
-                                        'swimming': '#0984e3',
-                                        'weight_lifting': '#636e72',
-                                        'yoga': '#a29bfe'
-                                        } %}
+                                                'running': '#ffb700',
+                                                'cycling': '#00b894',
+                                                'swimming': '#0984e3',
+                                                'weight_lifting': '#636e72',
+                                                'yoga': '#a29bfe'
+                                                } %}
+                                                {% set units = {
+                                                'running': 'M',
+                                                'cycling': 'M',
+                                                'swimming': 'M',
+                                                'weight_lifting': 'KG',
+                                                'yoga': 'MIN'
+                                                } %}
                                                 {% set badge_classes = ['badge-bronze', 'badge-silver', 'badge-gold'] %}
                                                 {% set badge_labels = ['Bronze', 'Silver', 'Gold'] %}
                                                 {% for ex_type, milestones in all_achievements.items() %}
                                                     <div class="mb-2 d-flex align-items-center">
-                                            <span class="achievement-icon me-2"
-                                                  style="background: {{ icon_colors[ex_type.value] }};">
-                                                {{ icons[ex_type.value] }}
-                                            </span>
+                                                        <span class="achievement-icon me-2"
+                                                              style="background: {{ icon_colors[ex_type.value] }};">
+                                                            {{ icons[ex_type.value] }}
+                                                        </span>
                                                         <strong style="font-size:1.1em;">{{ ex_type }}</strong>:
                                                         <span class="ms-2">
-                                                {% for milestone in milestones %}
-                                                    {% set idx = loop.index0 %}
-                                                    {% set badge_class = badge_classes[idx] %}
-                                                    {% set badge_label = badge_labels[idx] %}
-                                                    {% if milestone in achievements_by_type[ex_type] %}
-                                                        <span class="badge {{ badge_class }} me-1"
-                                                              title="{{ badge_label }}">{{ badge_label }} {{ milestone }}</span>
-                                                    {% else %}
-                                                        <span class="badge badge-locked me-1"
-                                                              title="{{ badge_label }}">{{ badge_label }} {{ milestone }}</span>
-                                                    {% endif %}
-                                                {% endfor %}
-                                            </span>
+                                                            {% for milestone in milestones %}
+                                                                {% set idx = loop.index0 %}
+                                                                {% set badge_label = badge_labels[idx] %}
+                                                                {% if milestone in achievements_by_type[ex_type] %}
+                                                                    {% set badge_class = badge_classes[idx] %}
+                                                                {% else %}
+                                                                    {% set badge_class = 'badge-locked' %}
+                                                                {% endif %}
+                                                                <span class="badge {{ badge_class }} me-1"
+                                                                      title="{{ badge_label }}">
+                                                                    {{ badge_label }}
+                                                                    {% if units[ex_type.value] == "M" %}
+                                                                        {{ (milestone/1000)|int }}KM
+                                                                    {% else %}
+                                                                        {{ milestone|int }}{{ units[ex_type.value] }}
+                                                                    {% endif %}
+                                                                </span>
+                                                            {% endfor %}
+                                                        </span>
                                                     </div>
                                                 {% endfor %}
                                             </div>
