@@ -356,3 +356,13 @@ body {
     font-weight: 600;
     opacity: 0.5;
 }
+
+/* static/css/dashboard/index.css */
+#chatbot-messages {
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    min-height: 120px;
+    max-height: 250px;
+    overflow-y: auto;
+}

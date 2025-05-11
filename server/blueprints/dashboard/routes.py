@@ -1,7 +1,6 @@
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, url_for, flash,request, jsonify
 from flask_login import login_required
 from datetime import datetime
-
 from server.blueprints.browse.forms import BodyMeasurementForm
 from server.blueprints.dashboard import logic
 from server.models import ExerciseType, METRICS_REQUIREMENTS
@@ -136,3 +135,4 @@ def edit_goal(id):
         return redirect(url_for("dashboard.index"))
     flash("Goal updated.", "success")
     return redirect(url_for("dashboard.index"))
+
