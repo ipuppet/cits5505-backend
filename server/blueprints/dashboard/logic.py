@@ -107,7 +107,7 @@ def get_burned_calories():
             reps = int(ex.metrics.get("reps", 0))
             duration = (sets * reps * 4) / 60  # duration in minutes
         else:
-            duration = float(ex.metrics.get("duration_min", 0))
+            duration = float(ex.metrics.get("duration", 0))
         met = met_values.get(ex.type, 6.0)  # default MET if not found
         burned = round(0.0175 * met * weight_kg * duration, 2)
         burned_by_date[str(ex.created_at.date())] += burned

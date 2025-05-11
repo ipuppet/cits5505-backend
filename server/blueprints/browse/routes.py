@@ -37,6 +37,7 @@ def exercise():
             achievement = logic.add_exercise_data(
                 exercise_form.type.data,
                 exercise_form.metrics.data,
+                exercise_form.datetime,
             )
             if achievement:
                 flash(
@@ -60,6 +61,7 @@ def body_measurement():
             logic.add_body_measurement_data(
                 body_measurement_form.type.data,
                 body_measurement_form.value.data,
+                body_measurement_form.datetime,
             )
             flash("Body measurement data added successfully!", "success")
         except Exception as e:
@@ -78,6 +80,7 @@ def calorie_intake():
             logic.add_calorie_intake_data(
                 calorie_intake_form.calories.data,
                 calorie_intake_form.description.data,
+                calorie_intake_form.datetime,
             )
             flash("Calorie intake data added successfully!", "success")
         except Exception as e:

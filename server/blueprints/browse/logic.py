@@ -21,13 +21,14 @@ def get_exercises_metrics() -> dict:
     return {e.name: METRICS_REQUIREMENTS[e] for e in ExerciseType}
 
 
-def add_exercise_data(exercise_type, metrics) -> Achievement | None:
+def add_exercise_data(exercise_type, metrics, created_at) -> Achievement | None:
     try:
         exercise_type = ExerciseType[exercise_type]
         new_exercise = Exercise(
             user_id=current_user.id,
             type=exercise_type,
             metrics=metrics,
+            created_at=created_at,
         )
         db.session.add(new_exercise)
         # Check achievements
@@ -64,12 +65,13 @@ def get_body_measurement_types() -> dict:
     return {e.name: str(e) for e in BodyMeasurementType}
 
 
-def add_body_measurement_data(body_measurement_type, value):
+def add_body_measurement_data(body_measurement_type, value, created_at):
     try:
         new_body_measurement = BodyMeasurement(
             user_id=current_user.id,
             type=BodyMeasurementType[body_measurement_type],
             value=value,
+            created_at=created_at,
         )
         db.session.add(new_body_measurement)
         db.session.commit()
@@ -81,12 +83,13 @@ def add_body_measurement_data(body_measurement_type, value):
         raise RuntimeError(f"Unexpected error: {str(e)}")
 
 
-def add_calorie_intake_data(calories, description):
+def add_calorie_intake_data(calories, description, created_at):
     try:
         new_calorie_intake = CalorieIntake(
             user_id=current_user.id,
             calories=calories,
             description=description,
+            created_at=created_at,
         )
         db.session.add(new_calorie_intake)
         db.session.commit()
