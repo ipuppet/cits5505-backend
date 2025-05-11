@@ -17,6 +17,9 @@ Dashboard
                 <!-- User Info Left -->
                 <div class="col-lg-3 mb-4">
                     <div class="card shadow-lg border-0 h-100">
+                        <div id="motivation-message"
+                            style="font-size:1.1em; font-style:italic; font-weight:bold; color:#333; margin-top:1rem; text-align:center;">
+                        </div>
                         <div class="card-body">
                             <form id="avatar-form" action="{{ url_for('user.upload_avatar') }}" method="post"
                                 enctype="multipart/form-data" class="mt-2 mb-3 text-center">
@@ -412,26 +415,30 @@ Dashboard
                             {% if current_user.goals.all() %}
                             <ul class="list-group">
                                 {% for goal in current_user.goals %}
-                                <li
-                                    class="list-group-item d-flex justify-content-between align-items-center position-relative goal-item">
-                                    <span>
-                                        <strong>{{ goal.description }}</strong>
-                                        <br>
-                                        <span class="text-muted">
-                                            {{ goal.exercise_type }}
+                                <li class="list-group-item d-flex align-items-center position-relative goal-item"
+                                    style="gap: 0.75rem;">
+                                    <div
+                                        style="flex-shrink:0; width:48px; height:48px; display:flex; align-items:center; justify-content:center;">
+                                        <canvas id="goal-progress-{{ goal.id }}" width="40" height="40"></canvas>
+                                    </div>
+                                    <div style="flex:1; min-width:0;">
+                                        <strong style="font-size:1.1em;">{{ goal.description }}</strong><br>
+                                        <span class="text-muted">{{ goal.exercise_type }}</span><br>
+                                        <span style="font-size:0.95em;">Target: {{ goal.target_value }} {{ goal.unit
+                                            }}</span><br>
+                                        <span style="font-weight:bold; color:#007bff; font-size:1em;">
+                                            {{ goal.current_value }} / {{ goal.target_value }} &rarr;
+                                            {{ ((goal.current_value / goal.target_value * 100) if goal.target_value else
+                                            0)|round(1) }}% Complete
                                         </span>
-                                        <br>
-                                        Target: {{ goal.target_value }} {{ goal.unit }}
-                                    </span>
-
-                                    <span class="d-flex flex-column align-items-end">
+                                        <!-- ...existing badge/buttons... -->
                                         {% if goal.current_value >= goal.target_value %}
                                         <span class="badge bg-success rounded-pill mb-2">
                                             Completed <i class="bi bi-check-circle-fill ms-1"></i>
                                         </span>
                                         <form method="POST" action="{{ url_for('dashboard.delete_goal', id=goal.id) }}"
                                             onsubmit="return confirm('Are you sure you want to delete this completed goal?');"
-                                            class="delete-goal-form">
+                                            class="delete-goal-form d-inline">
                                             <button type="submit"
                                                 class="badge rounded-pill bg-white text-danger border border-danger give-up-badge-btn"
                                                 style="font-size: 0.8rem;" title="Delete Goal">
@@ -450,7 +457,7 @@ Dashboard
                                         {% endif %}
                                         <form method="POST" action="{{ url_for('dashboard.delete_goal', id=goal.id) }}"
                                             onsubmit="return confirm('Are you sure you want to give up this goal?');"
-                                            class="delete-goal-form">
+                                            class="delete-goal-form d-inline">
                                             <button type="submit"
                                                 class="badge rounded-pill bg-white text-danger border border-danger give-up-badge-btn"
                                                 style="font-size: 0.8rem;" title="Give Up Goal">
@@ -458,7 +465,7 @@ Dashboard
                                             </button>
                                         </form>
                                         {% endif %}
-                                    </span>
+                                    </div>
                                 </li>
                                 {% endfor %}
                             </ul>
@@ -477,10 +484,13 @@ Dashboard
                             </a>
                         </div>
                         <div class="card-body text-center">
-                            <div style="font-size:1.3rem;">
-                                Current BMI={{ bmi if bmi is not none else 'N/A' }}
+                            <div style="font-weight:bold;">
+                                Current BMI=
+                                <span style="color:#bfa000; font-weight:700;">
+                                    {{ bmi if bmi is not none else 'N/A' }}
+                                </span>
                             </div>
-                            <div style="color: #bfa000; font-weight:600;">
+                            <div style="color: #bfa000; font-weight:600; font-size:1.1rem;">
                                 {{ bmi_category or '' }}
                             </div>
                             <div class="bmi-bar-container my-3" style="position:relative; height:48px;">
@@ -908,6 +918,64 @@ Dashboard
         }
     }
         })
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Data for all goals
+        const goals = [
+            {% for goal in current_user.goals %}
+        {
+            id: {{ goal.id }},
+        current: {{ goal.current_value }},
+        target: {{ goal.target_value if goal.target_value else 1 }}
+        },
+        {% endfor %}
+    ];
+    goals.forEach(goal => {
+        const percent = Math.min(100, Math.round((goal.current / goal.target) * 100));
+        const ctx = document.getElementById(`goal-progress-${goal.id}`);
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [percent, 100 - percent],
+                        backgroundColor: [
+                            percent >= 100 ? '#28a745' : '#007bff',
+                            '#e9ecef'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '70%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    }
+                }
+            });
+        }
+    });
+});
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const messages = [
+            "You’re one step closer to your goals!",
+            "Keep pushing, your future self will thank you!",
+            "Every workout counts. Stay strong!",
+            "Consistency is key. You’ve got this!",
+            "Small steps lead to big changes!",
+            "Believe in yourself and all that you are.",
+            "Your only limit is you. Go for it!",
+            "Sweat now, shine later!",
+            "Progress, not perfection!"
+        ];
+        const msg = messages[Math.floor(Math.random() * messages.length)];
+        const el = document.getElementById("motivation-message");
+        if (el) el.textContent = msg;
+    });
 </script>
 
 <script data-id="cmajmm6yi000nk00bsg5t7xw1" src="https://tinychat.ai/tinychat.js" async defer></script>
