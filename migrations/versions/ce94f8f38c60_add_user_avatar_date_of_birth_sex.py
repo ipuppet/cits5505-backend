@@ -1,8 +1,8 @@
-"""empty message
+"""add user avatar,date_of_birth,sex
 
-Revision ID: cdb6a1336b3b
-Revises: 
-Create Date: 2025-05-05 21:12:01.540882
+Revision ID: ce94f8f38c60
+Revises: 1f76479bc982
+Create Date: 2025-05-02 00:15:44.327706
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'cdb6a1336b3b'
-down_revision = None
+revision = 'ce94f8f38c60'
+down_revision = '1f76479bc982'
 branch_labels = None
 depends_on = None
 

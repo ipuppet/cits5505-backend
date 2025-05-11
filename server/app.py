@@ -7,7 +7,7 @@ from server.utils.mail import mail
 from server.utils.login_manager import login_manager
 
 
-def  create_app(config_class=None):
+def create_app(config_class=None):
     # Create and configure the app
     app = Flask(__name__, instance_relative_config=True)
     # Load the default configuration
@@ -30,7 +30,6 @@ def  create_app(config_class=None):
                 )
     except OSError:
         pass
-    
     app.config.from_pyfile("config.py", silent=True)
 
     # Initialize the context processors
