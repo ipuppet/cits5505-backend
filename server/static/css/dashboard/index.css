@@ -357,12 +357,14 @@ body {
     opacity: 0.5;
 }
 
-/* static/css/dashboard/index.css */
-#chatbot-messages {
-    background: #f8f9fa;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    min-height: 120px;
-    max-height: 250px;
-    overflow-y: auto;
+.bmi-bar-container {
+    width: 100%;
+    overflow: hidden;
+}
+
+.bmi-bar-container canvas {
+    width: 100% !important;
+    height: 48px !important;
+    max-width: 100%;
+    display: block;
 }

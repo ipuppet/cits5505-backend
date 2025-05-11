@@ -4,7 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.utils import secure_filename
 from flask import current_app
 from flask_login import login_user, current_user, logout_user
-
+from datetime import datetime
 from server.models import db, User
 
 
@@ -13,7 +13,7 @@ def login(email: str, password: str, remember_me: bool) -> User:
     if user and user.check_password(password):
         try:
             # Update the last login time
-            user.last_login = db.func.now()
+            user.last_login = datetime.utcnow()
             db.session.commit()
             login_user(user, remember=remember_me)
         except SQLAlchemyError as e:
