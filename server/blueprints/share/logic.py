@@ -23,9 +23,9 @@ def get_shared(share_id: uuid.UUID) -> Share:
 
 
 def create_share(
-        sender_id: int,
-        receiver_id: int,
-        scope: dict,
+    sender_id: int,
+    receiver_id: int,
+    scope: dict,
 ) -> Share:
     """
     Create a new share record in the database.

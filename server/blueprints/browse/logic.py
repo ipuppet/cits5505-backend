@@ -1,7 +1,16 @@
 from flask_login import current_user
 from sqlalchemy.exc import SQLAlchemyError
-from server.models import db, Exercise, ExerciseType, METRICS_REQUIREMENTS, BodyMeasurement, BodyMeasurementType, \
-    BODY_MEASUREMENT_UNITS, ACHIEVEMENTS, Achievement, CalorieIntake
+from server.models import (
+    db,
+    Exercise,
+    ExerciseType,
+    METRICS_REQUIREMENTS,
+    BodyMeasurement,
+    BodyMeasurementType,
+    ACHIEVEMENTS,
+    Achievement,
+    CalorieIntake,
+)
 
 
 def get_exercise_types() -> dict:
@@ -9,28 +18,33 @@ def get_exercise_types() -> dict:
 
 
 def get_exercises_metrics() -> dict:
-    return {
-        e.name: METRICS_REQUIREMENTS[e]
-        for e in ExerciseType
-    }
+    return {e.name: METRICS_REQUIREMENTS[e] for e in ExerciseType}
 
 
-def add_exercise_data(exercise_type, metrics) -> Achievement | None:
+def add_exercise_data(exercise_type, metrics, created_at) -> Achievement | None:
     try:
         exercise_type = ExerciseType[exercise_type]
         new_exercise = Exercise(
             user_id=current_user.id,
             type=exercise_type,
             metrics=metrics,
+            created_at=created_at,
         )
         db.session.add(new_exercise)
         # Check achievements
         exercises = current_user.exercises.filter_by(type=exercise_type).all()
-        total = sum(float(ex.metrics.get(METRICS_REQUIREMENTS[exercise_type][0], 0)) for ex in exercises)
-        achievements = current_user.achievements.filter_by(exercise_type=exercise_type).all()
+        total = sum(
+            float(ex.metrics.get(METRICS_REQUIREMENTS[exercise_type][0], 0))
+            for ex in exercises
+        )
+        achievements = current_user.achievements.filter_by(
+            exercise_type=exercise_type
+        ).all()
         new_achievement = None
         for milestone in ACHIEVEMENTS[exercise_type]:
-            if total >= milestone and not any(a.milestone == milestone for a in achievements):
+            if total >= milestone and not any(
+                a.milestone == milestone for a in achievements
+            ):
                 new_achievement = Achievement(
                     user_id=current_user.id,
                     exercise_type=exercise_type,
@@ -51,20 +65,13 @@ def get_body_measurement_types() -> dict:
     return {e.name: str(e) for e in BodyMeasurementType}
 
 
-def get_body_measurement_units() -> dict:
-    return {
-        e.name: BODY_MEASUREMENT_UNITS[e]
-        for e in BodyMeasurementType
-    }
-
-
-def add_body_measurement_data(body_measurement_type, value, unit):
+def add_body_measurement_data(body_measurement_type, value, created_at):
     try:
         new_body_measurement = BodyMeasurement(
             user_id=current_user.id,
             type=BodyMeasurementType[body_measurement_type],
             value=value,
-            unit=unit,
+            created_at=created_at,
         )
         db.session.add(new_body_measurement)
         db.session.commit()
@@ -76,12 +83,13 @@ def add_body_measurement_data(body_measurement_type, value, unit):
         raise RuntimeError(f"Unexpected error: {str(e)}")
 
 
-def add_calorie_intake_data(calories, description):
+def add_calorie_intake_data(calories, description, created_at):
     try:
         new_calorie_intake = CalorieIntake(
             user_id=current_user.id,
             calories=calories,
             description=description,
+            created_at=created_at,
         )
         db.session.add(new_calorie_intake)
         db.session.commit()

@@ -12,8 +12,10 @@ share_bp = Blueprint("share", __name__, template_folder="templates")
 @share_bp.route("/", methods=["GET"])
 @login_required
 def index():
+    share_form = ShareForm()
     return render_template(
         "share/index.html",
+        form=share_form,
         exercise_types=browse_logic.get_exercise_types(),
         body_measurement_types=browse_logic.get_body_measurement_types(),
     )
@@ -40,7 +42,9 @@ def shared(share_id):
 def create_share():
     share_form = ShareForm()
     if not share_form.validate():
-        flash("Form validation failed. Please correct the errors and try again.", "danger")
+        flash(
+            "Form validation failed. Please correct the errors and try again.", "danger"
+        )
         return render_template("share/create.html", form=share_form)
     share = None
     try:

@@ -3,6 +3,7 @@ import uuid
 from enum import Enum
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import validates
 from flask_login import UserMixin
 
@@ -25,7 +26,9 @@ class User(UserMixin, db.Model):
     password = db.Column(db.Text, nullable=False)
     email = db.Column(db.Text, nullable=False, unique=True)
     nickname = db.Column(db.Text, nullable=False)
-    avatar = db.Column(db.String(256), nullable=True)  # Stores the relative path to the avatar image
+    avatar = db.Column(
+        db.String(256), nullable=True
+    )  # Stores the relative path to the avatar image
     date_of_birth = db.Column(db.Date, nullable=True)
     sex = db.Column(db.String(10), nullable=True)  # e.g. 'Male', 'Female', 'Other'
 
@@ -49,6 +52,13 @@ class User(UserMixin, db.Model):
         lazy="dynamic",
         cascade="all, delete-orphan",
         order_by="BodyMeasurement.created_at.desc()",
+    )
+    calorie_intakes = db.relationship(
+        "CalorieIntake",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+        order_by="CalorieIntake.created_at.desc()",
     )
     achievements = db.relationship(
         "Achievement",
@@ -101,23 +111,51 @@ class User(UserMixin, db.Model):
     def exercises_to_list(self) -> list:
         exercises = []
         for exercise in self.exercises.all():
-            exercises.append({
-                'type': exercise.type.name,
-                **exercise.metrics,
-                'created_at': exercise.created_at,
-            })
+            exercises.append(
+                {
+                    "type": exercise.type.name,
+                    **exercise.metrics,
+                    "created_at": exercise.created_at,
+                }
+            )
         return exercises
 
     def body_measurements_to_list(self) -> list:
         body_measurements = []
         for measurement in self.body_measurements.all():
-            body_measurements.append({
-                'type': measurement.type.name,
-                'value': measurement.value,
-                'unit': measurement.unit,
-                'created_at': measurement.created_at,
-            })
+            body_measurements.append(
+                {
+                    "type": measurement.type.name,
+                    "value": measurement.value,
+                    "created_at": measurement.created_at,
+                }
+            )
         return body_measurements
+
+    def calorie_intakes_to_list(self) -> list:
+        calorie_intakes = []
+        for intake in self.calorie_intakes.all():
+            calorie_intakes.append(
+                {
+                    "calories": intake.calories,
+                    "description": intake.description,
+                    "created_at": intake.created_at,
+                }
+            )
+        return calorie_intakes
+
+    def scheduled_exercises_to_list(self) -> list:
+        scheduled_exercises = []
+        for exercise in self.scheduled_exercises.all():
+            scheduled_exercises.append(
+                {
+                    "exercise_type": exercise.exercise_type.name,
+                    "scheduled_time": exercise.scheduled_time.strftime("%I:%M %p"),
+                    "note": exercise.note,
+                    "day_of_week": exercise.day_of_week,
+                }
+            )
+        return scheduled_exercises
 
     @staticmethod
     def get(user_id: int) -> "User":
@@ -141,7 +179,9 @@ class User(UserMixin, db.Model):
         """Fuzzy search for a user by username."""
         if not username:
             raise ValueError("Username cannot be empty")
-        users = db.session.query(User).filter(User.username.ilike(f"%{username}%")).all()
+        users = (
+            db.session.query(User).filter(User.username.ilike(f"%{username}%")).all()
+        )
         user_list = []
         for user in users:
             user_list.append(user.to_dict())
@@ -163,9 +203,9 @@ class User(UserMixin, db.Model):
 
     @staticmethod
     def validate_unique(
-            username: str | None,
-            email: str | None,
-            exclude_id: int | None = None,
+        username: str | None,
+        email: str | None,
+        exclude_id: int | None = None,
     ):
         """Check if the username or email is unique."""
         if not username and not email:
@@ -194,12 +234,17 @@ class ExerciseType(Enum):
         return self.value.replace("_", " ").title()
 
 
+METRICS = [
+    "distance",
+    "duration",
+    "weight",
+]
 METRICS_REQUIREMENTS = {
-    ExerciseType.CYCLING: ["distance_km", "duration_min"],
-    ExerciseType.RUNNING: ["distance_km", "duration_min"],
-    ExerciseType.SWIMMING: ["distance_m", "duration_min"],
-    ExerciseType.WEIGHTLIFTING: ["weight_kg", "sets", "reps"],
-    ExerciseType.YOGA: ["duration_min"],
+    ExerciseType.CYCLING: ["distance", "duration"],  # in miters and minutes
+    ExerciseType.RUNNING: ["distance", "duration"],
+    ExerciseType.SWIMMING: ["distance", "duration"],
+    ExerciseType.WEIGHTLIFTING: ["weight", "sets", "reps"],  # in kg
+    ExerciseType.YOGA: ["duration"],
 }
 
 
@@ -232,16 +277,20 @@ class Exercise(db.Model):
     def get_by_user(user_id: int, **kwargs):
         if not user_id:
             raise ValueError("User ID cannot be empty")
-        return db.session.query(Exercise).filter_by(user_id=user_id, **kwargs).order_by(
-            Exercise.created_at.desc()).all()
+        return (
+            db.session.query(Exercise)
+            .filter_by(user_id=user_id, **kwargs)
+            .order_by(Exercise.created_at.desc())
+            .all()
+        )
 
 
 ACHIEVEMENTS = {
-    ExerciseType.CYCLING: [100, 1000, 10000],  # in km
-    ExerciseType.RUNNING: [50, 500, 5000],  # in km
-    ExerciseType.SWIMMING: [10, 100, 1000],  # in km
-    ExerciseType.WEIGHTLIFTING: [1000, 10000, 100000],  # in kg
-    ExerciseType.YOGA: [10, 100, 1000],  # in minutes
+    ExerciseType.CYCLING: [50000, 100000, 200000],  # in m
+    ExerciseType.RUNNING: [10000, 50000, 100000],
+    ExerciseType.SWIMMING: [10000, 50000, 100000],
+    ExerciseType.WEIGHTLIFTING: [50, 100, 200],  # in kg
+    ExerciseType.YOGA: [100, 500, 1000],  # in minutes
 }
 
 
@@ -260,8 +309,12 @@ class Achievement(db.Model):
     def get_by_user(user_id: int, **kwargs):
         if not user_id:
             raise ValueError("User ID cannot be empty")
-        return db.session.query(Achievement).filter_by(user_id=user_id, **kwargs).order_by(
-            Achievement.achieved_at.desc()).all()
+        return (
+            db.session.query(Achievement)
+            .filter_by(user_id=user_id, **kwargs)
+            .order_by(Achievement.achieved_at.desc())
+            .all()
+        )
 
 
 class BodyMeasurementType(Enum):
@@ -273,19 +326,11 @@ class BodyMeasurementType(Enum):
         return self.value.replace("_", " ").title()
 
 
-BODY_MEASUREMENT_UNITS = {
-    BodyMeasurementType.WEIGHT: ["kg", "lbs"],
-    BodyMeasurementType.HEIGHT: ["cm", "inches"],
-    BodyMeasurementType.BODY_FAT: ["%"],
-}
-
-
 class BodyMeasurement(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     type = db.Column(db.Enum(BodyMeasurementType), nullable=False)
     value = db.Column(db.Float, nullable=False)
-    unit = db.Column(db.Text, nullable=False)
     created_at = db.Column(
         db.DateTime,
         nullable=False,
@@ -293,27 +338,22 @@ class BodyMeasurement(db.Model):
         index=True,
     )
 
-    @validates("unit")
-    def validate_unit(self, key, unit: str):
-        if unit not in BODY_MEASUREMENT_UNITS.get(self.type, []):
-            raise ValueError(
-                f"Invalid unit '{unit}' for {self.type}. "
-                f"Allowed units: {BODY_MEASUREMENT_UNITS[self.type]}"
-            )
-        return unit
-
     @staticmethod
     def get_by_user(user_id: int, **kwargs):
         if not user_id:
             raise ValueError("User ID cannot be empty")
-        return db.session.query(BodyMeasurement).filter_by(user_id=user_id, **kwargs).order_by(
-            BodyMeasurement.created_at.desc()).all()
+        return (
+            db.session.query(BodyMeasurement)
+            .filter_by(user_id=user_id, **kwargs)
+            .order_by(BodyMeasurement.created_at.desc())
+            .all()
+        )
 
 
 class CalorieIntake(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    calories = db.Column(db.Float, nullable=False)
+    calories = db.Column(db.Float, nullable=False)  # in kcal
     description = db.Column(db.Text, nullable=True)
     created_at = db.Column(
         db.DateTime,
@@ -326,8 +366,12 @@ class CalorieIntake(db.Model):
     def get_by_user(user_id: int, **kwargs):
         if not user_id:
             raise ValueError("User ID cannot be empty")
-        return db.session.query(CalorieIntake).filter_by(user_id=user_id, **kwargs).order_by(
-            CalorieIntake.created_at.desc()).all()
+        return (
+            db.session.query(CalorieIntake)
+            .filter_by(user_id=user_id, **kwargs)
+            .order_by(CalorieIntake.created_at.desc())
+            .all()
+        )
 
 
 class ScheduledExercise(db.Model):
@@ -336,7 +380,15 @@ class ScheduledExercise(db.Model):
     exercise_type = db.Column(db.Enum(ExerciseType), nullable=False)
     scheduled_time = db.Column(db.Time, nullable=False)
     note = db.Column(db.Text, nullable=True)
-    day_of_week = db.Column(db.String(10), nullable=False)  # e.g. "Monday", "Tuesday", etc.
+    day_of_week = db.Column(
+        db.String(10), nullable=False
+    )  # e.g. "Monday", "Tuesday", etc.
+
+    @staticmethod
+    def get(schedule_id: int):
+        if not schedule_id:
+            raise ValueError("ID cannot be empty")
+        return db.session.get(ScheduledExercise, int(schedule_id))
 
 
 class Goal(db.Model):
@@ -344,11 +396,36 @@ class Goal(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     description = db.Column(db.String(256), nullable=False)
     exercise_type = db.Column(db.Enum(ExerciseType), nullable=False)
-
+    metric = db.Column(db.String(64), nullable=False)
     target_value = db.Column(db.Float, nullable=False)
-    current_value = db.Column(db.Float, nullable=False, default=0)
-    unit = db.Column(db.String(32), nullable=True)  # e.g. "kg", "km", "min"
-    created_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
+    achieved = db.Column(db.Boolean, nullable=False, default=False)
+    created_at = db.Column(
+        db.DateTime, nullable=False, default=db.func.current_timestamp()
+    )
+
+    @hybrid_property
+    def current_value(self):
+        if self.achieved:
+            return self.target_value
+        # Calculate the current value based on the user's exercises
+        exercises = (
+            db.session.query(Exercise)
+            .filter_by(user_id=self.user_id, type=self.exercise_type)
+            .all()
+        )
+        total = 0.0
+        for ex in exercises:
+            value = float(ex.metrics.get(self.metric, 0))
+            total += value
+        if total >= self.target_value:
+            self.achieved = True
+        return total
+
+    @staticmethod
+    def get(goal_id: int):
+        if not goal_id:
+            raise ValueError("ID cannot be empty")
+        return db.session.get(Goal, int(goal_id))
 
 
 class Share(db.Model):

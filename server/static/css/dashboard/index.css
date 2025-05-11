@@ -1,0 +1,358 @@
+body {
+    background: #292a2c51 !important;
+    /* light grey */
+}
+
+.card {
+    border-radius: 1rem;
+}
+
+.chart-card {
+    min-height: 400px;
+    background: linear-gradient(135deg, #f8fafc 60%, #e0e7ef 100%);
+}
+
+.card-header.bg-light {
+    background: #f8fafc !important;
+    font-size: 1.1rem;
+    border-bottom: 1px solid #e0e7ef;
+}
+
+.card-body .row {
+    align-items: center;
+}
+
+.card-body .col-5 {
+    font-weight: 500;
+}
+
+.card-body .col-7 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rounded-circle {
+    border: 3px solid #0d6efd;
+}
+
+.btn-link {
+    text-decoration: none;
+}
+
+.btn-link:hover {
+    text-decoration: underline;
+}
+
+.btn-circle {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff86a;
+    color: #222;
+    border: none;
+    font-size: 1.3rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    transition: background 0.2s;
+}
+
+.btn-circle:hover {
+    background: #ffe066;
+}
+
+.btn-add {
+    background: #fff86a;
+    color: #222;
+}
+
+.btn-check {
+    background: none;
+    border: none;
+    color: #bbb;
+    font-size: 1.5rem;
+    margin-top: 0.2rem;
+}
+
+.btn-check:hover {
+    color: #0d6efd;
+}
+
+.btn-edit {
+    background: none;
+    border: none;
+    color: #bbb;
+    font-size: 1.3rem;
+}
+
+.btn-edit:hover {
+    color: #0d6efd;
+}
+
+.achievement-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.3em;
+    height: 2.3em;
+    border-radius: 50%;
+    font-size: 1.5em;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+    color: #fff;
+    margin-right: 0.5em;
+    border: 2.5px solid #fff;
+    transition: transform 0.2s;
+}
+
+.achievement-icon:hover {
+    transform: scale(1.1) rotate(-6deg);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+}
+
+.schedule-item {
+    border-radius: 1.2rem;
+    padding: 0.7rem 1rem;
+    background: #f8fafc;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+    transition: box-shadow 0.2s;
+}
+
+.schedule-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    background: #fffde7;
+}
+
+.goal-item {
+    transition: background 0.2s;
+}
+
+.goal-item:hover {
+    background: #fffde7 !important;
+    /* light yellow */
+}
+
+.goal-item .delete-goal-form {
+    display: none;
+}
+
+.goal-item:hover .delete-goal-form {
+    display: block;
+}
+
+.give-up-badge-btn {
+    cursor: pointer;
+    font-weight: 500;
+    padding: 0.2em 0.7em;
+    margin-bottom: 0.1rem;
+    margin-right: 0.1rem;
+    background: #fff;
+    color: #dc3545 !important;
+    border: 1.5px solid #dc3545 !important;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.give-up-badge-btn:hover {
+    background: #ffe066 !important;
+    color: #b30000 !important;
+    border-color: #b30000 !important;
+}
+
+/* Make the calendar more compact and modern */
+#calendar {
+    font-size: 0.95rem;
+    padding: 0.5rem;
+    background: #faf8f6 !important;
+    border-radius: 1rem;
+}
+
+/* Remove grid lines */
+.fc-theme-standard .fc-scrollgrid,
+.fc-theme-standard td,
+.fc-theme-standard th {
+    border: none !important;
+    background: transparent !important;
+}
+
+/* Black day header letters (S M T W T F S) */
+.fc-col-header-cell-cushion {
+    color: #222 !important;
+    font-weight: 500;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+}
+
+/* Month/Year title at top left, bold, black */
+.fc-toolbar-title {
+    font-size: 1.3rem !important;
+    font-weight: 600;
+    color: #222 !important;
+    text-align: left !important;
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+/* Navigation arrows at top right */
+.fc-header-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.25rem;
+    flex-direction: row;
+    margin-bottom: 0.5rem;
+}
+
+/* Style navigation buttons */
+.fc .fc-button,
+.fc .fc-button-primary {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: #fff !important;
+    border: none !important;
+    color: #222 !important;
+    box-shadow: none !important;
+    border-radius: 50% !important;
+    width: 2.2rem;
+    height: 2.2rem;
+    font-size: 1.2rem !important;
+    transition: background 0.2s;
+    padding: 0 !important;
+}
+
+.fc-button:hover,
+.fc-button-primary:hover {
+    background: #f0f0f0 !important;
+}
+
+/* Remove cell hover/focus */
+.fc-daygrid-day-frame {
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Remove background from calendar */
+.fc {
+    background: #faf8f6 !important;
+    border-radius: 1rem;
+    padding: 0.5rem;
+}
+
+.fc-daygrid-day {
+    padding: 0 !important;
+    margin: 0 !important;
+    height: 2em !important;
+    min-height: 2em !important;
+    vertical-align: middle !important;
+}
+
+/* Remove extra space from the row */
+.fc-daygrid-row {
+    min-height: 2em !important;
+    height: 2em !important;
+}
+
+/* Make date numbers compact, centered, and today's highlight a perfect circle */
+.fc-daygrid-day-number {
+    color: #222 !important;
+    text-decoration: none !important;
+    font-weight: 400;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2em;
+    height: 2em;
+    line-height: 2em;
+    vertical-align: middle;
+    font-size: 1rem;
+    border-radius: 50%;
+    margin: 0;
+    padding: 0;
+    transition: background 0.2s;
+}
+
+/* Highlight today as a filled yellow circle */
+.fc-day-today {
+    background: none !important;
+}
+
+.fc-day-today .fc-daygrid-day-number {
+    background: #fff86a !important;
+    color: #222 !important;
+    border-radius: 50% !important;
+    font-weight: 500;
+    box-shadow: none !important;
+    text-decoration: none !important;
+    border: none !important;
+}
+
+/* Fade out days from other months */
+.fc-day-other .fc-daygrid-day-number {
+    color: #c0c0c0 !important;
+    opacity: 0.7;
+}
+
+.fc-blue-circle .fc-daygrid-day-number {
+    background: #339af0 !important;
+    color: #fff !important;
+    border-radius: 50% !important;
+    font-weight: 600;
+    box-shadow: 0 0 0 2px #e3f0fb;
+    transition: background 0.2s;
+}
+
+/* Hide default event lines under the date number */
+.fc-daygrid-event-harness {
+    display: none !important;
+}
+
+.weather-day-card {
+    min-width: 80px;
+    max-width: 90px;
+    background: #f8fafc;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    border-radius: 0.75rem;
+    margin-bottom: 0;
+    padding: 0.5rem 0.25rem;
+    transition: box-shadow 0.2s;
+}
+
+.weather-day-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+    background: #e9f5ff;
+}
+
+.badge-bronze {
+    background: linear-gradient(90deg, #cd7f32 60%, #b87333 100%);
+    color: #fff;
+    border: 1.5px solid #b87333;
+    font-weight: 600;
+    box-shadow: 0 1px 4px rgba(205, 127, 50, 0.08);
+}
+
+.badge-silver {
+    background: linear-gradient(90deg, #c0c0c0 60%, #a9a9a9 100%);
+    color: #fff;
+    border: 1.5px solid #a9a9a9;
+    font-weight: 600;
+    box-shadow: 0 1px 4px rgba(192, 192, 192, 0.08);
+}
+
+.badge-gold {
+    background: linear-gradient(90deg, #ffd700 60%, #ffb700 100%);
+    color: #222;
+    border: 1.5px solid #ffb700;
+    font-weight: 700;
+    box-shadow: 0 1px 4px rgba(255, 215, 0, 0.12);
+}
+
+.badge-locked {
+    background: transparent;
+    color: #bbb;
+    border: 1.5px dashed #bbb;
+    font-weight: 600;
+    opacity: 0.5;
+}

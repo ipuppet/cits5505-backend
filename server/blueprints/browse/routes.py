@@ -1,8 +1,12 @@
-from flask import Blueprint, render_template, flash, redirect, url_for, g
+from flask import Blueprint, render_template, flash, redirect, url_for, request
 from flask_login import login_required
 
 from server.blueprints.browse import logic
-from server.blueprints.browse.forms import ExerciseForm, BodyMeasurementForm, CalorieIntakeForm
+from server.blueprints.browse.forms import (
+    ExerciseForm,
+    BodyMeasurementForm,
+    CalorieIntakeForm,
+)
 
 browse_bp = Blueprint("browse", __name__, template_folder="templates")
 
@@ -20,7 +24,6 @@ def index():
         exercise_metrics=logic.get_exercises_metrics(),
         body_measurement_form=body_measurement_form,
         body_measurement_types=logic.get_body_measurement_types(),
-        body_measurement_units=logic.get_body_measurement_units(),
         calorie_intake_form=calorie_intake_form,
     )
 
@@ -34,14 +37,16 @@ def exercise():
             achievement = logic.add_exercise_data(
                 exercise_form.type.data,
                 exercise_form.metrics.data,
+                exercise_form.datetime,
             )
             if achievement:
                 flash(
                     f"🎉 Congratulations! You reached the {achievement.milestone} milestone in {achievement.exercise_type}!",
-                    "success")
+                    "success",
+                )
             flash("Exercise data added successfully!", "success")
         except Exception as e:
-            flash(f"Error adding exercise data: {str(e)}", "danger")
+            flash(str(e), "danger")
     else:
         flash(exercise_form.errors, "danger")
     return redirect(url_for("browse.index"))
@@ -56,14 +61,14 @@ def body_measurement():
             logic.add_body_measurement_data(
                 body_measurement_form.type.data,
                 body_measurement_form.value.data,
-                body_measurement_form.unit.data,
+                body_measurement_form.datetime,
             )
             flash("Body measurement data added successfully!", "success")
         except Exception as e:
-            flash(f"Error adding body measurement data: {str(e)}", "danger")
+            flash(str(e), "danger")
     else:
         flash(body_measurement_form.errors, "danger")
-    return redirect(url_for("browse.index"))
+    return redirect(request.form.get("referrer", url_for("browse.index")))
 
 
 @browse_bp.route("/calorie_intake", methods=["POST"])
@@ -75,10 +80,11 @@ def calorie_intake():
             logic.add_calorie_intake_data(
                 calorie_intake_form.calories.data,
                 calorie_intake_form.description.data,
+                calorie_intake_form.datetime,
             )
             flash("Calorie intake data added successfully!", "success")
         except Exception as e:
-            flash(f"Error adding calorie intake data: {str(e)}", "danger")
+            flash(str(e), "danger")
     else:
         flash(calorie_intake_form.errors, "danger")
     return redirect(url_for("browse.index"))

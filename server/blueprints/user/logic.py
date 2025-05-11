@@ -28,12 +28,12 @@ def logout():
 
 
 def register(
-        username: str,
-        password: str,
-        email: str,
-        nickname: str,
-        date_of_birth=None,
-        sex=None,
+    username: str,
+    password: str,
+    email: str,
+    nickname: str,
+    date_of_birth=None,
+    sex=None,
 ):
     # Check if the username or email already exists
     User.validate_unique(username, email)
@@ -59,7 +59,9 @@ def reset_password(new_password: str):
     if not current_user.is_authenticated:
         raise ValueError("User not found.")
     try:
-        current_user.password = User.hash_password(new_password)  # Hash the new password
+        current_user.password = User.hash_password(
+            new_password
+        )  # Hash the new password
         db.session.commit()
     except SQLAlchemyError as e:
         db.session.rollback()
@@ -67,9 +69,9 @@ def reset_password(new_password: str):
 
 
 def update_user(
-        username: str | None = None,
-        email: str | None = None,
-        nickname: str | None = None,
+    username: str | None = None,
+    email: str | None = None,
+    nickname: str | None = None,
 ):
     if not any([username, email, nickname]):
         return
@@ -106,7 +108,11 @@ def update_avatar(file: FileStorage):
     os.makedirs(avatar_folder, exist_ok=True)
     file_path = os.path.join(avatar_folder, filename)
 
-    old_avatar_path = os.path.join(avatar_folder, current_user.avatar.split('/')[-1]) if current_user.avatar else None
+    old_avatar_path = (
+        os.path.join(avatar_folder, current_user.avatar.split("/")[-1])
+        if current_user.avatar
+        else None
+    )
     try:
         if old_avatar_path and os.path.exists(old_avatar_path):
             os.remove(old_avatar_path)
