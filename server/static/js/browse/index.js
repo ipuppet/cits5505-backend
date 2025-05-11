@@ -41,12 +41,7 @@ function updateBrowseTable(headers, data) {
         trDom.appendChild(idDom)
         for (let k of headers) {
             const tdDom = document.createElement("td")
-            let value=data[i][k]
-            if (k === "created_at") {
-                value= new Date(value)
-                value=value.toLocaleString()
-            }
-            tdDom.innerText = value
+            tdDom.innerText = data[i][k]
             trDom.appendChild(tdDom)
         }
         tableBodyDom.appendChild(trDom)

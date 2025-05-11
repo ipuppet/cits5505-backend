@@ -20,17 +20,20 @@ a {
 }
 
 .mainstr {
+   margin-top: 80px;
+   /* Adjust to match your navbar height */
+
    display: flex;
    flex-direction: column;
-   min-height: 100vh;
-   background-color: #f8f9fa;
+   height: 100vh;
 }
 
-.navbar.navbar-expand-lg.bg-body-tertiary.bg-dark.border-bottom.border-body{
-   position:sticky;
-   top:0;
-   z-index: 100;
-   height: 15vh;
+#navbar {
+   flex: 1;
+}
+
+.navbar {
+   height: 100%;
 }
 
 .nav-link:active {
@@ -45,7 +48,7 @@ a {
     color: var(--bs-navbar-active-color);
 } */
 .carousel {
-   flex: 1;
+   flex: 3;
    overflow: hidden;
    /* if not add, the flex will not work */
 }
@@ -57,12 +60,9 @@ a {
 .carousel-item {
    height: 100%
 }
-.bt{
-   margin-top: 1%;
-   text-align: center;
-}
+
 .content {
-   flex: 1;
+   flex: 3;
    width: 80%;
    margin: auto;
    display: flex;
@@ -112,47 +112,9 @@ a {
 }
 
 .upload {
+   flex: 6;
    display: flex;
    flex-direction: column;
-   justify-content: space-around;
-   height:85vh;
-}
-.uploadForm,.uploadFile{
+   justify-content: space-evenly;
    background-color: #f8f9fa;
-   flex:2;
-   /* max-height:40%; */
-}
-.outset{
-   box-shadow:2px 2px rgb(0,0,0,0.3);
-}
-.inset{
-   box-shadow:inset 2px 2px rgb(0,0,0,0.3); 
-}
-.uploadForm{
-   display:none;
-}
-#form{
-   background-color: #f8f9fa;
-   margin-left: 2%;
-   /* display: flex;
-   flex-direction: column;
-   justify-content:center; */
-}
-#form div:nth-child(1){
-   margin-top: 2%;
-}
-.formSubmit{
-   display:block;
-   margin: auto;
-}
-
-
-.visualize{
-   flex:6;
-}
-.introductory{
-   display:flex;
-   flex-direction:column;
-   justify-content: space-around;
-   height:85vh;
 }
