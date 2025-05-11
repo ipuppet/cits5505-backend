@@ -2,8 +2,7 @@
 
 ## Dependencies
 
-Please use virtual environments to manage dependencies. You can use `venv` or `virtualenv` to create a virtual
-environment.
+Please use virtual environments to manage dependencies. You can use `venv` to create a virtual environment.
 
 To create a virtual environment, run the following command:
 
@@ -74,39 +73,12 @@ automatically on save.
 │   ├── config.py
 │   └── dev.sqlite
 ├── migrations
-│   ├── alembic.ini
-│   ├── env.py
-│   ├── README
-│   ├── script.py.mako
-│   └── versions
 ├── README.md
 ├── requirements.in
 ├── requirements.txt
 ├── server
 │   ├── app.py
 │   ├── blueprints
-│   │   ├── dashboard
-│   │   │   ├── routes.py
-│   │   │   └── templates
-│   │   │       └── dashboard
-│   │   ├── exercise
-│   │   │   ├── routes.py
-│   │   │   └── templates
-│   │   │       └── exercise
-│   │   ├── index
-│   │   │   ├── routes.py
-│   │   │   └── templates
-│   │   │       └── index
-│   │   ├── share
-│   │   │   ├── routes.py
-│   │   │   └── templates
-│   │   │       └── share
-│   │   └── user
-│   │       ├── forms.py
-│   │       ├── logic.py
-│   │       ├── routes.py
-│   │       └── templates
-│   │           └── user
 │   ├── config.py
 │   ├── models.py
 │   ├── static
@@ -127,8 +99,6 @@ automatically on save.
 - `server`: This directory contains the main application code. It includes the following contents:
     - `blueprints`: This directory contains the blueprints. Each blueprint is a separate module that can be registered
       with the main application.
-        - `index`: Blueprint for the home module.
-        - `user`: Blueprint for user-related module.
     - `utils`: This directory contains utility functions and decorators.
     - `static`: This directory contains static files such as CSS and JavaScript files.
     - `templates`: This directory contains the base templates for the application.
@@ -142,6 +112,14 @@ automatically on save.
 *`instance` should not be included in version control.*
 
 ## Running the project
+
+If you don't have the `SECRET_KEY` environment variable set, you can set it using the following command:
+
+```bash
+export SECRET_KEY="your_secret_key"
+```
+
+Or you can set it in the `instance/config.py` file.
 
 Use the following command to run the project:
 
