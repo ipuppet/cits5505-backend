@@ -398,12 +398,15 @@ class Goal(db.Model):
     exercise_type = db.Column(db.Enum(ExerciseType), nullable=False)
     metric = db.Column(db.String(64), nullable=False)
     target_value = db.Column(db.Float, nullable=False)
+    achieved = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(
         db.DateTime, nullable=False, default=db.func.current_timestamp()
     )
 
     @hybrid_property
     def current_value(self):
+        if self.achieved:
+            return self.target_value
         # Calculate the current value based on the user's exercises
         exercises = (
             db.session.query(Exercise)
@@ -414,6 +417,8 @@ class Goal(db.Model):
         for ex in exercises:
             value = float(ex.metrics.get(self.metric, 0))
             total += value
+        if total >= self.target_value:
+            self.achieved = True
         return total
 
     @staticmethod
