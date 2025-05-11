@@ -103,12 +103,12 @@ def index():
         flash(form.errors, "danger")
         return redirect(url_for("user.update_user"))
 
-    username = form.username.data
-    email = form.email.data
-    nickname = form.nickname.data
-
     try:
-        logic.update_user(username, email, nickname)
+        logic.update_user(
+            form.username.data,
+            form.email.data,
+            form.nickname.data,
+        )
         flash("User information updated successfully!", "success")
         return redirect(url_for("user.update_user"))
     except Exception as e:

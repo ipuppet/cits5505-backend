@@ -7,7 +7,6 @@ from server.models import (
     METRICS_REQUIREMENTS,
     BodyMeasurement,
     BodyMeasurementType,
-    BODY_MEASUREMENT_UNITS,
     ACHIEVEMENTS,
     Achievement,
     CalorieIntake,
@@ -65,17 +64,12 @@ def get_body_measurement_types() -> dict:
     return {e.name: str(e) for e in BodyMeasurementType}
 
 
-def get_body_measurement_units() -> dict:
-    return {e.name: BODY_MEASUREMENT_UNITS[e] for e in BodyMeasurementType}
-
-
-def add_body_measurement_data(body_measurement_type, value, unit):
+def add_body_measurement_data(body_measurement_type, value):
     try:
         new_body_measurement = BodyMeasurement(
             user_id=current_user.id,
             type=BodyMeasurementType[body_measurement_type],
             value=value,
-            unit=unit,
         )
         db.session.add(new_body_measurement)
         db.session.commit()
@@ -87,12 +81,11 @@ def add_body_measurement_data(body_measurement_type, value, unit):
         raise RuntimeError(f"Unexpected error: {str(e)}")
 
 
-def add_calorie_intake_data(calories, unit, description):
+def add_calorie_intake_data(calories, description):
     try:
         new_calorie_intake = CalorieIntake(
             user_id=current_user.id,
             calories=calories,
-            unit=unit,
             description=description,
         )
         db.session.add(new_calorie_intake)

@@ -1,6 +1,12 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, DateField, SelectField, FloatField
-from wtforms.validators import DataRequired, Length, Optional, Email, NumberRange
+from wtforms import (
+    StringField,
+    PasswordField,
+    BooleanField,
+    DateField,
+    SelectField,
+)
+from wtforms.validators import DataRequired, Length, Optional, Email
 
 
 class PasswordForm(FlaskForm):
@@ -23,9 +29,19 @@ class EmailForm(FlaskForm):
 class UserInfoForm(EmailForm):
     username = StringField("Username", validators=[Optional()])
     nickname = StringField("Nickname", validators=[Optional()])
-    date_of_birth = DateField("Date of Birth", format='%Y-%m-%d', validators=[Optional()])
-    sex = SelectField("Sex", choices=[('', 'Select'), ('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')],
-                      validators=[Optional()])
+    date_of_birth = DateField(
+        "Date of Birth", format="%Y-%m-%d", validators=[Optional()]
+    )
+    sex = SelectField(
+        "Sex",
+        choices=[
+            ("", "Select"),
+            ("Male", "Male"),
+            ("Female", "Female"),
+            ("Other", "Other"),
+        ],
+        validators=[Optional()],
+    )
 
 
 class LoginForm(PasswordForm, EmailForm):

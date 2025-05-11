@@ -3,6 +3,7 @@ import uuid
 from enum import Enum
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import validates
 from flask_login import UserMixin
 
@@ -126,7 +127,6 @@ class User(UserMixin, db.Model):
                 {
                     "type": measurement.type.name,
                     "value": measurement.value,
-                    "unit": measurement.unit,
                     "created_at": measurement.created_at,
                 }
             )
@@ -138,12 +138,24 @@ class User(UserMixin, db.Model):
             calorie_intakes.append(
                 {
                     "calories": intake.calories,
-                    "unit": intake.unit,
                     "description": intake.description,
                     "created_at": intake.created_at,
                 }
             )
         return calorie_intakes
+
+    def scheduled_exercises_to_list(self) -> list:
+        scheduled_exercises = []
+        for exercise in self.scheduled_exercises.all():
+            scheduled_exercises.append(
+                {
+                    "exercise_type": exercise.exercise_type.name,
+                    "scheduled_time": exercise.scheduled_time.strftime("%I:%M %p"),
+                    "note": exercise.note,
+                    "day_of_week": exercise.day_of_week,
+                }
+            )
+        return scheduled_exercises
 
     @staticmethod
     def get(user_id: int) -> "User":
@@ -222,12 +234,17 @@ class ExerciseType(Enum):
         return self.value.replace("_", " ").title()
 
 
+METRICS = [
+    "distance",
+    "duration",
+    "weight",
+]
 METRICS_REQUIREMENTS = {
-    ExerciseType.CYCLING: ["distance_km", "duration_min"],
-    ExerciseType.RUNNING: ["distance_km", "duration_min"],
-    ExerciseType.SWIMMING: ["distance_m", "duration_min"],
-    ExerciseType.WEIGHTLIFTING: ["weight_kg", "sets", "reps"],
-    ExerciseType.YOGA: ["duration_min"],
+    ExerciseType.CYCLING: ["distance", "duration"],  # in miters and minutes
+    ExerciseType.RUNNING: ["distance", "duration"],
+    ExerciseType.SWIMMING: ["distance", "duration"],
+    ExerciseType.WEIGHTLIFTING: ["weight", "sets", "reps"],  # in kg
+    ExerciseType.YOGA: ["duration"],
 }
 
 
@@ -309,34 +326,17 @@ class BodyMeasurementType(Enum):
         return self.value.replace("_", " ").title()
 
 
-BODY_MEASUREMENT_UNITS = {
-    BodyMeasurementType.WEIGHT: ["kg", "lbs"],
-    BodyMeasurementType.HEIGHT: ["cm", "inches"],
-    BodyMeasurementType.BODY_FAT: ["%"],
-}
-
-
 class BodyMeasurement(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     type = db.Column(db.Enum(BodyMeasurementType), nullable=False)
     value = db.Column(db.Float, nullable=False)
-    unit = db.Column(db.Text, nullable=False)
     created_at = db.Column(
         db.DateTime,
         nullable=False,
         default=db.func.current_timestamp(),
         index=True,
     )
-
-    @validates("unit")
-    def validate_unit(self, key, unit: str):
-        if unit not in BODY_MEASUREMENT_UNITS.get(self.type, []):
-            raise ValueError(
-                f"Invalid unit '{unit}' for {self.type}. "
-                f"Allowed units: {BODY_MEASUREMENT_UNITS[self.type]}"
-            )
-        return unit
 
     @staticmethod
     def get_by_user(user_id: int, **kwargs):
@@ -350,14 +350,10 @@ class BodyMeasurement(db.Model):
         )
 
 
-CALORIE_INTAKE_UNITS = ["kcal", "kj"]
-
-
 class CalorieIntake(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    calories = db.Column(db.Float, nullable=False)
-    unit = db.Column(db.Text, nullable=False)
+    calories = db.Column(db.Float, nullable=False)  # in kcal
     description = db.Column(db.Text, nullable=True)
     created_at = db.Column(
         db.DateTime,
@@ -365,14 +361,6 @@ class CalorieIntake(db.Model):
         default=db.func.current_timestamp(),
         index=True,
     )
-
-    @validates("unit")
-    def validate_unit(self, key, unit: str):
-        if unit not in CALORIE_INTAKE_UNITS:
-            raise ValueError(
-                f"Invalid unit '{unit}'. Allowed units: {CALORIE_INTAKE_UNITS}"
-            )
-        return unit
 
     @staticmethod
     def get_by_user(user_id: int, **kwargs):
@@ -396,19 +384,43 @@ class ScheduledExercise(db.Model):
         db.String(10), nullable=False
     )  # e.g. "Monday", "Tuesday", etc.
 
+    @staticmethod
+    def get(schedule_id: int):
+        if not schedule_id:
+            raise ValueError("ID cannot be empty")
+        return db.session.get(ScheduledExercise, int(schedule_id))
+
 
 class Goal(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     description = db.Column(db.String(256), nullable=False)
     exercise_type = db.Column(db.Enum(ExerciseType), nullable=False)
-    metric = db.Column(db.String(64), nullable=False)  
+    metric = db.Column(db.String(64), nullable=False)
     target_value = db.Column(db.Float, nullable=False)
-    current_value = db.Column(db.Float, nullable=False, default=0)
-    unit = db.Column(db.String(32), nullable=True)  # e.g. "kg", "km", "min"
     created_at = db.Column(
         db.DateTime, nullable=False, default=db.func.current_timestamp()
     )
+
+    @hybrid_property
+    def current_value(self):
+        # Calculate the current value based on the user's exercises
+        exercises = (
+            db.session.query(Exercise)
+            .filter_by(user_id=self.user_id, type=self.exercise_type)
+            .all()
+        )
+        total = 0.0
+        for ex in exercises:
+            value = float(ex.metrics.get(self.metric, 0))
+            total += value
+        return total
+
+    @staticmethod
+    def get(goal_id: int):
+        if not goal_id:
+            raise ValueError("ID cannot be empty")
+        return db.session.get(Goal, int(goal_id))
 
 
 class Share(db.Model):
