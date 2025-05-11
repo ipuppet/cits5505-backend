@@ -4,8 +4,6 @@
 Dashboard
 {% endblock %}
 
-{% set perth = pytz.timezone('Australia/Perth') %}
-
 {% block css %}
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard/index.css') }}" />
@@ -69,8 +67,7 @@ Dashboard
                                     <div class="row mb-2">
                                         <div class="col-5 text-muted"><strong>Last Login:</strong></div>
                                         <div class="col-7">
-                                            {{ current_user.last_login.astimezone(perth).strftime('%Y-%m-%d %H:%M') if
-                                            current_user.last_login else 'N/A' }}
+                                            {{ current_user.last_login.astimezone(perth).strftime('%Y-%m-%d %H:%M') }}
                                         </div>
                                     </div>
                                 </div>
@@ -472,8 +469,12 @@ Dashboard
                     </div>
                     <!-- BMI Chart Card -->
                     <div class="card chart-card shadow-sm border-0 mb-4">
-                        <div class="card-header bg-light">
+                        <div class="card-header bg-light d-flex align-items-center">
                             <strong>BMI</strong>
+                            <a href="https://en.wikipedia.org/wiki/Body_mass_index" target="_blank" class="ms-auto"
+                                title="Learn more about BMI" style="color: #007bff; text-decoration: none;">
+                                <i class="bi bi-question-circle" style="font-size: 1.2em; vertical-align: middle;"></i>
+                            </a>
                         </div>
                         <div class="card-body text-center">
                             <div style="font-size:1.3rem;">
@@ -483,7 +484,7 @@ Dashboard
                                 {{ bmi_category or '' }}
                             </div>
                             <div class="bmi-bar-container my-3" style="position:relative; height:48px;">
-                                <canvas id="bmiBar" width="400" height="48"></canvas>
+                                <canvas id="bmiBar" height="48"></canvas>
                             </div>
                             <div class="d-flex justify-content-between" style="font-size:0.95rem;">
                                 <span>15</span>
@@ -492,85 +493,103 @@ Dashboard
                                 <span>30</span>
                                 <span>40</span>
                             </div>
+                            {% if bmi is not none %}
+                            {% if bmi < 18.5 %} <div class="alert alert-info mt-3 py-2 px-3" style="font-size:1em;">
+                                Underweight (BMI &lt; 18.5): Consider gaining weight for better health.
                         </div>
+                        {% elif 18.5 <= bmi <=24.9 %} <div class="alert alert-success mt-3 py-2 px-3"
+                            style="font-size:1em;">
+                            Normal range (18.5–24.9): You're in a healthy weight zone!
                     </div>
-                    <!-- Exercise Log Card -->
-                    <div class="card chart-card shadow-sm border-0 mb-4">
-                        <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
-                            <strong>Exercise Log</strong>
-                        </div>
-                        <div class="card-body p-3">
-                            {% if current_user.exercises %}
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Type</th>
-                                        <th>Date</th>
-                                        <th>Details</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for ex in current_user.exercises[:10] %}
-                                    <tr>
-                                        <td>{{ loop.index }}</td>
-                                        <td>{{ ex.type }}</td>
-                                        <td>{{ ex.created_at.strftime('%Y/%m/%d') if ex.created_at else 'N/A' }}</td>
-                                        </td>
-                                        <td>
-                                            {% if ex.metrics %}
-                                            {% for key, value in ex.metrics.items() %}
-                                            {{ key.replace('_', ' ').capitalize() }}: {{ value }}<br>
-                                            {% endfor %}
-                                            {% else %}
-                                            N/A
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                            {% else %}
-                            <div class="text-muted text-center">No exercise data yet.</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <!-- Add Goal Modal -->
-                    <div class="modal fade" id="addGoalModal" tabindex="-1" aria-labelledby="addGoalModalLabel"
-                        aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <form method="POST" action="{{ url_for('dashboard.add_goal') }}">
-                                    {{ goal_form.hidden_tag() }}
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="addGoalModalLabel">Add Goal</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="mb-2">{{ goal_form.description.label }} {{
-                                            goal_form.description(class="form-control") }}</div>
-                                        <div class="mb-2">{{ goal_form.exercise_type.label }} {{
-                                            goal_form.exercise_type(class="form-select") }}</div>
-                                        <div class="mb-2">{{ goal_form.metric.label }} {{
-                                            goal_form.metric(class="form-select") }}</div>
-                                        <div class="mb-2">{{ goal_form.target_value.label }} {{
-                                            goal_form.target_value(class="form-control") }}</div>
-                                        <div class="mb-2">{{ goal_form.unit.label }} {{
-                                            goal_form.unit(class="form-control",
-                                            readonly=True) }}</div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-primary">{{ goal_form.submit(class="btn
-                                                btn-primary") }}</button>
-                                        </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+                    {% elif 25 <= bmi <=29.9 %} <div class="alert alert-warning mt-3 py-2 px-3" style="font-size:1em;">
+                        Overweight (25–29.9): Consider healthy lifestyle changes.
                 </div>
+                {% elif 30 <= bmi <=39.9 %} <div class="alert alert-danger mt-3 py-2 px-3" style="font-size:1em;">
+                    Obesity (30–39.9): Increased health risks. Consult your doctor.
+            </div>
+            {% elif bmi >= 40 %}
+            <div class="alert alert-danger mt-3 py-2 px-3" style="font-size:1em;">
+                Severe Obesity (BMI ≥ 40): High health risk. Seek medical advice.
+            </div>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    <!-- Exercise Log Card -->
+    <div class="card chart-card shadow-sm border-0 mb-4">
+        <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+            <strong>Exercise Log</strong>
+        </div>
+        <div class="card-body p-3">
+            {% if current_user.exercises %}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ex in current_user.exercises[:10] %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ ex.type }}</td>
+                        <td>{{ ex.created_at.strftime('%Y/%m/%d') if ex.created_at else 'N/A' }}</td>
+                        </td>
+                        <td>
+                            {% if ex.metrics %}
+                            {% for key, value in ex.metrics.items() %}
+                            {{ key.replace('_', ' ').capitalize() }}: {{ value }}<br>
+                            {% endfor %}
+                            {% else %}
+                            N/A
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="text-muted text-center">No exercise data yet.</div>
+            {% endif %}
+        </div>
+    </div>
+    <!-- Add Goal Modal -->
+    <div class="modal fade" id="addGoalModal" tabindex="-1" aria-labelledby="addGoalModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" action="{{ url_for('dashboard.add_goal') }}">
+                    {{ goal_form.hidden_tag() }}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addGoalModalLabel">Add Goal</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-2">{{ goal_form.description.label }} {{
+                            goal_form.description(class="form-control") }}</div>
+                        <div class="mb-2">{{ goal_form.exercise_type.label }} {{
+                            goal_form.exercise_type(class="form-select") }}</div>
+                        <div class="mb-2">{{ goal_form.metric.label }} {{
+                            goal_form.metric(class="form-select") }}</div>
+                        <div class="mb-2">{{ goal_form.target_value.label }} {{
+                            goal_form.target_value(class="form-control") }}</div>
+                        <div class="mb-2">{{ goal_form.unit.label }} {{
+                            goal_form.unit(class="form-control",
+                            readonly=True) }}</div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">{{ goal_form.submit(class="btn
+                                btn-primary") }}</button>
+                        </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
+</div>
+</div>
+</div>
 
 
 </div>
