@@ -69,7 +69,7 @@ def get_bmi():
     weight_kg = get_weight()
     height_cm = get_height()
     if not weight_kg or not height_cm:
-        return None
+        return None, None
     height_m = height_cm / 100
     bmi = round(weight_kg / (height_m**2), 1)
 
