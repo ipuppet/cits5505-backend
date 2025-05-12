@@ -11,6 +11,7 @@ Share Data
             <div class="card shadow-sm border-0" style="border-radius: 1rem;">
                 <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
                     <h4 class="mb-0">Share with Friends</h4>
+                    <div class="text-muted small mt-1">Current User: {{ current_user.nickname }} ({{ current_user.username }})</div>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
@@ -20,13 +21,10 @@ Share Data
                     <form id="friendShareForm" action="{{ url_for('share.create_share') }}" method="post" onsubmit="updateScopeHidden()">
                         <input type="hidden" name="csrf_token" value="">
                         <div class="mb-3">
-                            <label for="friendacSelect" class="form-label">Select Friends</label>
-                            <select id="friendacSelect" class="form-select" multiple size="5">
-                                <!-- 动态插入好友选项 -->
+                            <label for="friendacSelect" class="form-label">Select Friend</label>
+                            <select id="friendacSelect" class="form-select" name="receiver_id" size="5">
+                                <!-- Dynamic friend options will be inserted here -->
                             </select>
-                        </div>
-                        <div class="mb-3">
-                            <div id="selectedFriends" class="d-flex flex-wrap gap-2"></div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label" for="timeRange">Time Range</label>
@@ -88,6 +86,27 @@ Share Data
                             <div id="shareReceived"></div>
                             <div id="receivedCountText" class="text-muted mt-2">You have received 0 records.</div>
                         </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 新增：分享数据预览卡片 -->
+            <div class="col-lg-12 mb-4">
+                <div class="card shadow-sm border-0" style="border-radius: 1rem;">
+                    <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                        <h4 class="mb-0">Preview Data to Share</h4>
+                    </div>
+                    <div class="card-body p-3">
+                        <table class="table table-striped" id="sharePreviewTable">
+                            <thead>
+                            <tr id="sharePreviewHeader">
+                                <!-- 动态插入表头 -->
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <!-- 动态插入预览数据 -->
+                            </tbody>
+                        </table>
+                        <div id="sharePreviewEmpty" class="text-muted text-center" style="display:none;">No data to preview. Please select data type and time range.</div>
                     </div>
                 </div>
             </div>
@@ -185,9 +204,8 @@ Share Data
 {% block js %}
 {{ super() }}
 <script>
-    // 多选好友相关逻辑
-    let selectedFriends = [];
-    // 搜索并渲染下拉框
+    // Remove multi-select friends logic, only keep single select
+    // Search and render dropdown
     document.getElementById('searchFriend').addEventListener('input', function() {
         const username = this.value.trim();
         const friendSelect = document.getElementById('friendacSelect');
@@ -198,60 +216,16 @@ Share Data
             .then(res => {
                 if (res.code === 1 && Array.isArray(res.data)) {
                     res.data.forEach(user => {
-                        // 已选的不再显示
-                        if (!selectedFriends.find(f => f.id === user.id)) {
-                            const option = document.createElement('option');
-                            option.value = user.id;
-                            option.text = user.nickname ? `${user.nickname}（${user.username}）` : user.username;
-                            friendSelect.appendChild(option);
-                        }
+                        const option = document.createElement('option');
+                        option.value = user.id;
+                        option.text = user.nickname ? `${user.nickname}（${user.username}）` : user.username;
+                        friendSelect.appendChild(option);
                     });
                 }
             });
     });
-    // 选择好友并添加到已选区域
-    document.getElementById('friendacSelect').addEventListener('change', function() {
-        const friendSelect = this;
-        Array.from(friendSelect.selectedOptions).forEach(option => {
-            const id = option.value;
-            const name = option.text;
-            if (!selectedFriends.find(f => f.id === id)) {
-                selectedFriends.push({id, name});
-            }
-        });
-        renderSelectedFriends();
-        friendSelect.innerHTML = '';
-        document.getElementById('searchFriend').value = '';
-    });
-    // 渲染已选好友
-    function renderSelectedFriends() {
-        const container = document.getElementById('selectedFriends');
-        container.innerHTML = '';
-        selectedFriends.forEach(friend => {
-            const badge = document.createElement('span');
-            badge.className = 'badge bg-primary d-flex align-items-center';
-            badge.style.padding = '0.5em 1em';
-            badge.style.fontSize = '1em';
-            badge.innerHTML = `${friend.name} <button type="button" class="btn-close btn-close-white ms-2" aria-label="Remove" style="font-size:0.8em"></button>`;
-            badge.querySelector('button').onclick = function() {
-                selectedFriends = selectedFriends.filter(f => f.id !== friend.id);
-                renderSelectedFriends();
-            };
-            container.appendChild(badge);
-        });
-    }
-    // 提交时收集所有已选好友ID
-    document.getElementById('friendShareForm').addEventListener('submit', function(e) {
-        // 移除已有的hidden
-        document.querySelectorAll('input[name="receiver_id"]').forEach(el => el.remove());
-        selectedFriends.forEach(friend => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'receiver_id';
-            input.value = friend.id;
-            this.appendChild(input);
-        });
-    });
+    // Remove selectedFriends and related logic
+    // Remove form submit handler for selectedFriends
 
     // Fetch and render share records from backend
     fetch('/static/share/share_records.json')
@@ -342,7 +316,7 @@ Share Data
     document.getElementById('chartType').addEventListener('change', updateScopeHidden);
     document.getElementById('timeRange').addEventListener('change', updateScopeHidden);
 
-    // 动态渲染复选框
+    // Dynamically render checkboxes
     document.getElementById('chartType').addEventListener('change', function() {
         var value = this.value;
         var container = document.getElementById('subTypeCheckboxes');
@@ -361,5 +335,108 @@ Share Data
             });
         }
     });
+
+    // 新增：动态渲染表头和表格内容
+    function renderSharePreviewHeader(type) {
+        const header = document.getElementById('sharePreviewHeader');
+        let columns = ['Date'];
+        if (type === 'exercise') {
+            // 默认显示distance/duration，weightlifting和yoga特殊处理
+            const chartType = document.getElementById('chartType').value;
+            const subTypes = Array.from(document.querySelectorAll('#subTypeCheckboxes input:checked')).map(i => i.value.toLowerCase());
+            // 如果只选了一个子类型，按子类型渲染表头，否则显示全部
+            if (subTypes.length === 1) {
+                if (['cycling', 'running', 'swimming'].includes(subTypes[0])) {
+                    columns = ['Date', 'Type', 'Distance', 'Duration'];
+                } else if (subTypes[0] === 'weight lifting') {
+                    columns = ['Date', 'Type', 'Weight', 'Sets', 'Reps'];
+                } else if (subTypes[0] === 'yoga') {
+                    columns = ['Date', 'Type', 'Duration'];
+                }
+            } else {
+                columns = ['Date', 'Type', 'Distance', 'Duration', 'Weight', 'Sets', 'Reps'];
+            }
+        } else if (type === 'measurement') {
+            columns = ['Date', 'Type', 'Value'];
+        } else if (type === 'calorie') {
+            columns = ['Date', 'Calories'];
+        }
+        header.innerHTML = columns.map(col => `<th>${col}</th>`).join('');
+    }
+    function renderSharePreviewTable(type, data) {
+        const tbody = document.querySelector('#sharePreviewTable tbody');
+        const empty = document.getElementById('sharePreviewEmpty');
+        tbody.innerHTML = '';
+        if (!data || data.length === 0) {
+            empty.style.display = '';
+            return;
+        }
+        empty.style.display = 'none';
+        const subTypes = Array.from(document.querySelectorAll('#subTypeCheckboxes input:checked')).map(i => i.value.toLowerCase());
+        data.forEach((item, idx) => {
+            let row = '';
+            if (type === 'exercise') {
+                let t = (item.type || '').toLowerCase();
+                if (['cycling', 'running', 'swimming'].includes(t)) {
+                    row = `<td>${item.created_at ? (new Date(item.created_at)).toLocaleDateString() : '-'}</td>` +
+                          `<td>${item.type || '-'}</td>` +
+                          `<td>${item.metrics && item.metrics.distance !== undefined ? item.metrics.distance : '-'}</td>` +
+                          `<td>${item.metrics && item.metrics.duration !== undefined ? item.metrics.duration : '-'}</td>`;
+                } else if (t === 'weight lifting') {
+                    row = `<td>${item.created_at ? (new Date(item.created_at)).toLocaleDateString() : '-'}</td>` +
+                          `<td>${item.type || '-'}</td>` +
+                          `<td>${item.metrics && item.metrics.weight !== undefined ? item.metrics.weight : '-'}</td>` +
+                          `<td>${item.metrics && item.metrics.sets !== undefined ? item.metrics.sets : '-'}</td>` +
+                          `<td>${item.metrics && item.metrics.reps !== undefined ? item.metrics.reps : '-'}</td>`;
+                } else if (t === 'yoga') {
+                    row = `<td>${item.created_at ? (new Date(item.created_at)).toLocaleDateString() : '-'}</td>` +
+                          `<td>${item.type || '-'}</td>` +
+                          `<td>${item.metrics && item.metrics.duration !== undefined ? item.metrics.duration : '-'}</td>`;
+                } else {
+                    // 多类型混合时显示所有字段
+                    row = `<td>${item.created_at ? (new Date(item.created_at)).toLocaleDateString() : '-'}</td>` +
+                          `<td>${item.type || '-'}</td>` +
+                          `<td>${item.metrics && item.metrics.distance !== undefined ? item.metrics.distance : '-'}</td>` +
+                          `<td>${item.metrics && item.metrics.duration !== undefined ? item.metrics.duration : '-'}</td>` +
+                          `<td>${item.metrics && item.metrics.weight !== undefined ? item.metrics.weight : '-'}</td>` +
+                          `<td>${item.metrics && item.metrics.sets !== undefined ? item.metrics.sets : '-'}</td>` +
+                          `<td>${item.metrics && item.metrics.reps !== undefined ? item.metrics.reps : '-'}</td>`;
+                }
+            } else if (type === 'measurement') {
+                row = `<td>${item.created_at ? (new Date(item.created_at)).toLocaleDateString() : '-'}</td>` +
+                      `<td>${item.type || '-'}</td>` +
+                      `<td>${item.value !== undefined ? item.value : '-'}</td>`;
+            } else if (type === 'calorie') {
+                row = `<td>${item.created_at ? (new Date(item.created_at)).toLocaleDateString() : '-'}</td>` +
+                      `<td>${item.calories !== undefined ? item.calories : '-'}</td>`;
+            }
+            tbody.innerHTML += `<tr>${row}</tr>`;
+        });
+    }
+    // 监听数据类型、时间范围和子类型变化，动态渲染预览
+    function fetchAndPreviewShareData() {
+        const type = document.getElementById('chartType').value;
+        const days = document.getElementById('timeRange').value;
+        renderSharePreviewHeader(type);
+        if (!type || !days) {
+            renderSharePreviewTable(type, []);
+            return;
+        }
+        fetch(`/share/preview?type=${type}&days=${days}`)
+            .then(res => res.json())
+            .then(res => {
+                if (res.code === 1 && Array.isArray(res.data)) {
+                    renderSharePreviewTable(type, res.data);
+                } else {
+                    renderSharePreviewTable(type, []);
+                }
+            })
+            .catch(() => renderSharePreviewTable(type, []));
+    }
+    document.getElementById('chartType').addEventListener('change', fetchAndPreviewShareData);
+    document.getElementById('timeRange').addEventListener('change', fetchAndPreviewShareData);
+    document.getElementById('subTypeCheckboxes').addEventListener('change', fetchAndPreviewShareData);
+    // 页面加载时初始化
+    fetchAndPreviewShareData();
 </script>
 {% endblock %}
