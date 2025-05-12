@@ -1,9 +1,10 @@
 import uuid
 from sqlalchemy.exc import SQLAlchemyError
-from server.models import db, Share
+
+from server.models import db, Share, Exercise, BodyMeasurement, Achievement
 
 
-def get_shared(share_id: uuid.UUID) -> Share:
+def get_shared(share_id: uuid.UUID) -> dict[str, list]:
     """
     Retrieve a share record by its ID.
 
@@ -11,13 +12,63 @@ def get_shared(share_id: uuid.UUID) -> Share:
         share_id (uuid.UUID): The ID of the share to retrieve.
 
     Returns:
-        Share: The retrieved Share object, or None if not found.
+        Share: The dictionary containing the shared data.
     """
     try:
         share = Share.get(share_id)
-        if not share:
+        if not share or share.deleted:
             raise ValueError("Share not found")
-        return share
+        shared = {
+            "exercises": [],
+            "body_measurements": [],
+            "achievements": [],
+        }
+        exercise_types = share.scope.get("exercise_types", [])
+        for exercise_type in exercise_types:
+            exercise = (
+                Exercise.get_by_user(
+                    share.sender_id,
+                    type=exercise_type,
+                )
+                .filter(
+                    Exercise.date >= share.scope.get("start_date"),
+                    Exercise.date <= share.scope.get("end_date"),
+                )
+                .all()
+            )
+            if exercise:
+                shared["exercises"].append(exercise)
+        body_measurement_types = share.scope.get("body_measurement_types", [])
+        for body_measurement_type in body_measurement_types:
+            body_measurement = (
+                BodyMeasurement.get_by_user(
+                    share.sender_id,
+                    type=body_measurement_type,
+                )
+                .filter(
+                    BodyMeasurement.date >= share.scope.get("start_date"),
+                    BodyMeasurement.date <= share.scope.get("end_date"),
+                )
+                .all()
+            )
+            if body_measurement:
+                shared["body_measurements"].append(body_measurement)
+        achievements = share.scope.get("achievements", [])
+        for achievement in achievements:
+            achievement = (
+                Achievement.get_by_user(
+                    share.sender_id,
+                    type=achievement,
+                )
+                .filter(
+                    Achievement.date >= share.scope.get("start_date"),
+                    Achievement.date <= share.scope.get("end_date"),
+                )
+                .all()
+            )
+            if achievement:
+                shared["achievements"].append(achievement)
+        return shared
     except SQLAlchemyError as e:
         raise RuntimeError(f"Error retrieving share: {str(e)}")
 

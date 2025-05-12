@@ -281,7 +281,6 @@ class Exercise(db.Model):
             db.session.query(Exercise)
             .filter_by(user_id=user_id, **kwargs)
             .order_by(Exercise.created_at.desc())
-            .all()
         )
 
 
@@ -313,7 +312,6 @@ class Achievement(db.Model):
             db.session.query(Achievement)
             .filter_by(user_id=user_id, **kwargs)
             .order_by(Achievement.achieved_at.desc())
-            .all()
         )
 
 
@@ -346,7 +344,6 @@ class BodyMeasurement(db.Model):
             db.session.query(BodyMeasurement)
             .filter_by(user_id=user_id, **kwargs)
             .order_by(BodyMeasurement.created_at.desc())
-            .all()
         )
 
 
@@ -390,6 +387,16 @@ class ScheduledExercise(db.Model):
             raise ValueError("ID cannot be empty")
         return db.session.get(ScheduledExercise, int(schedule_id))
 
+    @staticmethod
+    def delete(schedule_id: int):
+        if not schedule_id:
+            raise ValueError("ID cannot be empty")
+        schedule = db.session.get(ScheduledExercise, int(schedule_id))
+        if not schedule:
+            raise ValueError("Schedule not found")
+        db.session.delete(schedule)
+        db.session.commit()
+
 
 class Goal(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -426,6 +433,16 @@ class Goal(db.Model):
         if not goal_id:
             raise ValueError("ID cannot be empty")
         return db.session.get(Goal, int(goal_id))
+
+    @staticmethod
+    def delete(goal_id: int):
+        if not goal_id:
+            raise ValueError("ID cannot be empty")
+        goal = db.session.get(Goal, int(goal_id))
+        if not goal:
+            raise ValueError("Goal not found")
+        db.session.delete(goal)
+        db.session.commit()
 
 
 class Share(db.Model):
