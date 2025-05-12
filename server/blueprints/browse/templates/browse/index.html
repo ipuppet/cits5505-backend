@@ -9,6 +9,7 @@
 {% endblock %}
 
 {% block content %}
+    <div class="container py-5">
     <div class="modal fade" id="exerciseModal" tabindex="-1" aria-labelledby="exerciseModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -136,8 +137,9 @@
             </div>
         </div>
     </div>
-    <div class="card">
-        <div class="card-header">
+    <div class="container">
+        <div class="row">
+        <div class="card left-block col-md-5 shadow-sm border-0">
             <h5 class="card-title">Browse</h5>
             <div class="btn-group" role="group" aria-label="Browse data">
                 <input type="radio" class="btn-check" name="dataset" id="browseExercise" autocomplete="off" checked>
@@ -150,10 +152,13 @@
             <button type="button" class="btn btn-primary btn-sm" onclick="showModal()">
                 Add new data
             </button>
+            <button type="button" class="btn btn-primary btn-sm" id="toggleDiagramButton">
+                Toogle diagram
+            </button>
         </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col">
+        <div class="card right-block rb1 col-md-5 shadow-sm border-0">
+            <div>
+                <div>
                     <select class="form-select" aria-label="Data types" id="browseTableTypeSelect"
                             onchange="browseTableChange(this.value)">
                     </select>
@@ -164,7 +169,15 @@
                 <tbody id="browseTableBody"></tbody>
             </table>
         </div>
+        <div class="card right-block rb2 col-md-5 shadow-sm border-0" style="display: none;">
+            <select class="form-select" aria-label="Data types" id="browseDiagramTypeSelect"></select>
+        </div>
+        </div>
     </div>
+
+</div>
+
+
 {% endblock %}
 
 {% block js %}
@@ -188,6 +201,13 @@
         const CalorieIntakeModal = new bootstrap.Modal("#calorieIntakeModal")
         const BodyMeasurementModal = new bootstrap.Modal("#bodyMeasurementModal")
 
+
+        document.querySelector("#toggleDiagramButton").addEventListener("click",function(){
+            const rb1=document.querySelector(".rb1")
+            const rb2=document.querySelector(".rb2")
+            rb1.style.display=rb1.style.display==="none"?"block":"none"
+            rb2.style.display=rb2.style.display==="none"?"block":"none"
+        })
         /**
          * Update the exercise metrics based on the selected type.
          */

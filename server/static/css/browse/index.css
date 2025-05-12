@@ -1,0 +1,25 @@
+body{
+    background-color: #292a2c51 !important;
+}
+.main-container{
+   
+    /* gap:8%;
+    padding-left: 8%;
+    padding-right: 8%;
+    height:60vh; */
+}
+.left-block, .right-block{
+    /* flex:1; */
+    padding-right: calc(var(--bs-gutter-x)*.5);
+    padding-right:calc(var(--bs-gutter-x)*.5);
+    border-radius: 1rem;
+}
+.left-block, .btn-group{
+    display: flex;
+    flex-direction:column;
+    gap:1rem;
+    justify-content: space-around;
+}
+.r2{
+    display:none;
+}

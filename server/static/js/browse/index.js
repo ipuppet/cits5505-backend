@@ -14,13 +14,18 @@ function convertTimezone(data, key = "created_at") {
 }
 
 function updateBrowseTableOptions(options) {
-    const select = document.querySelector("#browseTableTypeSelect")
-    select.innerHTML = ""
-    for (const key in options) {
-        const opt = document.createElement("option")
-        opt.value = key
-        opt.textContent = options[key]
-        select.appendChild(opt)
+    const selectTable = document.querySelector("#browseTableTypeSelect")
+    const selectDiagram=document.querySelector("#browseDiagramTypeSelect")
+    for(const select of [selectTable,selectDiagram]){
+        if (select){
+            select.innerHTML = ""
+            for (const key in options) {
+                const opt = document.createElement("option")
+                opt.value = key
+                opt.textContent = options[key]
+                select.appendChild(opt)
+            }
+        }
     }
 }
 
