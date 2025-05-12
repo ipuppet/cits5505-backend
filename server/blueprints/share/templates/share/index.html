@@ -27,19 +27,6 @@ Share Data
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label" for="timeRange">Time Range</label>
-                            <select id="timeRange" class="form-select" name="shareDays" required>
-                                <option value="" disabled selected>Please select days</option>
-                                <option value="1">1 day</option>
-                                <option value="2">2 days</option>
-                                <option value="3">3 days</option>
-                                <option value="4">4 days</option>
-                                <option value="5">5 days</option>
-                                <option value="6">6 days</option>
-                                <option value="7">7 days</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
                             <label for="start_date" class="form-label">Start Date</label>
                             <input type="date" id="start_date" name="start_date" class="form-control" required>
                         </div>
@@ -78,7 +65,7 @@ Share Data
                             <div class="d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0">Sent Shares</h5>
                                 <button class="btn btn-circle btn-add" data-bs-toggle="modal" data-bs-target="#sentSharesModal">
-                                    <i class="bi bi-plus"></i>
+                                    <i class="bi bi-three-dots"></i>
                                 </button>
                             </div>
                             <div id="shareSent"></div>
@@ -89,7 +76,7 @@ Share Data
                             <div class="d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0">Received Shares</h5>
                                 <button class="btn btn-circle btn-add" data-bs-toggle="modal" data-bs-target="#receivedSharesModal">
-                                    <i class="bi bi-plus"></i>
+                                    <i class="bi bi-three-dots"></i>
                                 </button>
                             </div>
                             <div id="shareReceived"></div>
@@ -98,7 +85,7 @@ Share Data
                     </div>
                 </div>
             </div>
-            <!-- 新增：分享数据预览卡片 -->
+            <!-- New: Data Sharing Preview Card -->
             <div class="col-lg-12 mb-4">
                 <div class="card shadow-sm border-0" style="border-radius: 1rem;">
                     <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
@@ -108,14 +95,14 @@ Share Data
                         <table class="table table-striped" id="sharePreviewTable">
                             <thead>
                             <tr id="sharePreviewHeader">
-                                <!-- 动态插入表头 -->
+                                <!-- Dynamically insert headers -->
                             </tr>
                             </thead>
                             <tbody>
-                            <!-- 动态插入预览数据 -->
+                            <!-- Dynamically insert preview data -->
                             </tbody>
                         </table>
-                        <div id="sharePreviewEmpty" class="text-muted text-center" style="display:none;">No data to preview. Please select data type and time range.</div>
+                        <div id="sharePreviewEmpty" class="text-muted text-center" style="display:none;">No data to preview. Please select data type.</div>
                     </div>
                 </div>
             </div>
@@ -213,290 +200,566 @@ Share Data
 {% block js %}
 {{ super() }}
 <script>
-    // 将所有DOM操作和事件绑定放在DOMContentLoaded事件中
-    window.addEventListener('DOMContentLoaded', () => {
-        // Remove multi-select friends logic, only keep single select
-        // Search and render dropdown
-        document.getElementById('searchFriend').addEventListener('input', function() {
-            const username = this.value.trim();
-            const friendSelect = document.getElementById('friendacSelect');
-            friendSelect.innerHTML = '';
-            if (!username) return;
-            fetch(`/user/${encodeURIComponent(username)}`)
-                .then(res => res.json())
-                .then(res => {
-                    if (res.code === 1 && Array.isArray(res.data)) {
-                        res.data.forEach(user => {
-                            const option = document.createElement('option');
-                            option.value = user.id;
-                            option.text = user.nickname ? `${user.nickname}（${user.username}）` : user.username;
-                            friendSelect.appendChild(option);
-                        });
-                    }
-                });
-        });
-        // Remove selectedFriends and related logic
-        // Remove form submit handler for selectedFriends
+const rawData = {
+  exercise: {{ current_user.exercises_to_list() | tojson }},
+  measurement: {{ current_user.body_measurements_to_list() | tojson }},
+  calorie_intake: {{ current_user.calorie_intakes_to_list() | tojson }},
+  achievement: [
+    {% for a in current_user.achievements %}
+    {
+      "id": {{ a.id }},
+      "type": "{{ a.exercise_type }}",
+      "milestone": {{ a.milestone }},
+      "created_at": "{{ a.achieved_at.isoformat() }}"
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+};
 
-        // Fetch and render share records from backend
-        fetch('/static/share/share_records.json')
-            .then(response => response.json())
-            .then(data => {
-                const shareSent = document.getElementById('shareSent');
-                const shareReceived = document.getElementById('shareReceived');
-                shareSent.innerHTML = '';
-                shareReceived.innerHTML = '';
-                data.share_sent.forEach(record => {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <div class="card-body">
-                            <h5 class="card-title">${record.receiver_name}</h5>
-                            <p class="card-text">${record.message}</p>
-                            <button class="btn btn-danger" onclick="deleteShareRecord(${record.id})">Delete</button>
-                        </div>
-                    `;
-                    shareSent.appendChild(card);
-                });
-                data.share_received.forEach(record => {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <div class="card-body">
-                            <h5 class="card-title">${record.sender_name}</h5>
-                            <p class="card-text">${record.message}</p>
-                        </div>
-                    `;
-                    shareReceived.appendChild(card);
-                });
-                // Update share count text dynamically
-                const sentCountText = document.getElementById('sentCountText');
-                if (sentCountText) {
-                    sentCountText.textContent = `You have successfully shared ${data.share_sent.length} records.`;
-                }
-                const receivedCountText = document.getElementById('receivedCountText');
-                if (receivedCountText) {
-                    receivedCountText.textContent = `You have received ${data.share_received.length} records.`;
-                }
-            });
-
-        // Listen for modal display and load data dynamically
-        const sentModal = document.getElementById('sentSharesModal');
-        sentModal && sentModal.addEventListener('show.bs.modal', function () {
-            fetch('/static/share/share_records.json')
-                .then(response => response.json())
-                .then(data => renderSharesDetail('sent', data.share_sent));
+// Function definitions in global scope
+function deleteShareRecord(id) {
+    fetch('/share/' + id, { method: 'DELETE' })
+        .then(response => response.json())
+        .then(data => {
+            alert('Share record deleted successfully.');
+            // Reload share records
+            location.reload();
         });
-        const receivedModal = document.getElementById('receivedSharesModal');
-        receivedModal && receivedModal.addEventListener('show.bs.modal', function () {
-            fetch('/static/share/share_records.json')
-                .then(response => response.json())
-                .then(data => renderSharesDetail('received', data.share_received));
-        });
+}
 
-        // Add updateScopeHidden function and event binding
-        function updateScopeHidden() {
-            // Get date values
-            var startDate = document.getElementById('start_date').value;
-            var endDate = document.getElementById('end_date').value;
-            
-            // Get selected exercise types
-            var exerciseTypes = Array.from(document.querySelectorAll('input[name="exerciseType"]:checked'))
-                .map(checkbox => checkbox.value);
-                
-            // Get selected body measurement types
-            var bodyMeasurementTypes = Array.from(document.querySelectorAll('input[name="measurementType"]:checked'))
-                .map(checkbox => checkbox.value);
-                
-            // Get selected achievement types
-            var achievements = Array.from(document.querySelectorAll('input[name="achievementType"]:checked'))
-                .map(checkbox => checkbox.value);
-                
-            // Assemble scope object
-            var scope = {
-                exercise_types: exerciseTypes,
-                body_measurement_types: bodyMeasurementTypes,
-                achievements: achievements,
-                start_date: startDate,
-                end_date: endDate
-            };
-            
-            // Update hidden field value
-            document.getElementById('scopeHidden').value = JSON.stringify(scope);
+// 添加时区转换函数，与browse页面一致
+function convertTimezone(data, key = "created_at") {
+    if (!Array.isArray(data)) return data;
+    
+    const result = JSON.parse(JSON.stringify(data)); // 深拷贝数组
+    for (let i = 0; i < result.length; i++) {
+        if (result[i][key]) {
+            const date = new Date(result[i][key]);
+            result[i][key] = date.toLocaleString();
         }
-
-        // Add event listeners for all elements that might affect scope
-        document.getElementById('start_date').addEventListener('change', updateScopeHidden);
-        document.getElementById('end_date').addEventListener('change', updateScopeHidden);
-        
-        // Add event delegation for checkbox container
-        document.getElementById('subTypeCheckboxes').addEventListener('change', function(e) {
-            if (e.target.matches('input[type="checkbox"]')) {
-                updateScopeHidden();
-            }
-        });
-
-        // Dynamically render checkboxes
-        document.getElementById('chartType').addEventListener('change', function() {
-            var value = this.value;
-            var container = document.getElementById('subTypeCheckboxes');
-            container.innerHTML = '';
-            if (value === 'exercise') {
-                const options = ['Cycling', 'Running', 'Swimming', 'Weight Lifting', 'Yoga'];
-                options.forEach(opt => {
-                    const id = 'exercise_' + opt.replace(/\s+/g, '').toLowerCase();
-                    container.innerHTML += `<div class='form-check'><input class='form-check-input' type='checkbox' value='${opt}' id='${id}' name='exerciseType'><label class='form-check-label' for='${id}'>${opt}</label></div>`;
-                });
-            } else if (value === 'measurement') {
-                const options = ['Body Fat', 'Height', 'Weight'];
-                options.forEach(opt => {
-                    const id = 'measurement_' + opt.replace(/\s+/g, '').toLowerCase();
-                    container.innerHTML += `<div class='form-check'><input class='form-check-input' type='checkbox' value='${opt}' id='${id}' name='measurementType'><label class='form-check-label' for='${id}'>${opt}</label></div>`;
-                });
-            } else if (value === 'achievement') {
-                const options = ['Personal Best', 'Weekly Goal', 'Monthly Goal', 'Weight Loss Goal', 'Training Milestone'];
-                options.forEach(opt => {
-                    const id = 'achievement_' + opt.replace(/\s+/g, '').toLowerCase();
-                    container.innerHTML += `<div class='form-check'><input class='form-check-input' type='checkbox' value='${opt}' id='${id}' name='achievementType'><label class='form-check-label' for='${id}'>${opt}</label></div>`;
-                });
-            }
-            // Update scope immediately after checkboxes are rendered
-            setTimeout(updateScopeHidden, 0);
-        });
-
-        document.getElementById('chartType').addEventListener('change', fetchAndPreviewShareData);
-        document.getElementById('timeRange').addEventListener('change', fetchAndPreviewShareData);
-        document.getElementById('subTypeCheckboxes').addEventListener('change', fetchAndPreviewShareData);
-        
-        // Initialize preview data on page load
-        fetchAndPreviewShareData();
-        
-        // Initialize scope hidden field on page load
-        updateScopeHidden();
-    });
-
-    // Function definitions outside of DOMContentLoaded event
-    function deleteShareRecord(id) {
-        fetch('/share/' + id, { method: 'DELETE' })
-            .then(response => response.json())
-            .then(data => {
-                alert('Share record deleted successfully.');
-                // Reload share records
-                location.reload();
-            });
     }
+    return result;
+}
 
-    // Expand all Sent Shares/Received Shares
-    function renderSharesDetail(type, data) {
-        let html = '';
-        data.forEach(record => {
-            html += `<div class="card mb-2"><div class="card-body">
-                <h6 class="card-title">${type === 'sent' ? record.receiver_name : record.sender_name}</h6>
-                <p class="card-text">${record.message}</p>
-                <div class="text-muted small">${record.time || ''}</div>
-            </div></div>`;
-        });
-        document.getElementById(type === 'sent' ? 'sentSharesDetail' : 'receivedSharesDetail').innerHTML = html;
-    }
+// 保存筛选条件到sessionStorage
+function saveFilterState() {
+    const state = {
+        start_date: document.getElementById('start_date').value,
+        end_date: document.getElementById('end_date').value,
+        chartType: document.getElementById('chartType').value,
+        exerciseTypes: Array.from(document.querySelectorAll('input[name="exerciseType"]:checked')).map(i => i.value),
+        measurementTypes: Array.from(document.querySelectorAll('input[name="measurementType"]:checked')).map(i => i.value),
+        achievementTypes: Array.from(document.querySelectorAll('input[name="achievementType"]:checked')).map(i => i.value)
+    };
+    sessionStorage.setItem('shareFilterState', JSON.stringify(state));
+    console.log('Filter state saved (valid for current session):', state);
+}
 
-    // New: Dynamically render table headers and content
-    function renderSharePreviewHeader(type) {
-        const header = document.getElementById('sharePreviewHeader');
-        let columns = ['Date'];
-        if (type === 'exercise') {
-            // Default display distance/duration, special handling for weightlifting and yoga
-            const chartType = document.getElementById('chartType').value;
-            const subTypes = Array.from(document.querySelectorAll('#subTypeCheckboxes input:checked')).map(i => i.value.toLowerCase());
-            // If only one subtype is selected, render headers based on subtype, otherwise show all
-            if (subTypes.length === 1) {
-                if (['cycling', 'running', 'swimming'].includes(subTypes[0])) {
-                    columns = ['Date', 'Type', 'Distance', 'Duration'];
-                } else if (subTypes[0] === 'weight lifting') {
-                    columns = ['Date', 'Type', 'Weight', 'Sets', 'Reps'];
-                } else if (subTypes[0] === 'yoga') {
-                    columns = ['Date', 'Type', 'Duration'];
+// 从sessionStorage恢复筛选条件
+function restoreFilterState() {
+    const stateStr = sessionStorage.getItem('shareFilterState');
+    if (!stateStr) return;
+    
+    try {
+        const state = JSON.parse(stateStr);
+        console.log('Restoring filter state:', state);
+        
+        // Restore dates
+        if (state.start_date) document.getElementById('start_date').value = state.start_date;
+        if (state.end_date) document.getElementById('end_date').value = state.end_date;
+        
+        // Restore data type selection
+        if (state.chartType) {
+            const chartTypeSelect = document.getElementById('chartType');
+            chartTypeSelect.value = state.chartType;
+            
+            // Trigger change event to generate appropriate sub-type checkboxes
+            const event = new Event('change');
+            chartTypeSelect.dispatchEvent(event);
+            
+            // Wait for sub-type checkboxes to be generated before restoring selection states
+            setTimeout(() => {
+                // Restore exercise type selection
+                if (state.exerciseTypes && state.chartType === 'exercise') {
+                    state.exerciseTypes.forEach(type => {
+                        const checkbox = document.querySelector(`input[name="exerciseType"][value="${type}"]`);
+                        if (checkbox) checkbox.checked = true;
+                    });
                 }
+                
+                // Restore body measurement type selection
+                if (state.measurementTypes && state.chartType === 'measurement') {
+                    state.measurementTypes.forEach(type => {
+                        const checkbox = document.querySelector(`input[name="measurementType"][value="${type}"]`);
+                        if (checkbox) checkbox.checked = true;
+                    });
+                }
+                
+                // Restore achievement type selection
+                if (state.achievementTypes && state.chartType === 'achievement') {
+                    state.achievementTypes.forEach(type => {
+                        const checkbox = document.querySelector(`input[name="achievementType"][value="${type}"]`);
+                        if (checkbox) checkbox.checked = true;
+                    });
+                }
+                
+                // Trigger data preview update
+                fetchAndPreviewShareData();
+            }, 100);
+        }
+    } catch (e) {
+        console.error('Failed to restore filter state:', e);
+    }
+}
+
+// Expand all Sent Shares/Received Shares
+function renderSharesDetail(type, data) {
+    let html = '';
+    data.forEach(record => {
+        html += `<div class="card mb-2"><div class="card-body">
+            <h6 class="card-title">${type === 'sent' ? record.receiver_name : record.sender_name}</h6>
+            <p class="card-text">${record.message}</p>
+            <div class="text-muted small">${record.time || ''}</div>
+        </div></div>`;
+    });
+    document.getElementById(type === 'sent' ? 'sentSharesDetail' : 'receivedSharesDetail').innerHTML = html;
+}
+
+// Dynamic render table headers based on data type
+function renderSharePreviewHeader(type) {
+    const header = document.getElementById('sharePreviewHeader');
+    let columns = ['Date'];
+    if (type === 'exercise') {
+        // Get selected subtypes for specific header rendering
+        const subTypes = Array.from(document.querySelectorAll('#subTypeCheckboxes input:checked')).map(i => i.value.toLowerCase());
+        
+        // If only one subtype is selected, render headers based on subtype
+        if (subTypes.length === 1) {
+            if (['cycling', 'running', 'swimming'].includes(subTypes[0])) {
+                columns = ['Date', 'Type', 'Distance', 'Duration'];
+            } else if (subTypes[0] === 'weight lifting') {
+                columns = ['Date', 'Type', 'Weight', 'Sets', 'Reps'];
+            } else if (subTypes[0] === 'yoga') {
+                columns = ['Date', 'Type', 'Duration'];
+            }
+        } else {
+            // Show all possible fields if multiple types selected
+            columns = ['Date', 'Type', 'Distance', 'Duration', 'Weight', 'Sets', 'Reps'];
+        }
+    } else if (type === 'measurement') {
+        columns = ['Date', 'Type', 'Value'];
+    } else if (type === 'calorie') {
+        columns = ['Date', 'Calories'];
+    } else if (type === 'achievement') {
+        columns = ['Date', 'Type', 'Milestone'];
+    }
+    header.innerHTML = columns.map(col => `<th>${col}</th>`).join('');
+}
+
+// Render preview table with filtered data
+function renderSharePreviewTable(type, data) {
+    const tbody = document.querySelector('#sharePreviewTable tbody');
+    const empty = document.getElementById('sharePreviewEmpty');
+    tbody.innerHTML = '';
+    
+    // 调试：打印最终处理后的数据
+    console.log('Rendering preview table with data type:', type);
+    console.log('Data to render:', data);
+    
+    // Handle empty data case
+    if (!data || data.length === 0) {
+        empty.style.display = '';
+        return;
+    }
+    empty.style.display = 'none';
+    
+    const subTypes = Array.from(document.querySelectorAll('#subTypeCheckboxes input:checked')).map(i => i.value.toLowerCase());
+    
+    data.forEach((item) => {
+        let row = '';
+        if (type === 'exercise') {
+            let t = (item.type || '').toLowerCase();
+            if (['cycling', 'running', 'swimming'].includes(t)) {
+                // 获取距离和时长，优先使用metrics对象，但也检查根属性
+                const distance = 
+                    (item.metrics && item.metrics.distance !== undefined) ? item.metrics.distance :
+                    item.distance !== undefined ? item.distance : '-';
+                
+                const duration = 
+                    (item.metrics && item.metrics.duration !== undefined) ? item.metrics.duration :
+                    item.duration !== undefined ? item.duration : '-';
+                
+                row = `<td>${item.created_at || '-'}</td>` +
+                      `<td>${item.type || '-'}</td>` +
+                      `<td>${distance}</td>` +
+                      `<td>${duration}</td>`;
+            } else if (t === 'weight lifting') {
+                row = `<td>${item.created_at || '-'}</td>` +
+                      `<td>${item.type || '-'}</td>` +
+                      `<td>${item.metrics && item.metrics.weight !== undefined ? item.metrics.weight : '-'}</td>` +
+                      `<td>${item.metrics && item.metrics.sets !== undefined ? item.metrics.sets : '-'}</td>` +
+                      `<td>${item.metrics && item.metrics.reps !== undefined ? item.metrics.reps : '-'}</td>`;
+            } else if (t === 'yoga') {
+                row = `<td>${item.created_at || '-'}</td>` +
+                      `<td>${item.type || '-'}</td>` +
+                      `<td>${item.metrics && item.metrics.duration !== undefined ? item.metrics.duration : '-'}</td>`;
             } else {
-                columns = ['Date', 'Type', 'Distance', 'Duration', 'Weight', 'Sets', 'Reps'];
+                // Show all fields for mixed types
+                // 直接获取距离和时长，优先使用metrics对象，但也检查根属性
+                const distance = 
+                    (item.metrics && item.metrics.distance !== undefined) ? item.metrics.distance :
+                    item.distance !== undefined ? item.distance : '-';
+                
+                const duration = 
+                    (item.metrics && item.metrics.duration !== undefined) ? item.metrics.duration :
+                    item.duration !== undefined ? item.duration : '-';
+                
+                const weight = (item.metrics && item.metrics.weight !== undefined) ? item.metrics.weight : 
+                              (item.weight !== undefined ? item.weight : '-');
+                
+                const sets = (item.metrics && item.metrics.sets !== undefined) ? item.metrics.sets : 
+                            (item.sets !== undefined ? item.sets : '-');
+                
+                const reps = (item.metrics && item.metrics.reps !== undefined) ? item.metrics.reps : 
+                            (item.reps !== undefined ? item.reps : '-');
+                
+                row = `<td>${item.created_at || '-'}</td>` +
+                      `<td>${item.type || '-'}</td>` +
+                      `<td>${distance}</td>` +
+                      `<td>${duration}</td>` +
+                      `<td>${weight}</td>` +
+                      `<td>${sets}</td>` +
+                      `<td>${reps}</td>`;
             }
         } else if (type === 'measurement') {
-            columns = ['Date', 'Type', 'Value'];
+            row = `<td>${item.created_at || '-'}</td>` +
+                  `<td>${item.type || '-'}</td>` +
+                  `<td>${item.value !== undefined ? item.value : '-'}</td>`;
         } else if (type === 'calorie') {
-            columns = ['Date', 'Calories'];
+            row = `<td>${item.created_at || '-'}</td>` +
+                  `<td>${item.calories !== undefined ? item.calories : '-'}</td>`;
+        } else if (type === 'achievement') {
+            row = `<td>${item.created_at || '-'}</td>` +
+                  `<td>${item.type || '-'}</td>` +
+                  `<td>${item.milestone !== undefined ? item.milestone : '-'}</td>`;
         }
-        header.innerHTML = columns.map(col => `<th>${col}</th>`).join('');
+        tbody.innerHTML += `<tr>${row}</tr>`;
+    });
+}
+
+// Collect and update filter scope values
+function updateScopeHidden() {
+    const startDate = document.getElementById('start_date').value;
+    const endDate = document.getElementById('end_date').value;
+    const exerciseTypes = Array.from(document.querySelectorAll('input[name="exerciseType"]:checked')).map(i => i.value);
+    const bodyMeasurementTypes = Array.from(document.querySelectorAll('input[name="measurementType"]:checked')).map(i => i.value);
+    const achievements = Array.from(document.querySelectorAll('input[name="achievementType"]:checked')).map(i => i.value);
+
+    const scope = {
+        exercise_types: exerciseTypes,
+        body_measurement_types: bodyMeasurementTypes,
+        achievements: achievements,
+        start_date: startDate,
+        end_date: endDate
+    };
+    document.getElementById('scopeHidden').value = JSON.stringify(scope);
+    
+    // Save current filter conditions to sessionStorage
+    saveFilterState();
+}
+
+// Fetch data locally and apply filters
+function fetchAndPreviewShareData() {
+    updateScopeHidden();
+    const scope = JSON.parse(document.getElementById('scopeHidden').value);
+    const type = document.getElementById('chartType').value;
+    
+    // Render appropriate headers based on data type
+    renderSharePreviewHeader(type);
+    
+    // Handle empty type selection
+    if (!type) {
+        renderSharePreviewTable(type, []);
+        return;
     }
 
-    function renderSharePreviewTable(type, data) {
-        const tbody = document.querySelector('#sharePreviewTable tbody');
-        const empty = document.getElementById('sharePreviewEmpty');
-        tbody.innerHTML = '';
-        if (!data || data.length === 0) {
-            empty.style.display = '';
-            return;
-        }
-        empty.style.display = 'none';
-        const subTypes = Array.from(document.querySelectorAll('#subTypeCheckboxes input:checked')).map(i => i.value.toLowerCase());
-        data.forEach((item, idx) => {
-            let row = '';
-            if (type === 'exercise') {
-                let t = (item.type || '').toLowerCase();
-                if (['cycling', 'running', 'swimming'].includes(t)) {
-                    row = `<td>${item.created_at ? (new Date(item.created_at)).toLocaleDateString() : '-'}</td>` +
-                          `<td>${item.type || '-'}</td>` +
-                          `<td>${item.metrics && item.metrics.distance !== undefined ? item.metrics.distance : '-'}</td>` +
-                          `<td>${item.metrics && item.metrics.duration !== undefined ? item.metrics.duration : '-'}</td>`;
-                } else if (t === 'weight lifting') {
-                    row = `<td>${item.created_at ? (new Date(item.created_at)).toLocaleDateString() : '-'}</td>` +
-                          `<td>${item.type || '-'}</td>` +
-                          `<td>${item.metrics && item.metrics.weight !== undefined ? item.metrics.weight : '-'}</td>` +
-                          `<td>${item.metrics && item.metrics.sets !== undefined ? item.metrics.sets : '-'}</td>` +
-                          `<td>${item.metrics && item.metrics.reps !== undefined ? item.metrics.reps : '-'}</td>`;
-                } else if (t === 'yoga') {
-                    row = `<td>${item.created_at ? (new Date(item.created_at)).toLocaleDateString() : '-'}</td>` +
-                          `<td>${item.type || '-'}</td>` +
-                          `<td>${item.metrics && item.metrics.duration !== undefined ? item.metrics.duration : '-'}</td>`;
-                } else {
-                    // Show all fields for mixed types
-                    row = `<td>${item.created_at ? (new Date(item.created_at)).toLocaleDateString() : '-'}</td>` +
-                          `<td>${item.type || '-'}</td>` +
-                          `<td>${item.metrics && item.metrics.distance !== undefined ? item.metrics.distance : '-'}</td>` +
-                          `<td>${item.metrics && item.metrics.duration !== undefined ? item.metrics.duration : '-'}</td>` +
-                          `<td>${item.metrics && item.metrics.weight !== undefined ? item.metrics.weight : '-'}</td>` +
-                          `<td>${item.metrics && item.metrics.sets !== undefined ? item.metrics.sets : '-'}</td>` +
-                          `<td>${item.metrics && item.metrics.reps !== undefined ? item.metrics.reps : '-'}</td>`;
+    // Get raw data from the globally defined rawData
+    let list = [];
+    
+    // Map the UI type to the rawData key
+    const dataTypeMap = {
+        'exercise': 'exercise',
+        'measurement': 'measurement',
+        'calorie': 'calorie_intake',  // 修正映射
+        'achievement': 'achievement'
+    };
+    
+    // Get the correct data key
+    const dataKey = dataTypeMap[type] || type.toLowerCase().replace(' ', '_');
+    console.log('Data key for type:', type, 'is', dataKey);
+    
+    if (rawData && rawData[dataKey]) {
+        list = [...rawData[dataKey]];
+        console.log(`Found ${list.length} records for ${dataKey}`);
+    } else {
+        console.log(`No data found for key ${dataKey} in rawData:`, Object.keys(rawData));
+    }
+
+    // Process exercise metrics - ensure they're objects not strings
+    if (type === 'exercise') {
+        list = list.map(item => {
+            const newItem = {...item};
+            
+            // 初始化metrics对象（如果不存在或是undefined）
+            if (!newItem.metrics || typeof newItem.metrics === 'undefined') {
+                newItem.metrics = {};
+                
+                // 如果distance和duration作为独立属性存在于item中而不是metrics子对象中
+                if (newItem.distance !== undefined) {
+                    newItem.metrics.distance = newItem.distance;
                 }
-            } else if (type === 'measurement') {
-                row = `<td>${item.created_at ? (new Date(item.created_at)).toLocaleDateString() : '-'}</td>` +
-                      `<td>${item.type || '-'}</td>` +
-                      `<td>${item.value !== undefined ? item.value : '-'}</td>`;
-            } else if (type === 'calorie') {
-                row = `<td>${item.created_at ? (new Date(item.created_at)).toLocaleDateString() : '-'}</td>` +
-                      `<td>${item.calories !== undefined ? item.calories : '-'}</td>`;
+                
+                if (newItem.duration !== undefined) {
+                    newItem.metrics.duration = newItem.duration;
+                }
+            } else if (typeof newItem.metrics === 'string') {
+                try {
+                    // 尝试处理单引号JSON
+                    newItem.metrics = JSON.parse(newItem.metrics.replace(/'/g,'"'));
+                } catch (e) {
+                    // 尝试更激进的清理方法
+                    try {
+                        const cleanString = newItem.metrics
+                            .replace(/'/g, '"')
+                            .replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3'); // 确保键名有引号
+                        newItem.metrics = JSON.parse(cleanString);
+                    } catch (e2) {
+                        newItem.metrics = {};
+                        
+                        // 如果metrics解析失败，尝试从item根属性获取
+                        if (newItem.distance !== undefined) {
+                            newItem.metrics.distance = newItem.distance;
+                        }
+                        if (newItem.duration !== undefined) {
+                            newItem.metrics.duration = newItem.duration;
+                        }
+                    }
+                }
             }
-            tbody.innerHTML += `<tr>${row}</tr>`;
+            
+            // 在此阶段额外检查
+            // 如果metrics仍为空但有距离和时长数据在item根属性上
+            if (Object.keys(newItem.metrics).length === 0) {
+                if (newItem.distance !== undefined) {
+                    newItem.metrics.distance = newItem.distance;
+                }
+                if (newItem.duration !== undefined) {
+                    newItem.metrics.duration = newItem.duration;
+                }
+            }
+            
+            return newItem;
         });
     }
 
-    // Listen for data type, time range and subtype changes to dynamically render preview
-    function fetchAndPreviewShareData() {
-        const type = document.getElementById('chartType').value;
-        const days = document.getElementById('timeRange').value;
-        renderSharePreviewHeader(type);
-        if (!type || !days) {
-            renderSharePreviewTable(type, []);
-            return;
+    // Apply date filter if dates are specified
+    if (scope.start_date || scope.end_date) {
+        // Convert local date to UTC time, considering timezone differences
+        const sd = scope.start_date ? new Date(scope.start_date + 'T00:00:00') : new Date(0);
+        
+        // Set end date to end of day to include the entire day
+        const ed = scope.end_date ? new Date(scope.end_date + 'T23:59:59') : new Date(8640000000000000);
+        
+        list = list.filter(item => {
+            if (!item.created_at) return false;
+            const d = new Date(item.created_at);
+            return d >= sd && d <= ed;
+        });
+    }
+
+    // Apply type filters
+    if (type === 'exercise' && scope.exercise_types && scope.exercise_types.length) {
+        const exTypes = scope.exercise_types.map(v => v.toLowerCase());
+        list = list.filter(item => item.type && exTypes.includes(item.type.toLowerCase()));
+    }
+    
+    if (type === 'measurement' && scope.body_measurement_types && scope.body_measurement_types.length) {
+        const measurementTypes = scope.body_measurement_types.map(v => v.toLowerCase());
+        list = list.filter(item => item.type && measurementTypes.includes(item.type.toLowerCase()));
+    }
+    
+    if (type === 'achievement' && scope.achievements && scope.achievements.length) {
+        const achievementTypes = scope.achievements.map(v => v.toLowerCase());
+        list = list.filter(item => item.type && achievementTypes.includes(item.type.toLowerCase()));
+    }
+
+    // Apply timezone conversion - 先过滤再转换时区
+    list = convertTimezone(list);
+
+    // Render the filtered data
+    renderSharePreviewTable(type, list);
+}
+
+// Function to set default dates to today
+function setDefaultDates() {
+    const today = new Date();
+    const year = today.getFullYear();
+    // Month is 0-indexed in JS, so add 1, and ensure two digits
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    
+    const todayFormatted = `${year}-${month}-${day}`;
+    
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+    
+    // Set default values if not already set
+    if (!startDateInput.value) {
+        startDateInput.value = todayFormatted;
+    }
+    
+    if (!endDateInput.value) {
+        endDateInput.value = todayFormatted;
+    }
+    
+    // Set max attribute to limit dates to today
+    startDateInput.max = todayFormatted;
+    endDateInput.max = todayFormatted;
+    
+    // Add event listeners for date validation
+    startDateInput.addEventListener('change', function() {
+        // End date cannot be earlier than start date
+        endDateInput.min = this.value;
+        
+        // If end date is now invalid (earlier than start), update it
+        if (endDateInput.value < this.value) {
+            endDateInput.value = this.value;
         }
-        fetch(`/share/preview?type=${type}&days=${days}`)
+        
+        fetchAndPreviewShareData();
+        saveFilterState();
+    });
+    
+    endDateInput.addEventListener('change', function() {
+        // Start date cannot be later than end date
+        startDateInput.max = this.value;
+        
+        // If start date is now invalid (later than end), update it
+        if (startDateInput.value > this.value) {
+            startDateInput.value = this.value;
+        }
+        
+        fetchAndPreviewShareData();
+        saveFilterState();
+    });
+}
+
+// Wait for DOM content to load before attaching event listeners
+window.addEventListener('DOMContentLoaded', () => {
+    // Set default dates to today
+    setDefaultDates();
+    
+    // Try to restore previously saved filter state
+    restoreFilterState();
+
+    // Search friends functionality
+    document.getElementById('searchFriend').addEventListener('input', function() {
+        const username = this.value.trim();
+        const friendSelect = document.getElementById('friendacSelect');
+        friendSelect.innerHTML = '';
+        if (!username) return;
+        fetch(`/user/${encodeURIComponent(username)}`)
             .then(res => res.json())
             .then(res => {
                 if (res.code === 1 && Array.isArray(res.data)) {
-                    renderSharePreviewTable(type, res.data);
-                } else {
-                    renderSharePreviewTable(type, []);
+                    res.data.forEach(user => {
+                        const option = document.createElement('option');
+                        option.value = user.id;
+                        option.text = user.nickname ? `${user.nickname}（${user.username}）` : user.username;
+                        friendSelect.appendChild(option);
+                    });
                 }
-            })
-            .catch(() => renderSharePreviewTable(type, []));
+            });
+    });
+
+    // Initialize share record displays
+    const shareSent = document.getElementById('shareSent');
+    const shareReceived = document.getElementById('shareReceived');
+    shareSent.innerHTML = '';
+    shareReceived.innerHTML = '';
+    
+    // Initialize counter displays
+    const sentCountText = document.getElementById('sentCountText');
+    if (sentCountText) {
+        sentCountText.textContent = 'You have successfully shared 0 records.';
     }
+    const receivedCountText = document.getElementById('receivedCountText');
+    if (receivedCountText) {
+        receivedCountText.textContent = 'You have received 0 records.';
+    }
+
+    // Modal event handlers
+    const sentModal = document.getElementById('sentSharesModal');
+    sentModal && sentModal.addEventListener('show.bs.modal', function () {
+        renderSharesDetail('sent', []);
+    });
+    const receivedModal = document.getElementById('receivedSharesModal');
+    receivedModal && receivedModal.addEventListener('show.bs.modal', function () {
+        renderSharesDetail('received', []);
+    });
+
+    // Date range filter event handlers
+    document.getElementById('start_date').addEventListener('change', function() {
+        fetchAndPreviewShareData();
+        saveFilterState();
+    });
+    document.getElementById('end_date').addEventListener('change', function() {
+        fetchAndPreviewShareData();
+        saveFilterState();
+    });
+    
+    // Sub-type filter event delegation
+    document.getElementById('subTypeCheckboxes').addEventListener('change', function() {
+        fetchAndPreviewShareData();
+        saveFilterState();
+    });
+
+    // Data type selection handler - generates appropriate sub-type filters
+    document.getElementById('chartType').addEventListener('change', function() {
+        var value = this.value;
+        var container = document.getElementById('subTypeCheckboxes');
+        container.innerHTML = '';
+        
+        if (value === 'exercise') {
+            const options = ['Cycling', 'Running', 'Swimming', 'Weight Lifting', 'Yoga'];
+            options.forEach(opt => {
+                const id = 'exercise_' + opt.replace(/\s+/g, '').toLowerCase();
+                container.innerHTML += `<div class='form-check'><input class='form-check-input' type='checkbox' value='${opt}' id='${id}' name='exerciseType'><label class='form-check-label' for='${id}'>${opt}</label></div>`;
+            });
+        } else if (value === 'measurement') {
+            const options = ['Body Fat', 'Height', 'Weight'];
+            options.forEach(opt => {
+                const id = 'measurement_' + opt.replace(/\s+/g, '').toLowerCase();
+                container.innerHTML += `<div class='form-check'><input class='form-check-input' type='checkbox' value='${opt}' id='${id}' name='measurementType'><label class='form-check-label' for='${id}'>${opt}</label></div>`;
+            });
+        } else if (value === 'achievement') {
+            const options = ['Personal Best', 'Weekly Goal', 'Monthly Goal', 'Weight Loss Goal', 'Training Milestone'];
+            options.forEach(opt => {
+                const id = 'achievement_' + opt.replace(/\s+/g, '').toLowerCase();
+                container.innerHTML += `<div class='form-check'><input class='form-check-input' type='checkbox' value='${opt}' id='${id}' name='achievementType'><label class='form-check-label' for='${id}'>${opt}</label></div>`;
+            });
+        }
+        
+        // 保存数据类型选择
+        saveFilterState();
+        
+        // Update preview immediately after changing data type
+        setTimeout(fetchAndPreviewShareData, 0);
+    });
+    
+    // Initialize preview data on page load
+    updateScopeHidden();
+    fetchAndPreviewShareData();
+});
 </script>
 {% endblock %}
