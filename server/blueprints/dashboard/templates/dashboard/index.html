@@ -103,12 +103,52 @@ Dashboard
                                     </div>
                                 </div>
                                 <!-- Calendar Card END -->
+                                <div class="card mb-4 shadow-sm border-0">
+                                    <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                                        <strong>Hydration Tracker</strong>
+                                    </div>
+                                    <div class="card-body text-center">
+                                        <div style="font-size:1.2em; font-weight:bold;">
+                                            Water Drank Today:
+                                            <span id="water-amount" style="color:#007bff;">0</span> / <span
+                                                id="water-goal">2000</span>
+                                            ml
+                                        </div>
+                                        <div class="progress my-3" style="height: 24px;">
+                                            <div id="water-progress" class="progress-bar bg-info" role="progressbar"
+                                                style="width: 0%;" aria-valuenow="0" aria-valuemin="0"
+                                                aria-valuemax="2000"></div>
+                                        </div>
+                                        <button class="btn btn-outline-primary btn-sm"
+                                            onclick="addWater(250)">+250ml</button>
+                                        <button class="btn btn-outline-secondary btn-sm"
+                                            onclick="resetWater()">Reset</button>
+                                        <div class="text-muted mt-2" style="font-size:0.95em;">
+                                            Tip: Aim for at least 2 liters (2000ml).
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Mini Weather-Based Workout Suggestion Card -->
+                                <div class="card mb-4 shadow-sm border-0">
+                                    <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                                        <strong>Today's Workout Suggestion</strong>
+                                    </div>
+                                    <div class="card-body text-center" id="weather-workout-suggestion">
+                                        <div class="spinner-border text-primary" role="status"
+                                            style="width: 2rem; height: 2rem;">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <div class="mt-2 text-muted">Fetching suggestion...</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
                 <!-- Achievements Card START -->
-                <div class="col-lg-5 mb-4">
+                <div class="col-lg-5 mb-4 d-flex flex-column" style="height: 100%;">
                     <div class="row g-4">
                         <div class="col-md-12">
                             <div class="card chart-card shadow-sm border-0 mb-4">
@@ -521,7 +561,7 @@ Dashboard
         </div>
     </div>
     <!-- Exercise Log Card -->
-    <div class="card chart-card shadow-sm border-0 mb-4">
+    <div class="card chart-card shadow-sm border-0">
         <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
             <strong>Exercise Log</strong>
         </div>
@@ -1003,6 +1043,64 @@ Dashboard
         if (el) el.textContent = msg;
     });
 </script>
-
+<script>
+    function updateWaterUI() {
+        const goal = 2000;
+        const amount = parseInt(localStorage.getItem("waterAmount") || "0");
+        document.getElementById("water-amount").textContent = amount;
+        document.getElementById("water-goal").textContent = goal;
+        const percent = Math.min(100, (amount / goal) * 100);
+        const bar = document.getElementById("water-progress");
+        bar.style.width = percent + "%";
+        bar.setAttribute("aria-valuenow", amount);
+    }
+    function addWater(ml) {
+        let amount = parseInt(localStorage.getItem("waterAmount") || "0");
+        amount += ml;
+        localStorage.setItem("waterAmount", amount);
+        updateWaterUI();
+    }
+    function resetWater() {
+        localStorage.setItem("waterAmount", "0");
+        updateWaterUI();
+    }
+    document.addEventListener("DOMContentLoaded", updateWaterUI);
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Example: Use the first day in weather_forecast for today's weather
+        const weather = {{ weather_forecast| tojson
+    }};
+    let suggestion = "Stay active!";
+    if (weather && weather.length > 0) {
+        const today = weather[0];
+        const desc = today.description.toLowerCase();
+        if (desc.includes("rain") || desc.includes("storm")) {
+            suggestion = "It's wet outside. Try an indoor workout like yoga or bodyweight exercises!";
+        } else if (desc.includes("clear") || desc.includes("sunny")) {
+            suggestion = "Great weather! Go for a run, walk, or cycle outdoors.";
+        } else if (desc.includes("cloud")) {
+            suggestion = "Mild weather. A brisk walk or outdoor stretching is perfect!";
+        } else if (desc.includes("snow")) {
+            suggestion = "Snowy day! Consider an indoor HIIT or dance workout.";
+        } else {
+            suggestion = "Check the weather and choose your favorite activity!";
+        }
+    }
+    const el = document.getElementById("weather-workout-suggestion");
+    if (el) {
+        el.innerHTML = `
+            <div style="font-size:1.2em;">
+                <span style="font-size:2em;">💡</span>
+                <strong>${suggestion}</strong>
+            </div>
+            <div class="mt-2 text-muted" style="font-size:0.95em;">
+                Weather: ${weather && weather.length > 0 ? weather[0].description : "N/A"}, 
+                Temp: ${weather && weather.length > 0 ? weather[0].temp + "°C" : "N/A"}
+            </div>
+        `;
+    }
+});
+</script>
 <script data-id="cmajmm6yi000nk00bsg5t7xw1" src="https://tinychat.ai/tinychat.js" async defer></script>
 {% endblock %}
