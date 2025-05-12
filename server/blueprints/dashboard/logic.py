@@ -135,14 +135,9 @@ def add_schedule(exercise_type, scheduled_time, day_of_week, note):
 
 def delete_schedule(schedule_id):
     try:
-        db.session.delete(ScheduledExercise.get(schedule_id))
-        db.session.commit()
-    except SQLAlchemyError as e:
-        db.session.rollback()
-        raise RuntimeError(f"Error deleting schedule: {str(e)}")
+        ScheduledExercise.delete(schedule_id)
     except Exception as e:
-        db.session.rollback()
-        raise RuntimeError(f"Unexpected error: {str(e)}")
+        raise RuntimeError(f"Error deleting schedule: {str(e)}")
 
 
 def edit_schedule(schedule_id, exercise_type, scheduled_time, day_of_week, note):
@@ -182,14 +177,9 @@ def add_goal(exercise_type, metric, target_value, description):
 
 def delete_goal(goal_id):
     try:
-        db.session.delete(Goal.get(goal_id))
-        db.session.commit()
+        Goal.delete(goal_id)
     except SQLAlchemyError as e:
-        db.session.rollback()
-        raise RuntimeError(f"Error deleting goal: {str(e)}")
-    except Exception as e:
-        db.session.rollback()
-        raise RuntimeError(f"Unexpected error: {str(e)}")
+        raise Exception(f"Error deleting goal: {str(e)}")
 
 
 def edit_goal(goal_id, exercise_type, metric, target_value, description):
