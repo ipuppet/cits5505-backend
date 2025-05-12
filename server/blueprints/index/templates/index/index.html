@@ -8,11 +8,17 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index/index.css') }}"/>
 {% endblock %}
 
-
-
 {% block overlap_content %}
     <div class="big-screen">
-        <h1>Your personal sport tracker</h1>
+        <div class="row text-center">
+            <div class="col-12 slogan">
+                <h1 class="display-4 fw-bold">
+                    <i class="bi bi-speedometer2 me-2"></i>
+                    Sport Track
+                </h1>
+                <p>Your Comprehensive Fitness Companion</p>
+            </div>
+        </div>
         {% if current_user.is_authenticated %}
             <div class="start-button">
                 <button class="btn btn-light" onclick="toDashboard()">Open dashboard</button>
@@ -127,19 +133,22 @@
         </div>
         <div class="block-space"></div>
     </div>
-    <div class="footer">
+{% endblock %}
+
+{% block footer %}
+    <footer class="footer">
         <div class="footer-content">
             <div class="footer-links">
-                <a href="#">About</a>
-                <a href="#">Contact</a>
-                <a href="#">Privacy</a>
-                <a href="#">Terms</a>
+                <a href="{{ url_for('index.about') }}">About</a>
+                <a href="{{ url_for('index.contact') }}">Contact</a>
+                <a href="{{ url_for('index.privacy') }}">Privacy</a>
+                <a href="{{ url_for('index.terms') }}">Terms</a>
             </div>
             <div class="footer-copyright">
                 <p>© 2025 Your Personal Sport Tracker. All rights reserved.</p>
             </div>
         </div>
-    </div>
+    </footer>
 {% endblock %}
 
 {% block js %}

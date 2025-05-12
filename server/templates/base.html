@@ -2,30 +2,33 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>{% block title %}Sport Track{% endblock %}</title>
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}"/>
     {% block css %}{% endblock %}
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-sm fixed-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('index.index') }}">Sport Track</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+<nav class="navbar navbar-expand-sm fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('index.index') }}">Sport Track</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
                 aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav me-auto">
-                    {% if current_user.is_authenticated %}
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav me-auto">
+                {% if current_user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" aria-current="page" href="{{ url_for('dashboard.index') }}">Dashboard</a>
                     </li>
@@ -35,13 +38,26 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('share.index') }}">Share</a>
                     </li>
-                    {% endif %}
-                </ul>
-                {% if current_user.is_authenticated %}
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index.about') }}">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index.contact') }}">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index.privacy') }}">Privacy</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index.terms') }}">Terms</a>
+                    </li>
+                {% endif %}
+            </ul>
+            {% if current_user.is_authenticated %}
                 <ul class="navbar-nav d-flex">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
+                           aria-expanded="false">
                             Hello, {{ current_user.nickname }}!
                         </a>
                         <ul class="dropdown-menu dropdown-menu-sm-end">
@@ -54,12 +70,13 @@
                         </ul>
                     </li>
                 </ul>
-                {% else %}
+            {% else %}
                 <ul class="navbar-nav d-flex">
                     <li class="nav-item">
                         <div class="dropdown">
                             <button type="button" class="btn btn-outline-success dropdown-toggle"
-                                data-bs-toggle="dropdown" aria-expanded="false" id="login" data-bs-auto-close="outside">
+                                    data-bs-toggle="dropdown" aria-expanded="false" id="login"
+                                    data-bs-auto-close="outside">
                                 Login
                             </button>
                             <div class="dropdown-menu dropdown-menu-sm-end">
@@ -68,17 +85,17 @@
                                     <div class="mb-3">
                                         <label for="navLoginFormEmail" class="form-label">Email address</label>
                                         <input type="email" name="email" class="form-control" id="navLoginFormEmail"
-                                            placeholder="email@example.com">
+                                               placeholder="email@example.com">
                                     </div>
                                     <div class="mb-3">
                                         <label for="navLoginFormPassword" class="form-label">Password</label>
                                         <input type="password" name="password" class="form-control"
-                                            id="navLoginFormPassword" placeholder="Password">
+                                               id="navLoginFormPassword" placeholder="Password">
                                     </div>
                                     <div class="mb-3">
                                         <div class="form-check">
                                             <input type="checkbox" name="remember_me" class="form-check-input"
-                                                id="navLoginFormRememberMe">
+                                                   id="navLoginFormRememberMe">
                                             <label class="form-check-label" for="navLoginFormRememberMe">
                                                 Remember me
                                             </label>
@@ -95,44 +112,63 @@
                         </div>
                     </li>
                 </ul>
-                {% endif %}
-            </div>
+            {% endif %}
         </div>
-    </nav>
-
-    {% block overlap_content %}
-    <div class="container-fluid page-content">
-        {% block content %}{% endblock %}
     </div>
-    {% endblock %}
+</nav>
 
-    <!-- Flash messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <div aria-live="polite" aria-atomic="true" class="position-relative">
-        <div class="toast-container position-fixed bottom-0 end-0 p-3">
-            {% for category, message in messages %}
-            <div class="toast align-items-center text-bg-{{ category }} border-0" role="alert" aria-live="assertive"
-                aria-atomic="true">
-                <div class="d-flex">
-                    <div class="toast-body">{{ message }}</div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                        aria-label="Close"></button>
+{% block overlap_content %}
+    <main class="container-fluid page-content">
+        {% block content %}{% endblock %}
+    </main>
+{% endblock %}
+
+{% block footer %}
+    <footer class="bg-dark text-white-50 py-3 mt-auto">
+        <div class="container">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+                <div class="d-flex gap-4 mb-3 mb-md-0">
+                    <a href="{{ url_for('index.about') }}" class="link-secondary text-decoration-none">About</a>
+                    <a href="{{ url_for('index.contact') }}" class="link-secondary text-decoration-none">Contact</a>
+                    <a href="{{ url_for('index.privacy') }}" class="link-secondary text-decoration-none">Privacy</a>
+                    <a href="{{ url_for('index.terms') }}" class="link-secondary text-decoration-none">Terms</a>
+                </div>
+                <div class="text-center text-md-end">
+                    <small>© 2025 SportTracker. All rights reserved.</small>
                 </div>
             </div>
-            {% endfor %}
         </div>
-    </div>
-    <script>
-        // Automatically show all toasts
-        document.querySelectorAll(".toast").forEach(toast => {
-            new bootstrap.Toast(toast).show()
-        })
-    </script>
+    </footer>
+{% endblock %}
+
+<!-- Flash messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div aria-live="polite" aria-atomic="true" class="position-relative">
+            <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                {% for category, message in messages %}
+                    <div class="toast align-items-center text-bg-{{ category }} border-0" role="alert"
+                         aria-live="assertive"
+                         aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">{{ message }}</div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                                    aria-label="Close"></button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <script>
+            // Automatically show all toasts
+            document.querySelectorAll(".toast").forEach(toast => {
+                new bootstrap.Toast(toast).show()
+            })
+        </script>
     {% endif %}
-    {% endwith %}
-    <script src="{{ url_for('static', filename='js/base.js') }}"></script>
-    {% block js %}{% endblock %}
+{% endwith %}
+<script src="{{ url_for('static', filename='js/base.js') }}"></script>
+{% block js %}{% endblock %}
 </body>
 
 </html>

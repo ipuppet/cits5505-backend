@@ -6,7 +6,7 @@
     color: white;
 }
 
-.big-screen h1 {
+.big-screen .slogan {
     float: left;
     margin-top: max(20%, 200px);
     margin-left: 50%;
