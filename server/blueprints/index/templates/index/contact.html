@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Contact
+{% endblock %}
+
+{% block content %}
+    <div class="container py-5">
+        <div class="row mb-5 text-center">
+            <div class="col-12">
+                <h1 class="display-4 fw-bold">
+                    <i class="bi bi-chat-dots"></i>
+                    Get in Touch
+                </h1>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow">
+                    <div class="card-body p-4">
+                        <!-- address -->
+                        <div class="d-flex mb-4">
+                            <div class="me-3">
+                                <i class="bi bi-geo-alt fs-3"></i>
+                            </div>
+                            <div>
+                                <h3 class="h5">Office Address</h3>
+                                <p class="mb-0">
+                                    35 Stirling Highway<br>
+                                    Perth WA 6009 Australia
+                                </p>
+                            </div>
+                        </div>
+                        <!--phone -->
+                        <div class="d-flex mb-4">
+                            <div class="me-3">
+                                <i class="bi bi-telephone fs-3"></i>
+                            </div>
+                            <div>
+                                <h3 class="h5">Phone</h3>
+                                <p class="mb-0">
+                                    <a href="tel:+61123456789" class="text-decoration-none">
+                                        +61 123456789
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                        <!-- email -->
+                        <div class="d-flex mb-4">
+                            <div class="me-3">
+                                <i class="bi bi-envelope fs-3"></i>
+                            </div>
+                            <div>
+                                <h3 class="h5">Email</h3>
+                                <p class="mb-0">
+                                    <a href="mailto:contact@example.com" class="text-decoration-none">
+                                        contact@example.com
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                        <!-- office hours -->
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="bi bi-clock fs-3"></i>
+                            </div>
+                            <div>
+                                <h3 class="h5">Office Hours</h3>
+                                <ul class="list-unstyled">
+                                    <li>
+                                        <i class="bi bi-check2-circle text-success me-2"></i>
+                                        Mon-Fri: 9:00 AM - 5:00 PM
+                                    </li>
+                                    <li class="text-muted">
+                                        <i class="bi bi-x-circle text-danger me-2"></i>
+                                        Sat-Sun: Closed
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

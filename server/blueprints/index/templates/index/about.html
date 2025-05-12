@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}
+    About
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index/about.css') }}"/>
+{% endblock %}
+
+{% block content %}
+    <div class="container py-5">
+        <div class="row mb-5 text-center">
+            <div class="col-12">
+                <h1 class="display-4 fw-bold">
+                    <i class="bi bi-people-fill me-2"></i>
+                    Our Team
+                </h1>
+                <p class="lead">Passionate Developers from The University of Western Australia</p>
+            </div>
+        </div>
+
+        <!-- Team Members -->
+        <div class="row g-4 justify-content-center">
+            <!-- Member 1 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <img src="https://avatars.githubusercontent.com/u/37722993?v=4" alt="ipuppet"
+                             class="rounded-circle mb-3">
+                        <h3 class="card-title">ipuppet</h3>
+                        <div class="badge bg-primary mb-2">UWA Student</div>
+                        <p class="text-muted">Backend Developer</p>
+                        <div class="social-links">
+                            <a href="https://github.com/ipuppet"
+                               class="btn btn-outline-dark btn-sm"
+                               target="_blank">
+                                <i class="bi bi-github"></i> GitHub
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Member 2 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <img src="https://avatars.githubusercontent.com/u/82875755?v=4" alt="bag026"
+                             class="rounded-circle mb-3">
+                        <h3 class="card-title">bag026</h3>
+                        <div class="badge bg-primary mb-2">UWA Student</div>
+                        <p class="text-muted">Backend Developer</p>
+                        <div class="social-links">
+                            <a href="https://github.com/bag026"
+                               class="btn btn-outline-dark btn-sm"
+                               target="_blank">
+                                <i class="bi bi-github"></i> GitHub
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Member 3 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <img src="https://avatars.githubusercontent.com/u/201231629?v=4" alt="Fan-Xiaoqin"
+                             class="rounded-circle mb-3">
+                        <h3 class="card-title">Fan Xiaoqin</h3>
+                        <div class="badge bg-primary mb-2">UWA Student</div>
+                        <p class="text-muted">Frontend Developer</p>
+                        <div class="social-links">
+                            <a href="https://github.com/Fan-Xiaoqin"
+                               class="btn btn-outline-dark btn-sm"
+                               target="_blank">
+                                <i class="bi bi-github"></i> GitHub
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Member 4 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <img src="https://avatars.githubusercontent.com/u/81287715?v=4" alt="wisermonk"
+                             class="rounded-circle mb-3">
+                        <h3 class="card-title">wisermonk</h3>
+                        <div class="badge bg-primary mb-2">UWA Student</div>
+                        <p class="text-muted">Frontend Developer</p>
+                        <div class="social-links">
+                            <a href="https://github.com/wisermonk"
+                               class="btn btn-outline-dark btn-sm"
+                               target="_blank">
+                                <i class="bi bi-github"></i> GitHub
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team Story -->
+        <div class="row mt-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h2 class="mb-4">Our Story</h2>
+                        <p class="lead">
+                            As computer science students at UWA, we combined our passion for fitness
+                            and technology to create SportTrack. Through countless late-night coding
+                            sessions and collaborative problem-solving, we've built a platform that
+                            makes fitness tracking both rewarding and socially engaging.
+                        </p>
+                        <div class="mt-4">
+                            <i class="bi bi-git fs-1 text-muted me-3"></i>
+                            <i class="bi bi-code-square fs-1 text-muted me-3"></i>
+                            <i class="bi bi-cup-hot fs-1 text-muted"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
