@@ -1,11 +1,12 @@
-from flask import Blueprint, render_template, redirect, url_for, flash,request, jsonify
-from flask_login import login_required, current_user
+from flask import Blueprint, render_template, redirect, url_for, flash
+from flask_login import login_required
 from datetime import datetime
+
 from server.blueprints.browse.forms import BodyMeasurementForm
 from server.blueprints.dashboard import logic
 from server.models import ExerciseType, METRICS_REQUIREMENTS
 from server.blueprints.dashboard.forms import ScheduleExerciseForm, GoalForm
-import pytz
+
 dashboard_bp = Blueprint("dashboard", __name__, template_folder="templates")
 
 
@@ -15,14 +16,6 @@ def index():
     body_measurement_form = BodyMeasurementForm()
     schedule_form = ScheduleExerciseForm()
     goal_form = GoalForm()
-    perth = pytz.timezone("Australia/Perth")
-     # --- Fix: Make last_login UTC-aware if naive ---
-    if current_user.last_login and current_user.last_login.tzinfo is None:
-        current_user.last_login = current_user.last_login.replace(tzinfo=pytz.UTC)
-    if current_user.created_at and current_user.created_at.tzinfo is None:
-        current_user.created_at = current_user.created_at.replace(tzinfo=pytz.UTC)
-    # -----------------------------------------------
-
 
     weather_forecast = logic.fetch_weather_forecast("Perth", days=5)
     bmi, bmi_category = logic.get_bmi()
@@ -39,7 +32,6 @@ def index():
         achievements_by_type=logic.get_achievements_by_type(),
         all_achievements=logic.get_all_achievements(),
         burned_by_date=logic.get_burned_calories(),
-        perth=perth
     )
 
 
@@ -144,4 +136,3 @@ def edit_goal(id):
         return redirect(url_for("dashboard.index"))
     flash("Goal updated.", "success")
     return redirect(url_for("dashboard.index"))
-
