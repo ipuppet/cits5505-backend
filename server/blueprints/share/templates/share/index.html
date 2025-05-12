@@ -14,36 +14,43 @@ Share Data
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
+                        <label for="searchFriend" class="form-label">Search Friends</label>
                         <input type="text" id="searchFriend" class="form-control" placeholder="Search friends...">
                     </div>
                     <form id="friendShareForm" action="{{ url_for('share.create_share') }}" method="post" onsubmit="updateScopeHidden()">
                         <input type="hidden" name="csrf_token" value="">
                         <div class="mb-3">
                             <label for="friendacSelect" class="form-label">Select Friends</label>
-                            <select id="friendacSelect" class="form-select" name="receiver_id" required>
-                                <option value="" hidden>Select a friend</option>
+                            <select id="friendacSelect" class="form-select" multiple size="5">
+                                <!-- 动态插入好友选项 -->
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label for="chartType" class="form-label">Exercise Type</label>
+                            <div id="selectedFriends" class="d-flex flex-wrap gap-2"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="timeRange">Time Range</label>
+                            <select id="timeRange" class="form-select" name="shareDays" required>
+                                <option value="" disabled selected>Please select days</option>
+                                <option value="1">1 day</option>
+                                <option value="2">2 days</option>
+                                <option value="3">3 days</option>
+                                <option value="4">4 days</option>
+                                <option value="5">5 days</option>
+                                <option value="6">6 days</option>
+                                <option value="7">7 days</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="chartType" class="form-label">Data Type</label>
                             <select id="chartType" class="form-select" required>
-                                <option value="" disabled selected>Please select an exercise type</option>
-                                <option value="cycling">Cycling</option>
-                                <option value="running">Running</option>
-                                <option value="swimming">Swimming</option>
-                                <option value="weight_lifting">Weight Lifting</option>
-                                <option value="yoga">Yoga</option>
+                                <option value="" disabled selected>Please select a data type</option>
+                                <option value="exercise">Exercise</option>
+                                <option value="calorie">Calorie Intake</option>
+                                <option value="measurement">Body Measurement</option>
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Time Range</label>
-                            <div>
-                                <input type="radio" id="days7" name="shareDays" value="7" checked>
-                                <label for="days7">Last 7 days</label>
-                                <input type="radio" id="days14" name="shareDays" value="14">
-                                <label for="days14">Last 14 days</label>
-                            </div>
-                        </div>
+                        <div id="subTypeCheckboxes" class="mb-3"></div>
                         <div id="chartPreview" class="my-3"></div>
                         <input type="hidden" id="scopeHidden" name="scope" value='{"exercise_type":"","days":7,"data_type":"exercise"}'>
                         <button type="submit" class="btn btn-primary">Share Data</button>
@@ -52,20 +59,8 @@ Share Data
                 </div>
             </div>
         </div>
-        <!-- Right Column: Generate Link + Share Records -->
+        <!-- Right Column: Share Records -->
         <div class="col-lg-7 mb-4 d-flex flex-column gap-4">
-            <div class="card shadow-sm border-0" style="border-radius: 1rem;">
-                <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
-                    <h4 class="mb-0">Generate Shareable Link</h4>
-                </div>
-                <div class="card-body">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="shareLink" value="https://yourdomain.com/share/ABC123" readonly>
-                        <button class="btn btn-outline-secondary btn-copy" onclick="copyLink()">Copy</button>
-                    </div>
-                    <div class="text-muted mt-2">This link grants access to your analysis summary.</div>
-                </div>
-            </div>
             <div class="card shadow-sm border-0" style="border-radius: 1rem;">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center" style="border-radius: 1rem 1rem 0 0;">
                     <h4 class="mb-0">Share Records</h4>
@@ -134,8 +129,6 @@ Share Data
 <style>
     body {
         background: #292a2c51 !important;
-        font-size: 1.05rem;
-        font-family: 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
     }
     .card {
         border-radius: 1rem !important;
@@ -192,19 +185,12 @@ Share Data
 {% block js %}
 {{ super() }}
 <script>
-    function copyLink() {
-        const copyText = document.getElementById("shareLink");
-        copyText.select();
-        copyText.setSelectionRange(0, 99999);
-        document.execCommand("copy");
-        alert("Link copied to clipboard.");
-    }
-
-    // Add search functionality for friends
+    // 多选好友相关逻辑
+    let selectedFriends = [];
+    // 搜索并渲染下拉框
     document.getElementById('searchFriend').addEventListener('input', function() {
         const username = this.value.trim();
         const friendSelect = document.getElementById('friendacSelect');
-        // Clear dropdown box
         friendSelect.innerHTML = '';
         if (!username) return;
         fetch(`/user/${encodeURIComponent(username)}`)
@@ -212,13 +198,59 @@ Share Data
             .then(res => {
                 if (res.code === 1 && Array.isArray(res.data)) {
                     res.data.forEach(user => {
-                        const option = document.createElement('option');
-                        option.value = user.id;
-                        option.text = user.nickname ? `${user.nickname}（${user.username}）` : user.username;
-                        friendSelect.appendChild(option);
+                        // 已选的不再显示
+                        if (!selectedFriends.find(f => f.id === user.id)) {
+                            const option = document.createElement('option');
+                            option.value = user.id;
+                            option.text = user.nickname ? `${user.nickname}（${user.username}）` : user.username;
+                            friendSelect.appendChild(option);
+                        }
                     });
                 }
             });
+    });
+    // 选择好友并添加到已选区域
+    document.getElementById('friendacSelect').addEventListener('change', function() {
+        const friendSelect = this;
+        Array.from(friendSelect.selectedOptions).forEach(option => {
+            const id = option.value;
+            const name = option.text;
+            if (!selectedFriends.find(f => f.id === id)) {
+                selectedFriends.push({id, name});
+            }
+        });
+        renderSelectedFriends();
+        friendSelect.innerHTML = '';
+        document.getElementById('searchFriend').value = '';
+    });
+    // 渲染已选好友
+    function renderSelectedFriends() {
+        const container = document.getElementById('selectedFriends');
+        container.innerHTML = '';
+        selectedFriends.forEach(friend => {
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-primary d-flex align-items-center';
+            badge.style.padding = '0.5em 1em';
+            badge.style.fontSize = '1em';
+            badge.innerHTML = `${friend.name} <button type="button" class="btn-close btn-close-white ms-2" aria-label="Remove" style="font-size:0.8em"></button>`;
+            badge.querySelector('button').onclick = function() {
+                selectedFriends = selectedFriends.filter(f => f.id !== friend.id);
+                renderSelectedFriends();
+            };
+            container.appendChild(badge);
+        });
+    }
+    // 提交时收集所有已选好友ID
+    document.getElementById('friendShareForm').addEventListener('submit', function(e) {
+        // 移除已有的hidden
+        document.querySelectorAll('input[name="receiver_id"]').forEach(el => el.remove());
+        selectedFriends.forEach(friend => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'receiver_id';
+            input.value = friend.id;
+            this.appendChild(input);
+        });
     });
 
     // Fetch and render share records from backend
@@ -303,14 +335,31 @@ Share Data
     // Add updateScopeHidden function and event binding
     function updateScopeHidden() {
         var chartType = document.getElementById('chartType').value;
-        var days = document.querySelector('input[name="shareDays"]:checked').value;
+        var days = document.getElementById('timeRange').value;
         var scope = { exercise_type: chartType, days: Number(days), data_type: 'exercise' };
         document.getElementById('scopeHidden').value = JSON.stringify(scope);
     }
     document.getElementById('chartType').addEventListener('change', updateScopeHidden);
-    var radios = document.querySelectorAll('input[name="shareDays"]');
-    radios.forEach(function(radio) {
-        radio.addEventListener('change', updateScopeHidden);
+    document.getElementById('timeRange').addEventListener('change', updateScopeHidden);
+
+    // 动态渲染复选框
+    document.getElementById('chartType').addEventListener('change', function() {
+        var value = this.value;
+        var container = document.getElementById('subTypeCheckboxes');
+        container.innerHTML = '';
+        if (value === 'exercise') {
+            const options = ['Cycling', 'Running', 'Swimming', 'Weight Lifting', 'Yoga'];
+            options.forEach(opt => {
+                const id = 'exercise_' + opt.replace(/\s+/g, '').toLowerCase();
+                container.innerHTML += `<div class='form-check'><input class='form-check-input' type='checkbox' value='${opt}' id='${id}' name='exerciseType'><label class='form-check-label' for='${id}'>${opt}</label></div>`;
+            });
+        } else if (value === 'measurement') {
+            const options = ['Body Fat', 'Height', 'Weight'];
+            options.forEach(opt => {
+                const id = 'measurement_' + opt.replace(/\s+/g, '').toLowerCase();
+                container.innerHTML += `<div class='form-check'><input class='form-check-input' type='checkbox' value='${opt}' id='${id}' name='measurementType'><label class='form-check-label' for='${id}'>${opt}</label></div>`;
+            });
+        }
     });
 </script>
 {% endblock %}
