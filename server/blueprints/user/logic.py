@@ -1,4 +1,5 @@
 import os
+import datetime
 from werkzeug.datastructures import FileStorage
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.utils import secure_filename
@@ -13,7 +14,7 @@ def login(email: str, password: str, remember_me: bool) -> User:
     if user and user.check_password(password):
         try:
             # Update the last login time
-            user.last_login = db.func.now()
+            user.last_login = datetime.datetime.now(datetime.UTC)
             db.session.commit()
             login_user(user, remember=remember_me)
         except SQLAlchemyError as e:

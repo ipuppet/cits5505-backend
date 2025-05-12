@@ -62,16 +62,11 @@ Dashboard
                                     </div>
                                     <div class="row mb-2">
                                         <div class="col-5 text-muted"><strong>Created At:</strong></div>
-                                        <div class="col-7">
-                                            {{ current_user.created_at.astimezone(perth).strftime('%Y-%m-%d %H:%M') if
-                                            current_user.created_at else 'N/A' }}
-                                        </div>
+                                        <div class="col-7" id="createdAt"></div>
                                     </div>
                                     <div class="row mb-2">
                                         <div class="col-5 text-muted"><strong>Last Login:</strong></div>
-                                        <div class="col-7">
-                                            {{ current_user.last_login.astimezone(perth).strftime('%Y-%m-%d %H:%M') }}
-                                        </div>
+                                        <div class="col-7" id="lastLogin"></div>
                                     </div>
                                 </div>
                                 <!-- Weather Forecast Card START -->
@@ -613,6 +608,37 @@ Dashboard
         if (this.files.length > 0) {
             document.getElementById("avatar-form").submit()
         }
+    })
+    document.addEventListener("DOMContentLoaded", function () {
+        const lastLogin = new Date('{{ current_user.last_login }}' + 'Z')
+        const today = new Date();
+        let lastLoginString;
+        if (
+            lastLogin.getDate() === today.getDate() &&
+            lastLogin.getMonth() === today.getMonth() &&
+            lastLogin.getFullYear() === today.getFullYear()
+        ) {
+            lastLoginString = 'Today, ' + lastLogin.toLocaleTimeString([],
+                {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                }
+            );
+        } else {
+            lastLoginString = lastLogin.toLocaleString([], {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            });
+        }
+        document.getElementById('lastLogin').textContent = lastLoginString
+
+        const createdAt = new Date('{{ current_user.created_at }}' + 'Z')
+        document.getElementById('createdAt').textContent = createdAt.toLocaleDateString()
     })
     document.addEventListener("DOMContentLoaded", function () {
         const greetingLine = document.getElementById("greeting-line")
