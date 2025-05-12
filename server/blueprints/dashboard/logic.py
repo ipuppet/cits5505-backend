@@ -179,7 +179,7 @@ def delete_goal(goal_id):
     try:
         Goal.delete(goal_id)
     except SQLAlchemyError as e:
-        raise Exception(f"Error deleting goal: {str(e)}")
+        raise RuntimeError(f"Error deleting goal: {str(e)}")
 
 
 def edit_goal(goal_id, exercise_type, metric, target_value, description):
