@@ -227,11 +227,11 @@ function deleteShareRecord(id) {
         });
 }
 
-// 添加时区转换函数，与browse页面一致
+// Add timezone conversion function, consistent with browse page
 function convertTimezone(data, key = "created_at") {
     if (!Array.isArray(data)) return data;
     
-    const result = JSON.parse(JSON.stringify(data)); // 深拷贝数组
+    const result = JSON.parse(JSON.stringify(data)); // Deep copy of the array
     for (let i = 0; i < result.length; i++) {
         if (result[i][key]) {
             const date = new Date(result[i][key]);
@@ -241,7 +241,7 @@ function convertTimezone(data, key = "created_at") {
     return result;
 }
 
-// 保存筛选条件到sessionStorage
+// Save filter conditions to sessionStorage
 function saveFilterState() {
     const state = {
         start_date: document.getElementById('start_date').value,
@@ -255,7 +255,7 @@ function saveFilterState() {
     console.log('Filter state saved (valid for current session):', state);
 }
 
-// 从sessionStorage恢复筛选条件
+// Restore filter conditions from sessionStorage
 function restoreFilterState() {
     const stateStr = sessionStorage.getItem('shareFilterState');
     if (!stateStr) return;
@@ -362,7 +362,7 @@ function renderSharePreviewTable(type, data) {
     const empty = document.getElementById('sharePreviewEmpty');
     tbody.innerHTML = '';
     
-    // 调试：打印最终处理后的数据
+    // Debug: Print final processed data
     console.log('Rendering preview table with data type:', type);
     console.log('Data to render:', data);
     
@@ -380,7 +380,7 @@ function renderSharePreviewTable(type, data) {
         if (type === 'exercise') {
             let t = (item.type || '').toLowerCase();
             if (['cycling', 'running', 'swimming'].includes(t)) {
-                // 获取距离和时长，优先使用metrics对象，但也检查根属性
+                // Get distance and duration, prioritize metrics object but also check root properties
                 const distance = 
                     (item.metrics && item.metrics.distance !== undefined) ? item.metrics.distance :
                     item.distance !== undefined ? item.distance : '-';
@@ -404,8 +404,7 @@ function renderSharePreviewTable(type, data) {
                       `<td>${item.type || '-'}</td>` +
                       `<td>${item.metrics && item.metrics.duration !== undefined ? item.metrics.duration : '-'}</td>`;
             } else {
-                // Show all fields for mixed types
-                // 直接获取距离和时长，优先使用metrics对象，但也检查根属性
+                // Directly get distance and duration, prioritize metrics object but also check root properties
                 const distance = 
                     (item.metrics && item.metrics.distance !== undefined) ? item.metrics.distance :
                     item.distance !== undefined ? item.distance : '-';
@@ -490,7 +489,7 @@ function fetchAndPreviewShareData() {
     const dataTypeMap = {
         'exercise': 'exercise',
         'measurement': 'measurement',
-        'calorie': 'calorie_intake',  // 修正映射
+        'calorie': 'calorie_intake',  // Fix mapping
         'achievement': 'achievement'
     };
     
@@ -510,11 +509,11 @@ function fetchAndPreviewShareData() {
         list = list.map(item => {
             const newItem = {...item};
             
-            // 初始化metrics对象（如果不存在或是undefined）
+            // Initialize metrics object (if it doesn't exist or is undefined)
             if (!newItem.metrics || typeof newItem.metrics === 'undefined') {
                 newItem.metrics = {};
                 
-                // 如果distance和duration作为独立属性存在于item中而不是metrics子对象中
+                // If distance and duration exist as independent properties in the item rather than in metrics subobject
                 if (newItem.distance !== undefined) {
                     newItem.metrics.distance = newItem.distance;
                 }
@@ -524,19 +523,19 @@ function fetchAndPreviewShareData() {
                 }
             } else if (typeof newItem.metrics === 'string') {
                 try {
-                    // 尝试处理单引号JSON
+                    // Try to parse single-quote JSON
                     newItem.metrics = JSON.parse(newItem.metrics.replace(/'/g,'"'));
                 } catch (e) {
-                    // 尝试更激进的清理方法
+                    // Try more aggressive cleaning method
                     try {
                         const cleanString = newItem.metrics
                             .replace(/'/g, '"')
-                            .replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3'); // 确保键名有引号
+                            .replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3'); // Ensure key names have quotes
                         newItem.metrics = JSON.parse(cleanString);
                     } catch (e2) {
                         newItem.metrics = {};
                         
-                        // 如果metrics解析失败，尝试从item根属性获取
+                        // If metrics parsing fails, try to get from item root properties
                         if (newItem.distance !== undefined) {
                             newItem.metrics.distance = newItem.distance;
                         }
@@ -547,8 +546,8 @@ function fetchAndPreviewShareData() {
                 }
             }
             
-            // 在此阶段额外检查
-            // 如果metrics仍为空但有距离和时长数据在item根属性上
+            // Additional check at this stage
+            // If metrics is still empty but distance and duration data exist on item root properties
             if (Object.keys(newItem.metrics).length === 0) {
                 if (newItem.distance !== undefined) {
                     newItem.metrics.distance = newItem.distance;
@@ -593,7 +592,7 @@ function fetchAndPreviewShareData() {
         list = list.filter(item => item.type && achievementTypes.includes(item.type.toLowerCase()));
     }
 
-    // Apply timezone conversion - 先过滤再转换时区
+    // Apply timezone conversion - filter first then convert timezone
     list = convertTimezone(list);
 
     // Render the filtered data
@@ -750,7 +749,7 @@ window.addEventListener('DOMContentLoaded', () => {
             });
         }
         
-        // 保存数据类型选择
+        // Save data type selection
         saveFilterState();
         
         // Update preview immediately after changing data type
