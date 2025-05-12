@@ -356,3 +356,15 @@ body {
     font-weight: 600;
     opacity: 0.5;
 }
+
+.bmi-bar-container {
+    width: 100%;
+    overflow: hidden;
+}
+
+.bmi-bar-container canvas {
+    width: 100% !important;
+    height: 48px !important;
+    max-width: 100%;
+    display: block;
+}
