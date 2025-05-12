@@ -25,34 +25,46 @@ def get_shared(share_id: uuid.UUID) -> dict[str, list]:
         }
         exercise_types = share.scope.get("exercise_types", [])
         for exercise_type in exercise_types:
-            exercise = Exercise.get_by_user(
-                share.sender_id,
-                type=exercise_type,
-            ).filter(
-                Exercise.date >= share.scope.get("start_date"),
-                Exercise.date <= share.scope.get("end_date"),
+            exercise = (
+                Exercise.get_by_user(
+                    share.sender_id,
+                    type=exercise_type,
+                )
+                .filter(
+                    Exercise.date >= share.scope.get("start_date"),
+                    Exercise.date <= share.scope.get("end_date"),
+                )
+                .all()
             )
             if exercise:
                 shared["exercises"].append(exercise)
         body_measurement_types = share.scope.get("body_measurement_types", [])
         for body_measurement_type in body_measurement_types:
-            body_measurement = BodyMeasurement.get_by_user(
-                share.sender_id,
-                type=body_measurement_type,
-            ).filter(
-                BodyMeasurement.date >= share.scope.get("start_date"),
-                BodyMeasurement.date <= share.scope.get("end_date"),
+            body_measurement = (
+                BodyMeasurement.get_by_user(
+                    share.sender_id,
+                    type=body_measurement_type,
+                )
+                .filter(
+                    BodyMeasurement.date >= share.scope.get("start_date"),
+                    BodyMeasurement.date <= share.scope.get("end_date"),
+                )
+                .all()
             )
             if body_measurement:
                 shared["body_measurements"].append(body_measurement)
         achievements = share.scope.get("achievements", [])
         for achievement in achievements:
-            achievement = Achievement.get_by_user(
-                share.sender_id,
-                type=achievement,
-            ).filter(
-                Achievement.date >= share.scope.get("start_date"),
-                Achievement.date <= share.scope.get("end_date"),
+            achievement = (
+                Achievement.get_by_user(
+                    share.sender_id,
+                    type=achievement,
+                )
+                .filter(
+                    Achievement.date >= share.scope.get("start_date"),
+                    Achievement.date <= share.scope.get("end_date"),
+                )
+                .all()
             )
             if achievement:
                 shared["achievements"].append(achievement)
