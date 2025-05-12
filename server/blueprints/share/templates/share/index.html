@@ -19,7 +19,7 @@ Share Data
                         <input type="text" id="searchFriend" class="form-control" placeholder="Search friends...">
                     </div>
                     <form id="friendShareForm" action="{{ url_for('share.create_share') }}" method="post" onsubmit="updateScopeHidden()">
-                        <input type="hidden" name="csrf_token" value="">
+                        {{ form.hidden_tag() }}
                         <div class="mb-3">
                             <label for="friendacSelect" class="form-label">Select Friend</label>
                             <select id="friendacSelect" class="form-select" name="receiver_id" size="5">
@@ -40,17 +40,26 @@ Share Data
                             </select>
                         </div>
                         <div class="mb-3">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" id="start_date" name="start_date" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="end_date" class="form-label">End Date</label>
+                            <input type="date" id="end_date" name="end_date" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
                             <label for="chartType" class="form-label">Data Type</label>
                             <select id="chartType" class="form-select" required>
                                 <option value="" disabled selected>Please select a data type</option>
                                 <option value="exercise">Exercise</option>
                                 <option value="calorie">Calorie Intake</option>
                                 <option value="measurement">Body Measurement</option>
+                                <option value="achievement">Achievement</option>
                             </select>
                         </div>
                         <div id="subTypeCheckboxes" class="mb-3"></div>
                         <div id="chartPreview" class="my-3"></div>
-                        <input type="hidden" id="scopeHidden" name="scope" value='{"exercise_type":"","days":7,"data_type":"exercise"}'>
+                        <input type="hidden" id="scopeHidden" name="scope" value='{"exercise_types":[],"body_measurement_types":[],"achievements":[],"start_date":"","end_date":""}'>
                         <button type="submit" class="btn btn-primary">Share Data</button>
                     </form>
                     <div id="sendStatus" class="mt-3 text-success" style="display:none;">Data shared successfully with selected friends.</div>
@@ -204,71 +213,169 @@ Share Data
 {% block js %}
 {{ super() }}
 <script>
-    // Remove multi-select friends logic, only keep single select
-    // Search and render dropdown
-    document.getElementById('searchFriend').addEventListener('input', function() {
-        const username = this.value.trim();
-        const friendSelect = document.getElementById('friendacSelect');
-        friendSelect.innerHTML = '';
-        if (!username) return;
-        fetch(`/user/${encodeURIComponent(username)}`)
-            .then(res => res.json())
-            .then(res => {
-                if (res.code === 1 && Array.isArray(res.data)) {
-                    res.data.forEach(user => {
-                        const option = document.createElement('option');
-                        option.value = user.id;
-                        option.text = user.nickname ? `${user.nickname}（${user.username}）` : user.username;
-                        friendSelect.appendChild(option);
-                    });
+    // 将所有DOM操作和事件绑定放在DOMContentLoaded事件中
+    window.addEventListener('DOMContentLoaded', () => {
+        // Remove multi-select friends logic, only keep single select
+        // Search and render dropdown
+        document.getElementById('searchFriend').addEventListener('input', function() {
+            const username = this.value.trim();
+            const friendSelect = document.getElementById('friendacSelect');
+            friendSelect.innerHTML = '';
+            if (!username) return;
+            fetch(`/user/${encodeURIComponent(username)}`)
+                .then(res => res.json())
+                .then(res => {
+                    if (res.code === 1 && Array.isArray(res.data)) {
+                        res.data.forEach(user => {
+                            const option = document.createElement('option');
+                            option.value = user.id;
+                            option.text = user.nickname ? `${user.nickname}（${user.username}）` : user.username;
+                            friendSelect.appendChild(option);
+                        });
+                    }
+                });
+        });
+        // Remove selectedFriends and related logic
+        // Remove form submit handler for selectedFriends
+
+        // Fetch and render share records from backend
+        fetch('/static/share/share_records.json')
+            .then(response => response.json())
+            .then(data => {
+                const shareSent = document.getElementById('shareSent');
+                const shareReceived = document.getElementById('shareReceived');
+                shareSent.innerHTML = '';
+                shareReceived.innerHTML = '';
+                data.share_sent.forEach(record => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div class="card-body">
+                            <h5 class="card-title">${record.receiver_name}</h5>
+                            <p class="card-text">${record.message}</p>
+                            <button class="btn btn-danger" onclick="deleteShareRecord(${record.id})">Delete</button>
+                        </div>
+                    `;
+                    shareSent.appendChild(card);
+                });
+                data.share_received.forEach(record => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div class="card-body">
+                            <h5 class="card-title">${record.sender_name}</h5>
+                            <p class="card-text">${record.message}</p>
+                        </div>
+                    `;
+                    shareReceived.appendChild(card);
+                });
+                // Update share count text dynamically
+                const sentCountText = document.getElementById('sentCountText');
+                if (sentCountText) {
+                    sentCountText.textContent = `You have successfully shared ${data.share_sent.length} records.`;
+                }
+                const receivedCountText = document.getElementById('receivedCountText');
+                if (receivedCountText) {
+                    receivedCountText.textContent = `You have received ${data.share_received.length} records.`;
                 }
             });
-    });
-    // Remove selectedFriends and related logic
-    // Remove form submit handler for selectedFriends
 
-    // Fetch and render share records from backend
-    fetch('/static/share/share_records.json')
-        .then(response => response.json())
-        .then(data => {
-            const shareSent = document.getElementById('shareSent');
-            const shareReceived = document.getElementById('shareReceived');
-            shareSent.innerHTML = '';
-            shareReceived.innerHTML = '';
-            data.share_sent.forEach(record => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <div class="card-body">
-                        <h5 class="card-title">${record.receiver_name}</h5>
-                        <p class="card-text">${record.message}</p>
-                        <button class="btn btn-danger" onclick="deleteShareRecord(${record.id})">Delete</button>
-                    </div>
-                `;
-                shareSent.appendChild(card);
-            });
-            data.share_received.forEach(record => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <div class="card-body">
-                        <h5 class="card-title">${record.sender_name}</h5>
-                        <p class="card-text">${record.message}</p>
-                    </div>
-                `;
-                shareReceived.appendChild(card);
-            });
-            // Update share count text dynamically
-            const sentCountText = document.getElementById('sentCountText');
-            if (sentCountText) {
-                sentCountText.textContent = `You have successfully shared ${data.share_sent.length} records.`;
-            }
-            const receivedCountText = document.getElementById('receivedCountText');
-            if (receivedCountText) {
-                receivedCountText.textContent = `You have received ${data.share_received.length} records.`;
+        // Listen for modal display and load data dynamically
+        const sentModal = document.getElementById('sentSharesModal');
+        sentModal && sentModal.addEventListener('show.bs.modal', function () {
+            fetch('/static/share/share_records.json')
+                .then(response => response.json())
+                .then(data => renderSharesDetail('sent', data.share_sent));
+        });
+        const receivedModal = document.getElementById('receivedSharesModal');
+        receivedModal && receivedModal.addEventListener('show.bs.modal', function () {
+            fetch('/static/share/share_records.json')
+                .then(response => response.json())
+                .then(data => renderSharesDetail('received', data.share_received));
+        });
+
+        // Add updateScopeHidden function and event binding
+        function updateScopeHidden() {
+            // Get date values
+            var startDate = document.getElementById('start_date').value;
+            var endDate = document.getElementById('end_date').value;
+            
+            // Get selected exercise types
+            var exerciseTypes = Array.from(document.querySelectorAll('input[name="exerciseType"]:checked'))
+                .map(checkbox => checkbox.value);
+                
+            // Get selected body measurement types
+            var bodyMeasurementTypes = Array.from(document.querySelectorAll('input[name="measurementType"]:checked'))
+                .map(checkbox => checkbox.value);
+                
+            // Get selected achievement types
+            var achievements = Array.from(document.querySelectorAll('input[name="achievementType"]:checked'))
+                .map(checkbox => checkbox.value);
+                
+            // Assemble scope object
+            var scope = {
+                exercise_types: exerciseTypes,
+                body_measurement_types: bodyMeasurementTypes,
+                achievements: achievements,
+                start_date: startDate,
+                end_date: endDate
+            };
+            
+            // Update hidden field value
+            document.getElementById('scopeHidden').value = JSON.stringify(scope);
+        }
+
+        // Add event listeners for all elements that might affect scope
+        document.getElementById('start_date').addEventListener('change', updateScopeHidden);
+        document.getElementById('end_date').addEventListener('change', updateScopeHidden);
+        
+        // Add event delegation for checkbox container
+        document.getElementById('subTypeCheckboxes').addEventListener('change', function(e) {
+            if (e.target.matches('input[type="checkbox"]')) {
+                updateScopeHidden();
             }
         });
 
+        // Dynamically render checkboxes
+        document.getElementById('chartType').addEventListener('change', function() {
+            var value = this.value;
+            var container = document.getElementById('subTypeCheckboxes');
+            container.innerHTML = '';
+            if (value === 'exercise') {
+                const options = ['Cycling', 'Running', 'Swimming', 'Weight Lifting', 'Yoga'];
+                options.forEach(opt => {
+                    const id = 'exercise_' + opt.replace(/\s+/g, '').toLowerCase();
+                    container.innerHTML += `<div class='form-check'><input class='form-check-input' type='checkbox' value='${opt}' id='${id}' name='exerciseType'><label class='form-check-label' for='${id}'>${opt}</label></div>`;
+                });
+            } else if (value === 'measurement') {
+                const options = ['Body Fat', 'Height', 'Weight'];
+                options.forEach(opt => {
+                    const id = 'measurement_' + opt.replace(/\s+/g, '').toLowerCase();
+                    container.innerHTML += `<div class='form-check'><input class='form-check-input' type='checkbox' value='${opt}' id='${id}' name='measurementType'><label class='form-check-label' for='${id}'>${opt}</label></div>`;
+                });
+            } else if (value === 'achievement') {
+                const options = ['Personal Best', 'Weekly Goal', 'Monthly Goal', 'Weight Loss Goal', 'Training Milestone'];
+                options.forEach(opt => {
+                    const id = 'achievement_' + opt.replace(/\s+/g, '').toLowerCase();
+                    container.innerHTML += `<div class='form-check'><input class='form-check-input' type='checkbox' value='${opt}' id='${id}' name='achievementType'><label class='form-check-label' for='${id}'>${opt}</label></div>`;
+                });
+            }
+            // Update scope immediately after checkboxes are rendered
+            setTimeout(updateScopeHidden, 0);
+        });
+
+        document.getElementById('chartType').addEventListener('change', fetchAndPreviewShareData);
+        document.getElementById('timeRange').addEventListener('change', fetchAndPreviewShareData);
+        document.getElementById('subTypeCheckboxes').addEventListener('change', fetchAndPreviewShareData);
+        
+        // Initialize preview data on page load
+        fetchAndPreviewShareData();
+        
+        // Initialize scope hidden field on page load
+        updateScopeHidden();
+    });
+
+    // Function definitions outside of DOMContentLoaded event
     function deleteShareRecord(id) {
         fetch('/share/' + id, { method: 'DELETE' })
             .then(response => response.json())
@@ -292,59 +399,15 @@ Share Data
         document.getElementById(type === 'sent' ? 'sentSharesDetail' : 'receivedSharesDetail').innerHTML = html;
     }
 
-    // Listen for modal display and load data dynamically
-    const sentModal = document.getElementById('sentSharesModal');
-    sentModal && sentModal.addEventListener('show.bs.modal', function () {
-        fetch('/static/share/share_records.json')
-            .then(response => response.json())
-            .then(data => renderSharesDetail('sent', data.share_sent));
-    });
-    const receivedModal = document.getElementById('receivedSharesModal');
-    receivedModal && receivedModal.addEventListener('show.bs.modal', function () {
-        fetch('/static/share/share_records.json')
-            .then(response => response.json())
-            .then(data => renderSharesDetail('received', data.share_received));
-    });
-
-    // Add updateScopeHidden function and event binding
-    function updateScopeHidden() {
-        var chartType = document.getElementById('chartType').value;
-        var days = document.getElementById('timeRange').value;
-        var scope = { exercise_type: chartType, days: Number(days), data_type: 'exercise' };
-        document.getElementById('scopeHidden').value = JSON.stringify(scope);
-    }
-    document.getElementById('chartType').addEventListener('change', updateScopeHidden);
-    document.getElementById('timeRange').addEventListener('change', updateScopeHidden);
-
-    // Dynamically render checkboxes
-    document.getElementById('chartType').addEventListener('change', function() {
-        var value = this.value;
-        var container = document.getElementById('subTypeCheckboxes');
-        container.innerHTML = '';
-        if (value === 'exercise') {
-            const options = ['Cycling', 'Running', 'Swimming', 'Weight Lifting', 'Yoga'];
-            options.forEach(opt => {
-                const id = 'exercise_' + opt.replace(/\s+/g, '').toLowerCase();
-                container.innerHTML += `<div class='form-check'><input class='form-check-input' type='checkbox' value='${opt}' id='${id}' name='exerciseType'><label class='form-check-label' for='${id}'>${opt}</label></div>`;
-            });
-        } else if (value === 'measurement') {
-            const options = ['Body Fat', 'Height', 'Weight'];
-            options.forEach(opt => {
-                const id = 'measurement_' + opt.replace(/\s+/g, '').toLowerCase();
-                container.innerHTML += `<div class='form-check'><input class='form-check-input' type='checkbox' value='${opt}' id='${id}' name='measurementType'><label class='form-check-label' for='${id}'>${opt}</label></div>`;
-            });
-        }
-    });
-
-    // 新增：动态渲染表头和表格内容
+    // New: Dynamically render table headers and content
     function renderSharePreviewHeader(type) {
         const header = document.getElementById('sharePreviewHeader');
         let columns = ['Date'];
         if (type === 'exercise') {
-            // 默认显示distance/duration，weightlifting和yoga特殊处理
+            // Default display distance/duration, special handling for weightlifting and yoga
             const chartType = document.getElementById('chartType').value;
             const subTypes = Array.from(document.querySelectorAll('#subTypeCheckboxes input:checked')).map(i => i.value.toLowerCase());
-            // 如果只选了一个子类型，按子类型渲染表头，否则显示全部
+            // If only one subtype is selected, render headers based on subtype, otherwise show all
             if (subTypes.length === 1) {
                 if (['cycling', 'running', 'swimming'].includes(subTypes[0])) {
                     columns = ['Date', 'Type', 'Distance', 'Duration'];
@@ -363,6 +426,7 @@ Share Data
         }
         header.innerHTML = columns.map(col => `<th>${col}</th>`).join('');
     }
+
     function renderSharePreviewTable(type, data) {
         const tbody = document.querySelector('#sharePreviewTable tbody');
         const empty = document.getElementById('sharePreviewEmpty');
@@ -393,7 +457,7 @@ Share Data
                           `<td>${item.type || '-'}</td>` +
                           `<td>${item.metrics && item.metrics.duration !== undefined ? item.metrics.duration : '-'}</td>`;
                 } else {
-                    // 多类型混合时显示所有字段
+                    // Show all fields for mixed types
                     row = `<td>${item.created_at ? (new Date(item.created_at)).toLocaleDateString() : '-'}</td>` +
                           `<td>${item.type || '-'}</td>` +
                           `<td>${item.metrics && item.metrics.distance !== undefined ? item.metrics.distance : '-'}</td>` +
@@ -413,7 +477,8 @@ Share Data
             tbody.innerHTML += `<tr>${row}</tr>`;
         });
     }
-    // 监听数据类型、时间范围和子类型变化，动态渲染预览
+
+    // Listen for data type, time range and subtype changes to dynamically render preview
     function fetchAndPreviewShareData() {
         const type = document.getElementById('chartType').value;
         const days = document.getElementById('timeRange').value;
@@ -433,10 +498,5 @@ Share Data
             })
             .catch(() => renderSharePreviewTable(type, []));
     }
-    document.getElementById('chartType').addEventListener('change', fetchAndPreviewShareData);
-    document.getElementById('timeRange').addEventListener('change', fetchAndPreviewShareData);
-    document.getElementById('subTypeCheckboxes').addEventListener('change', fetchAndPreviewShareData);
-    // 页面加载时初始化
-    fetchAndPreviewShareData();
 </script>
 {% endblock %}
