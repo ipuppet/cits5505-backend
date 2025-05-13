@@ -164,6 +164,9 @@
         const ExercisesMetrics = {{ exercise_metrics | tojson }}
         const ExercisesTypes = {{ exercise_types | tojson }}
         const BodyMeasurementTypes = {{ body_measurement_types | tojson }}
+
+        const Shared = {{ current_user.shares_sent | tojson }}
+        const Received = {{ current_user.shares_received | tojson }}
     </script>
     <script src="{{ url_for('static', filename='js/share/index.js') }}"></script>
     <script src="{{ url_for('static', filename='js/share/onload.js') }}"></script>
