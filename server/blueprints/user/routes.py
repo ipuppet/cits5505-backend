@@ -17,7 +17,7 @@ user_bp = Blueprint("user", __name__, template_folder="templates")
 def login():
     form = LoginForm()
     if not form.validate_on_submit():
-        flash(form.errors, "danger")
+        flash(str(form.errors), "danger")
         return redirect(url_for("index.index"))
 
     try:
@@ -48,11 +48,11 @@ def register():
         return render_template("user/register.html", form=form)
 
     if not form.validate_on_submit():
-        flash(form.errors, "danger")
+        flash(str(form.errors), "danger")
         return redirect(url_for("user.register"))
 
     try:
-        logic.register(
+        logic.create_user(
             form.username.data,
             form.password.data,
             form.email.data,
@@ -76,12 +76,12 @@ def password():
         return render_template("user/reset_password.html", form=form)
 
     if not form.validate_on_submit():
-        flash(form.errors, "danger")
+        flash(str(form.errors), "danger")
         return redirect(url_for("user.reset_password"))
 
     new_password = form.password.data
     try:
-        logic.reset_password(new_password)
+        logic.update_user(new_password=new_password)
         flash(
             "Password reset successful! Please log in with your new password.",
             "success",
@@ -100,7 +100,7 @@ def index():
         return render_template("user/index.html", form=form)
 
     if not form.validate_on_submit():
-        flash(form.errors, "danger")
+        flash(str(form.errors), "danger")
         return redirect(url_for("user.update_user"))
 
     try:

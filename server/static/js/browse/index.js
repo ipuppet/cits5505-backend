@@ -5,14 +5,6 @@ function toReadable(str) {
         .replace(/\b\w/g, char => char.toUpperCase())
 }
 
-function convertTimezone(data, key = "created_at") {
-    for (let i = 0; i < data.length; i++) {
-        const date = new Date(data[i][key])
-        data[i][key] = date.toLocaleString()
-    }
-    return data
-}
-
 function updateBrowseTableOptions(options) {
     const select = document.querySelector("#browseTableTypeSelect")
     select.innerHTML = ""
@@ -41,10 +33,10 @@ function updateBrowseTable(headers, data) {
         trDom.appendChild(idDom)
         for (let k of headers) {
             const tdDom = document.createElement("td")
-            let value=data[i][k]
+            let value = data[i][k]
             if (k === "created_at") {
-                value= new Date(value)
-                value=value.toLocaleString()
+                value = new Date(value)
+                value = value.toLocaleString()
             }
             tdDom.innerText = value
             trDom.appendChild(tdDom)

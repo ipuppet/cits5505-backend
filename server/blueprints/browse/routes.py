@@ -7,6 +7,7 @@ from server.blueprints.browse.forms import (
     BodyMeasurementForm,
     CalorieIntakeForm,
 )
+from server.utils.constants import ExerciseType, BodyMeasurementType
 
 browse_bp = Blueprint("browse", __name__, template_folder="templates")
 
@@ -31,13 +32,13 @@ def index():
 @browse_bp.route("/exercise", methods=["POST"])
 @login_required
 def exercise():
-    exercise_form = ExerciseForm()
-    if exercise_form.validate_on_submit():
+    form = ExerciseForm()
+    if form.validate_on_submit():
         try:
             achievement = logic.add_exercise_data(
-                exercise_form.type.data,
-                exercise_form.metrics.data,
-                exercise_form.datetime,
+                ExerciseType[form.type.data],
+                form.metrics.data,
+                form.datetime,
             )
             if achievement:
                 flash(
@@ -48,43 +49,43 @@ def exercise():
         except Exception as e:
             flash(str(e), "danger")
     else:
-        flash(exercise_form.errors, "danger")
+        flash(str(form.errors), "danger")
     return redirect(url_for("browse.index"))
 
 
 @browse_bp.route("/body_measurement", methods=["POST"])
 @login_required
 def body_measurement():
-    body_measurement_form = BodyMeasurementForm()
-    if body_measurement_form.validate_on_submit():
+    form = BodyMeasurementForm()
+    if form.validate_on_submit():
         try:
             logic.add_body_measurement_data(
-                body_measurement_form.type.data,
-                body_measurement_form.value.data,
-                body_measurement_form.datetime,
+                BodyMeasurementType[form.type.data],
+                form.value.data,
+                form.datetime,
             )
             flash("Body measurement data added successfully!", "success")
         except Exception as e:
             flash(str(e), "danger")
     else:
-        flash(body_measurement_form.errors, "danger")
+        flash(str(form.errors), "danger")
     return redirect(request.form.get("referrer", url_for("browse.index")))
 
 
 @browse_bp.route("/calorie_intake", methods=["POST"])
 @login_required
 def calorie_intake():
-    calorie_intake_form = CalorieIntakeForm()
-    if calorie_intake_form.validate_on_submit():
+    form = CalorieIntakeForm()
+    if form.validate_on_submit():
         try:
             logic.add_calorie_intake_data(
-                calorie_intake_form.calories.data,
-                calorie_intake_form.description.data,
-                calorie_intake_form.datetime,
+                form.calories.data,
+                form.description.data,
+                form.datetime,
             )
             flash("Calorie intake data added successfully!", "success")
         except Exception as e:
             flash(str(e), "danger")
     else:
-        flash(calorie_intake_form.errors, "danger")
+        flash(str(form.errors), "danger")
     return redirect(url_for("browse.index"))

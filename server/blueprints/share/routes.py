@@ -38,7 +38,7 @@ def shared(share_id):
 def create_share():
     share_form = ShareForm()
     if not share_form.validate():
-        flash(share_form.errors, "danger")
+        flash(str(share_form.errors), "danger")
         return render_template("share/create.html", form=share_form)
     share = None
     try:

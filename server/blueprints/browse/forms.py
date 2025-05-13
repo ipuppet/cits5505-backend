@@ -11,8 +11,9 @@ from wtforms.validators import ValidationError, DataRequired, Optional
 from datetime import datetime, time, date
 import pytz
 
+from server.utils.validators import validate_metrics
 from server.utils.wtforms_custom import JSONField
-from server.models import ExerciseType, BodyMeasurementType
+from server.utils.constants import ExerciseType, BodyMeasurementType
 
 
 class DatetimeForm(FlaskForm):
@@ -80,8 +81,10 @@ class ExerciseForm(DatetimeForm):
     submit = SubmitField("Submit")
 
     def validate_metrics(self, field):
-        if not field.data:
-            raise ValidationError("Metrics cannot be empty.")
+        try:
+            validate_metrics(self.type.data, field.data)
+        except ValueError as e:
+            raise ValidationError(str(e))
 
 
 class BodyMeasurementForm(DatetimeForm):

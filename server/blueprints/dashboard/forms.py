@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import SelectField, TimeField, StringField, SubmitField, FloatField
 from wtforms.validators import DataRequired, NumberRange
 
-from server.models import ExerciseType, METRICS
+from server.utils.constants import ExerciseType, GOAL_METRICS
 
 
 class ScheduleExerciseForm(FlaskForm):
@@ -37,7 +37,7 @@ class GoalForm(FlaskForm):
     )
     metric = SelectField(
         "Metric",
-        choices=[(metric, metric.capitalize()) for metric in METRICS],
+        choices=[(metric, metric.capitalize()) for metric in GOAL_METRICS],
         validators=[DataRequired()],
     )
     target_value = FloatField(
