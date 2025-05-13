@@ -4,7 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from flask_login import current_user
 from collections import defaultdict
 
-from server.models import ScheduledExercise, Goal, db, BodyMeasurementType
+from server.models import ScheduledExercise, Goal, db, BodyMeasurementType, WaterIntake
 from server.utils.constants import ExerciseType, ACHIEVEMENTS
 
 
@@ -126,7 +126,7 @@ def add_schedule(exercise_type: ExerciseType, scheduled_time, day_of_week, note)
 
 def delete_schedule(schedule_id: int):
     try:
-        schedule = db.session.get(ScheduledExercise, schedule_id).first()
+        schedule = db.session.get(ScheduledExercise, schedule_id)
         if not schedule:
             raise ValueError("Schedule not found")
         db.session.delete(schedule)
@@ -143,7 +143,7 @@ def edit_schedule(
     note,
 ):
     try:
-        schedule = db.session.get(ScheduledExercise, schedule_id).first()
+        schedule = db.session.get(ScheduledExercise, schedule_id)
         schedule.day_of_week = day_of_week
         schedule.exercise_type = exercise_type
         schedule.scheduled_time = scheduled_time
@@ -172,7 +172,7 @@ def add_goal(exercise_type: ExerciseType, metric, target_value, description):
 
 def delete_goal(goal_id: int):
     try:
-        goal = db.session.get(Goal, goal_id).first()
+        goal = db.session.get(Goal, goal_id)
         if not goal:
             raise ValueError("Goal not found")
         db.session.delete(goal)
@@ -198,3 +198,38 @@ def edit_goal(
     except SQLAlchemyError as e:
         db.session.rollback()
         raise RuntimeError(f"Error editing goal: {str(e)}")
+
+
+def add_water_intake(amount: float):
+    try:
+        new_water_intake = WaterIntake(
+            user_id=current_user.id,
+            amount=amount,
+        )
+        db.session.add(new_water_intake)
+        db.session.commit()
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise RuntimeError(f"Error adding water intake: {str(e)}")
+
+
+def get_water_intake() -> float:
+    water_intakes = current_user.water_intakes.all()
+    water_today = 0
+    for intake in water_intakes:
+        if intake.created_at.date() == datetime.now().date():
+            water_today += intake.amount
+    return water_today
+
+
+def delete_latest_water_intake():
+    try:
+        water_intake = current_user.water_intakes.order_by(
+            WaterIntake.created_at.desc()
+        ).first()
+        if water_intake:
+            db.session.delete(water_intake)
+            db.session.commit()
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise RuntimeError(f"Error deleting water intake: {str(e)}")

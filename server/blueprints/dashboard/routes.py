@@ -1,11 +1,13 @@
-from flask import Blueprint, render_template, redirect, url_for, flash
-from flask_login import login_required
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
+from flask_login import login_required, current_user
+from server.models import db
 from datetime import datetime
 
 from server.blueprints.browse.forms import BodyMeasurementForm
 from server.blueprints.dashboard import logic
 from server.utils.constants import ExerciseType, EXERCISE_METRICS
 from server.blueprints.dashboard.forms import ScheduleExerciseForm, GoalForm
+from server.utils.decorators import api_response
 
 dashboard_bp = Blueprint("dashboard", __name__, template_folder="templates")
 
@@ -136,3 +138,16 @@ def edit_goal(goal_id):
         return redirect(url_for("dashboard.index"))
     flash("Goal updated.", "success")
     return redirect(url_for("dashboard.index"))
+
+
+@dashboard_bp.route("/water", methods=["GET", "POST", "DELETE"])
+@api_response
+@login_required
+def water():
+    if request.method == "POST":
+        amount = request.json.get("amount", 0)
+        return logic.add_water_intake(amount)
+    if request.method == "DELETE":
+        return logic.delete_latest_water_intake()
+    # GET
+    return logic.get_water_intake()

@@ -5,8 +5,9 @@ from wtforms import (
     BooleanField,
     DateField,
     SelectField,
+    SubmitField,
 )
-from wtforms.validators import DataRequired, Length, Optional, Email
+from wtforms.validators import DataRequired, Length, Optional, Email, EqualTo
 
 
 class PasswordForm(FlaskForm):
@@ -57,3 +58,8 @@ class RegistrationForm(PasswordForm, UserInfoForm):
 
         if not self.nickname.data and self.username.data:
             self.nickname.data = self.username.data
+
+
+class ForgotPasswordForm(FlaskForm):
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    submit = SubmitField("Send Reset Email")

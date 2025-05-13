@@ -49,6 +49,12 @@ class User(UserMixin, db.Model):
         cascade="all, delete-orphan",
         order_by="CalorieIntake.created_at.desc()",
     )
+    water_intakes = db.relationship(
+        "WaterIntake",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+        order_by="WaterIntake.created_at.desc()",
+    )
     achievements = db.relationship(
         "Achievement",
         lazy="dynamic",
@@ -170,6 +176,20 @@ class CalorieIntake(db.Model):
     )
     calories = db.Column(db.Float, nullable=False)  # in kcal
     description = db.Column(db.Text, nullable=True)
+    created_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=db.func.current_timestamp(),
+        index=True,
+    )
+
+
+class WaterIntake(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+    )
+    amount = db.Column(db.Float, nullable=False)  # in liters
     created_at = db.Column(
         db.DateTime,
         nullable=False,

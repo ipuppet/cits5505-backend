@@ -3,12 +3,15 @@ import datetime
 from werkzeug.datastructures import FileStorage
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from werkzeug.utils import secure_filename
-from flask import current_app
+from flask import current_app, url_for
 from flask_login import login_user, current_user, logout_user
+from itsdangerous import URLSafeTimedSerializer
+from flask_mail import Message
 
 from server.models import db, User
 from server.utils.security import hash_password, check_password
 from server.utils.login_manager import login_manager
+from server.utils.mail import mail
 
 
 class UserConflictError(Exception):
@@ -198,3 +201,32 @@ def update_avatar(file: FileStorage):
         if os.path.exists(file_path):
             os.remove(file_path)
         raise RuntimeError(f"Failed to save avatar: {e}") from e
+
+
+def reset_password(token: str, new_password: str):
+    serializer = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
+    email = serializer.loads(
+        token, salt=current_app.config["SECURITY_PASSWORD_SALT"], max_age=3600
+    )
+    if not email:
+        raise ValueError("Invalid or expired token.")
+    update_user(new_password=new_password)
+
+
+def send_reset_email(email: str) -> str:
+    user = get_user_by_email(email)
+    if not user:
+        raise UserNotFoundError(email)
+
+    serializer = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
+    token = serializer.dumps(email, salt=current_app.config["SECURITY_PASSWORD_SALT"])
+    reset_url = url_for("user.reset_password", token=token, _external=True)
+    msg = Message(
+        subject="Password Reset Request",
+        sender=current_app.config["MAIL_USERNAME"],
+        recipients=[email],
+        body=f"To reset your password, click the following link:\n{reset_url}\n\nIf you did not request this, ignore this email.",
+    )
+    mail.send(msg)
+
+    return token
