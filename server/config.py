@@ -12,12 +12,11 @@ class Config:
     MAIL_PASSWORD = "ujewgxhkrhygcucw"
 
 
-
 class DevelopmentConfig(Config):
     DEBUG = True  # Does not work with `flask run`, use `flask run --debug`
     SQLALCHEMY_DATABASE_URI = "sqlite:///dev.sqlite"
     SQLALCHEMY_ECHO = False
-    
+
 
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = "sqlite:///db.sqlite"

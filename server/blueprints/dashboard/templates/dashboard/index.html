@@ -1,1147 +1,1160 @@
 {% extends "base.html" %}
 
 {% block title %}
-Dashboard
+    Dashboard
 {% endblock %}
 
 {% block css %}
-<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet" />
-<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard/index.css') }}" />
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard/index.css') }}"/>
 {% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-12">
-            <div class="row">
-                <!-- User Info Left -->
-                <div class="col-lg-3 mb-4">
-                    <div class="card shadow-lg border-0 h-100">
-                        <div id="motivation-message"
-                            style="font-size:1.1em; font-style:italic; font-weight:bold; color:#333; margin-top:1rem; text-align:center;">
-                        </div>
-                        <div class="card-body">
-                            <form id="avatar-form" action="{{ url_for('user.upload_avatar') }}" method="post"
-                                enctype="multipart/form-data" class="mt-2 mb-3 text-center">
-                                <label for="avatar" style="cursor:pointer; display:block;">
-                                    {% if current_user.avatar %}
-                                    <img src="{{ url_for('static', filename=current_user.avatar) }}" alt="Avatar"
-                                        class="rounded-circle shadow mb-3" width="96" height="96" id="avatar-img">
-                                    {% else %}
-                                    <img src="https://ui-avatars.com/api/?name={{ current_user.nickname|default('User') }}&size=96&background=0D8ABC&color=fff"
-                                        alt="Default Avatar" class="rounded-circle shadow mb-3" width="96" height="96"
-                                        id="avatar-img">
-                                    {% endif %}
-                                </label>
-                                <input type="file" name="avatar" id="avatar" accept="image/*" style="display:none"
-                                    required>
-                            </form>
-                            <h2 class="card-title mb-1 text-center" id="greeting-line">
-                                <strong>{{ current_user.nickname }}</strong>
-                            </h2>
-                            <div class="card mb-3 shadow-sm border-0">
-                                <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
-                                    <strong>Personal Information</strong>
-                                </div>
-                                <div class="card-body p-3">
-                                    <div class="row mb-2">
-                                        <div class="col-5 text-muted"><strong>Username:</strong></div>
-                                        <div class="col-7">{{ current_user.username }}</div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col-5 text-muted"><strong>Email:</strong></div>
-                                        <div class="col-7">{{ current_user.email }}</div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col-5 text-muted"><strong>Date of Birth:</strong></div>
-                                        <div class="col-7">{{ current_user.date_of_birth or 'N/A' }}</div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col-5 text-muted"><strong>Sex:</strong></div>
-                                        <div class="col-7">{{ current_user.sex or 'N/A' }}</div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col-5 text-muted"><strong>Created At:</strong></div>
-                                        <div class="col-7" id="createdAt"></div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col-5 text-muted"><strong>Last Login:</strong></div>
-                                        <div class="col-7" id="lastLogin"></div>
-                                    </div>
-                                </div>
-                                <!-- Weather Forecast Card START -->
-                                <div class="card mb-4 shadow-sm border-0">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="row">
+                    <!-- User Info Left -->
+                    <div class="col-lg-3 mb-4">
+                        <div class="card shadow-lg border-0 h-100">
+                            <div id="motivation-message"
+                                 style="font-size:1.1em; font-style:italic; font-weight:bold; color:#333; margin-top:1rem; text-align:center;">
+                            </div>
+                            <div class="card-body">
+                                <form id="avatar-form" action="{{ url_for('user.upload_avatar') }}" method="post"
+                                      enctype="multipart/form-data" class="mt-2 mb-3 text-center">
+                                    <label for="avatar" style="cursor:pointer; display:block;">
+                                        {% if current_user.avatar %}
+                                            <img src="{{ url_for('static', filename=current_user.avatar) }}"
+                                                 alt="Avatar"
+                                                 class="rounded-circle shadow mb-3" width="96" height="96"
+                                                 id="avatar-img">
+                                        {% else %}
+                                            <img src="https://ui-avatars.com/api/?name={{ current_user.nickname|default('User') }}&size=96&background=0D8ABC&color=fff"
+                                                 alt="Default Avatar" class="rounded-circle shadow mb-3" width="96"
+                                                 height="96"
+                                                 id="avatar-img">
+                                        {% endif %}
+                                    </label>
+                                    <input type="file" name="avatar" id="avatar" accept="image/*" style="display:none"
+                                           required>
+                                </form>
+                                <h2 class="card-title mb-1 text-center" id="greeting-line">
+                                    <strong>{{ current_user.nickname }}</strong>
+                                </h2>
+                                <div class="card mb-3 shadow-sm border-0">
                                     <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
-                                        <strong>Weather Forecast (Next 5 Days)</strong>
-                                    </div>
-                                    <div class="card-body p-2">
-                                        <div class="d-flex justify-content-between flex-nowrap overflow-auto gap-2">
-                                            {% for day in weather_forecast %}
-                                            <div
-                                                class="weather-day-card flex-shrink-0 text-center p-2 border rounded bg-light">
-                                                <div class="fw-bold" style="font-size: 1rem;">{{ day.date }}</div>
-                                                <div>
-                                                    <img src="{{ day.icon_url }}" alt="weather" width="28" height="28">
-                                                </div>
-                                                <div style="font-size: 1rem;">{{ day.temp }}°C</div>
-                                                <div class="text-muted" style="font-size:0.85em;">{{ day.description }}
-                                                </div>
-                                            </div>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- Weather Forecast Card END -->
-
-                                <!-- Calendar Card START -->
-                                <div class="card mb-4 shadow-sm border-0">
-                                    <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
-                                        <strong>Calendar</strong>
+                                        <strong>Personal Information</strong>
                                     </div>
                                     <div class="card-body p-3">
-                                        <div id="calendar"></div>
-                                    </div>
-                                </div>
-                                <!-- Calendar Card END -->
-                                <div class="card mb-4 shadow-sm border-0">
-                                    <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
-                                        <strong>Hydration Tracker</strong>
-                                    </div>
-                                    <div class="card-body text-center">
-                                        <div style="font-size:1.2em; font-weight:bold;">
-                                            Water Drank Today:
-                                            <span id="water-amount" style="color:#007bff;">0</span> / <span
-                                                id="water-goal">2000</span>
-                                            ml
+                                        <div class="row mb-2">
+                                            <div class="col-5 text-muted"><strong>Username:</strong></div>
+                                            <div class="col-7">{{ current_user.username }}</div>
                                         </div>
-                                        <div class="progress my-3" style="height: 24px;">
-                                            <div id="water-progress" class="progress-bar bg-info" role="progressbar"
-                                                style="width: 0%;" aria-valuenow="0" aria-valuemin="0"
-                                                aria-valuemax="2000"></div>
+                                        <div class="row mb-2">
+                                            <div class="col-5 text-muted"><strong>Email:</strong></div>
+                                            <div class="col-7">{{ current_user.email }}</div>
                                         </div>
-                                        <div id="hydration-progress-message" class="my-2"
-                                            style="font-size:1em; font-weight:500; color:#00bcd4;"></div>
-                                        <button class="btn btn-outline-primary btn-sm"
-                                            onclick="addWater(250)">+250ml</button>
-                                        <button class="btn btn-outline-secondary btn-sm"
-                                            onclick="resetWater()">Reset</button>
-                                        <div class="hydration-tip mt-3 d-flex align-items-center justify-content-center"
-                                            style="background: linear-gradient(90deg, #e0f7fa 0%, #fce4ec 100%); border-radius: 1rem; padding: 0.75em 1em;">
-                                            <span style="font-size:1.5em; color:#00bcd4; margin-right:0.5em;">💧</span>
-                                            <span style="font-size:1em; color:#333;">
-                                                <strong>Stay hydrated!</strong> Most people need <span
-                                                    style="color:#007bff;">2L (2000ml)</span> per day.<br>
+                                        <div class="row mb-2">
+                                            <div class="col-5 text-muted"><strong>Date of Birth:</strong></div>
+                                            <div class="col-7">{{ current_user.date_of_birth or 'N/A' }}</div>
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-5 text-muted"><strong>Sex:</strong></div>
+                                            <div class="col-7">{{ current_user.sex or 'N/A' }}</div>
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-5 text-muted"><strong>Created At:</strong></div>
+                                            <div class="col-7" id="createdAt"></div>
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-5 text-muted"><strong>Last Login:</strong></div>
+                                            <div class="col-7" id="lastLogin"></div>
+                                        </div>
+                                    </div>
+                                    <!-- Weather Forecast Card START -->
+                                    <div class="card mb-4 shadow-sm border-0">
+                                        <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                                            <strong>Weather Forecast (Next 5 Days)</strong>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <div class="d-flex justify-content-between flex-nowrap overflow-auto gap-2">
+                                                {% for day in weather_forecast %}
+                                                    <div
+                                                            class="weather-day-card flex-shrink-0 text-center p-2 border rounded bg-light">
+                                                        <div class="fw-bold"
+                                                             style="font-size: 1rem;">{{ day.date }}</div>
+                                                        <div>
+                                                            <img src="{{ day.icon_url }}" alt="weather" width="28"
+                                                                 height="28">
+                                                        </div>
+                                                        <div style="font-size: 1rem;">{{ day.temp }}°C</div>
+                                                        <div class="text-muted"
+                                                             style="font-size:0.85em;">{{ day.description }}
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Weather Forecast Card END -->
+
+                                    <!-- Calendar Card START -->
+                                    <div class="card mb-4 shadow-sm border-0">
+                                        <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                                            <strong>Calendar</strong>
+                                        </div>
+                                        <div class="card-body p-3">
+                                            <div id="calendar"></div>
+                                        </div>
+                                    </div>
+                                    <!-- Calendar Card END -->
+                                    <div class="card mb-4 shadow-sm border-0">
+                                        <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                                            <strong>Hydration Tracker</strong>
+                                        </div>
+                                        <div class="card-body text-center">
+                                            <div style="font-size:1.2em; font-weight:bold;">
+                                                Water Drank Today:
+                                                <span id="water-amount" style="color:#007bff;">0</span> / <span
+                                                    id="water-goal">2000</span>
+                                                ml
+                                            </div>
+                                            <div class="progress my-3" style="height: 24px;">
+                                                <div id="water-progress" class="progress-bar bg-info" role="progressbar"
+                                                     style="width: 0%;" aria-valuenow="0" aria-valuemin="0"
+                                                     aria-valuemax="2000"></div>
+                                            </div>
+                                            <div id="hydration-progress-message" class="my-2"
+                                                 style="font-size:1em; font-weight:500; color:#00bcd4;"></div>
+                                            <button class="btn btn-outline-primary btn-sm"
+                                                    onclick="addWater(250)">+250ml
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm"
+                                                    onclick="undoLastWater()">Undo
+                                            </button>
+                                            <div class="hydration-tip mt-3 d-flex align-items-center justify-content-center"
+                                                 style="background: linear-gradient(90deg, #e0f7fa 0%, #fce4ec 100%); border-radius: 1rem; padding: 0.75em 1em;">
+                                                <span style="font-size:1.5em; color:#00bcd4; margin-right:0.5em;">💧</span>
+                                                <span style="font-size:1em; color:#333;">
+                                                <strong>Stay hydrated!</strong>
+                                                    Most people need
+                                                    <span style="color:#007bff;">2L (2000ml)</span> per day.<br>
 
                                             </span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <!-- Mini Weather-Based Workout Suggestion Card -->
-                                <div class="card mb-4 shadow-sm border-0">
-                                    <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
-                                        <strong>Today's Workout Suggestion</strong>
-                                    </div>
-                                    <div class="card-body text-center" id="weather-workout-suggestion">
-                                        <div class="spinner-border text-primary" role="status"
-                                            style="width: 2rem; height: 2rem;">
-                                            <span class="visually-hidden">Loading...</span>
+                                    <!-- Mini Weather-Based Workout Suggestion Card -->
+                                    <div class="card mb-4 shadow-sm border-0">
+                                        <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                                            <strong>Today's Workout Suggestion</strong>
                                         </div>
-                                        <div class="mt-2 text-muted">Fetching suggestion...</div>
+                                        <div class="card-body text-center" id="weather-workout-suggestion">
+                                            <div class="spinner-border text-primary" role="status"
+                                                 style="width: 2rem; height: 2rem;">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                            <div class="mt-2 text-muted">Fetching suggestion...</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Achievements Card START -->
-                <div class="col-lg-5 mb-4 d-flex flex-column" style="height: 100%;">
-                    <div class="row g-4">
-                        <div class="col-md-12">
-                            <div class="card chart-card shadow-sm border-0 mb-4">
-                                <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
-                                    <strong>Achievements</strong>
-                                </div>
-                                <div class="card-body p-3">
-                                    {% if achievements_by_type %}
-                                    <div id="achievements-list">
-                                        {% set icons = {
+                    <!-- Achievements Card START -->
+                    <div class="col-lg-5 mb-4 d-flex flex-column" style="height: 100%;">
+                        <div class="row g-4">
+                            <div class="col-md-12">
+                                <div class="card chart-card shadow-sm border-0 mb-4">
+                                    <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                                        <strong>Achievements</strong>
+                                    </div>
+                                    <div class="card-body p-3">
+                                        {% if achievements_by_type %}
+                                            <div id="achievements-list">
+                                                {% set icons = {
                                         'running': '🏃‍♂️',
                                         'cycling': '🚴‍♀️',
                                         'swimming': '🏊‍♂️',
                                         'weight_lifting': '🏋️‍♂️',
                                         'yoga': '🧘‍♂️'
                                         } %}
-                                        {% set icon_colors = {
+                                                {% set icon_colors = {
                                         'running': '#ffb700',
                                         'cycling': '#00b894',
                                         'swimming': '#0984e3',
                                         'weight_lifting': '#636e72',
                                         'yoga': '#a29bfe'
                                         } %}
-                                        {% set units = {
+                                                {% set units = {
                                         'running': 'M',
                                         'cycling': 'M',
                                         'swimming': 'M',
                                         'weight_lifting': 'KG',
                                         'yoga': 'MIN'
                                         } %}
-                                        {% set badge_classes = ['badge-bronze', 'badge-silver', 'badge-gold'] %}
-                                        {% set badge_labels = ['Bronze', 'Silver', 'Gold'] %}
-                                        {% for ex_type, milestones in all_achievements.items() %}
-                                        <div class="mb-2 d-flex align-items-center">
+                                                {% set badge_classes = ['badge-bronze', 'badge-silver', 'badge-gold'] %}
+                                                {% set badge_labels = ['Bronze', 'Silver', 'Gold'] %}
+                                                {% for ex_type, milestones in all_achievements.items() %}
+                                                    <div class="mb-2 d-flex align-items-center">
                                             <span class="achievement-icon me-2"
-                                                style="background: {{ icon_colors[ex_type.value] }};">
+                                                  style="background: {{ icon_colors[ex_type.value] }};">
                                                 {{ icons[ex_type.value] }}
                                             </span>
-                                            <strong style="font-size:1.1em;">{{ ex_type }}</strong>:
-                                            <span class="ms-2">
+                                                        <strong style="font-size:1.1em;">{{ ex_type }}</strong>:
+                                                        <span class="ms-2">
                                                 {% for milestone in milestones %}
-                                                {% set idx = loop.index0 %}
-                                                {% set badge_label = badge_labels[idx] %}
-                                                {% if milestone in achievements_by_type[ex_type] %}
-                                                {% set badge_class = badge_classes[idx] %}
-                                                {% else %}
-                                                {% set badge_class = 'badge-locked' %}
-                                                {% endif %}
-                                                <span class="badge {{ badge_class }} me-1" title="{{ badge_label }}">
-                                                    {{ badge_label }}
-                                                    {% if units[ex_type.value] == "M" %}
-                                                    {{ (milestone/1000)|int }}KM
+                                                    {% set idx = loop.index0 %}
+                                                    {% set badge_label = badge_labels[idx] %}
+                                                    {% if milestone in achievements_by_type[ex_type] %}
+                                                        {% set badge_class = badge_classes[idx] %}
                                                     {% else %}
-                                                    {{ milestone|int }}{{ units[ex_type.value] }}
+                                                        {% set badge_class = 'badge-locked' %}
                                                     {% endif %}
+                                                    <span class="badge {{ badge_class }} me-1"
+                                                          title="{{ badge_label }}">
+                                                    {{ badge_label }}
+                                                        {% if units[ex_type.value] == "M" %}
+                                                            {{ (milestone/1000)|int }}KM
+                                                        {% else %}
+                                                            {{ milestone|int }}{{ units[ex_type.value] }}
+                                                        {% endif %}
                                                 </span>
                                                 {% endfor %}
                                             </span>
-                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            <div class="text-muted text-center">No achievements yet. Start logging your
+                                                activities!
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Achievements Card END -->
+
+
+                            <div class="col-md-12">
+                                <div class="card chart-card shadow-sm border-0 mb-4">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-center">Calories Burned</h5>
+                                        <canvas id="exerciseChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="card chart-card shadow-sm border-0 mb-4">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-center">Calorie Intake</h5>
+                                        <canvas id="intakeChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="card chart-card shadow-sm border-0">
+                                    <div class="card-header bg-light d-flex justify-content-between align-items-center"
+                                         style="border-radius: 1rem 1rem 0 0;">
+                                        <strong>Weight Trend</strong>
+                                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                                                data-bs-target="#editWeightModal">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </button>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="weightChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal fade" id="editWeightModal" tabindex="-1"
+                                 aria-labelledby="editWeightModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form method="POST" action="{{ url_for('browse.body_measurement') }}">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="editWeightModalLabel">Edit Weight</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <input type="hidden" name="referrer"
+                                                       value="{{ url_for('dashboard.index') }}">
+                                                {{ body_measurement_form.hidden_tag() }}
+                                                {{ body_measurement_form.type(class="d-none", value="WEIGHT") }}
+                                                <div class="mb-3">
+                                                    {{ body_measurement_form.value.label(class="form-label", text="Weight
+                                                (KG)") }}
+                                                    {{ body_measurement_form.value(class="form-control") }}
+                                                </div>
+                                                <div class="mb-3">
+                                                    {{ body_measurement_form.date.label(class="form-label") }}
+                                                    {{ body_measurement_form.date(class="form-control",
+                                                max=now.strftime('%Y-%m-%d')) }}
+                                                </div>
+                                                <div class="mb-3">
+                                                    {{ body_measurement_form.time.label(class="form-label") }}
+                                                    {{ body_measurement_form.time(class="form-control") }}
+                                                </div>
+                                                <div class="mb-3">
+                                                    {{ body_measurement_form.timezone.label(class="form-label") }}
+                                                    {{ body_measurement_form.timezone(class="form-select") }}
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="submit" class="btn btn-primary">Save</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Schedule & Goals -->
+                    <div class="col-lg-4 mb-4">
+                        <!-- Schedule Card -->
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <strong>My Schedule</strong>
+                                <!-- Add Button (opens modal) -->
+                                <button class="btn btn-circle btn-add" data-bs-toggle="modal"
+                                        data-bs-target="#addScheduleModal">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-2 text-muted">
+                                    {{ now.strftime('%A, %d %b %y') }}
+                                </div>
+                                {% if current_user.scheduled_exercises %}
+                                    <ul class="list-unstyled">
+                                        {% for se in current_user.scheduled_exercises %}
+                                            <li class="schedule-item d-flex align-items-start mb-3">
+                                                <button class="btn btn-check me-3" title="Mark as done">
+                                                    <i class="bi bi-circle"></i>
+                                                </button>
+                                                <div class="flex-grow-1">
+                                                    <div class="fw-bold" style="font-size:1.1rem;">
+                                                        {{ se.exercise_type }}
+                                                    </div>
+                                                    <div class="text-muted small">
+                                                        {{ se.day_of_week }} {{ se.scheduled_time.strftime('%I:%M %p').lstrip('0') }}
+                                                        {% if se.note %} <br/> {{ se.note }}{% endif %}
+                                                    </div>
+                                                </div>
+                                                <!-- Edit button -->
+                                                <button class="btn btn-edit ms-2" title="Edit" data-bs-toggle="modal"
+                                                        data-bs-target="#editScheduleModal-{{ se.id }}">
+                                                    <i class="bi bi-three-dots"></i>
+                                                </button>
+                                                <!-- Edit Modal for each schedule item -->
+                                                <div class="modal fade" id="editScheduleModal-{{ se.id }}" tabindex="-1"
+                                                     aria-labelledby="editScheduleModalLabel-{{ se.id }}"
+                                                     aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <form method="POST"
+                                                                  action="{{ url_for('dashboard.edit_schedule', schedule_id=se.id) }}">
+                                                                {{ schedule_form.hidden_tag() }}
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title"
+                                                                        id="editScheduleModalLabel-{{ se.id }}">
+                                                                        Edit or Delete Exercise</h5>
+                                                                    <button type="button" class="btn-close"
+                                                                            data-bs-dismiss="modal"
+                                                                            aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <div class="mb-2">
+                                                                        <label>Day</label>
+                                                                        <select name="day_of_week" class="form-select">
+                                                                            {% for val, label in schedule_form.day_of_week.choices %}
+                                                                                <option value="{{ val }}"
+                                                                                        {% if se.day_of_week==val %}selected{% endif %}>{{ label }}</option>
+                                                                            {% endfor %}
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="mb-2">
+                                                                        <label>Exercise</label>
+                                                                        <select name="exercise_type"
+                                                                                class="form-select">
+                                                                            {% for val, label in schedule_form.exercise_type.choices %}
+                                                                                <option value="{{ val }}" {% if
+                                                                    se.exercise_type.value==val or se.exercise_type==val %}selected{% endif %}>{{ label }}</option>
+                                                                            {% endfor %}
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="mb-2">
+                                                                        <label>Time</label>
+                                                                        <input type="time" name="scheduled_time"
+                                                                               class="form-control"
+                                                                               value="{{ se.scheduled_time.strftime('%H:%M') }}">
+                                                                    </div>
+                                                                    <div class="mb-2">
+                                                                        <label>Note</label>
+                                                                        <input type="text" name="note"
+                                                                               class="form-control"
+                                                                               value="{{ se.note }}">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer d-flex justify-content-between">
+                                                                    <button type="submit" class="btn btn-primary">Save
+                                                                        Changes
+                                                                    </button>
+                                                            </form>
+                                                            <form method="POST"
+                                                                  action="{{ url_for('dashboard.delete_schedule', schedule_id=se.id) }}"
+                                                                  onsubmit="return confirm('Delete this schedule?');">
+                                                                <button type="submit" class="btn btn-danger">Delete
+                                                                </button>
+                                                            </form>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </li>
                                         {% endfor %}
-                                    </div>
-                                    {% else %}
-                                    <div class="text-muted text-center">No achievements yet. Start logging your
-                                        activities!
-                                    </div>
-                                    {% endif %}
-                                </div>
+                                    </ul>
+                                {% else %}
+                                    <div class="text-muted">No scheduled exercises.</div>
+                                {% endif %}
                             </div>
                         </div>
-                        <!-- Achievements Card END -->
-
-
-                        <div class="col-md-12">
-                            <div class="card chart-card shadow-sm border-0 mb-4">
-                                <div class="card-body">
-                                    <h5 class="card-title text-center">Calories Burned</h5>
-                                    <canvas id="exerciseChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="card chart-card shadow-sm border-0 mb-4">
-                                <div class="card-body">
-                                    <h5 class="card-title text-center">Calorie Intake</h5>
-                                    <canvas id="intakeChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="card chart-card shadow-sm border-0">
-                                <div class="card-header bg-light d-flex justify-content-between align-items-center"
-                                    style="border-radius: 1rem 1rem 0 0;">
-                                    <strong>Weight Trend</strong>
-                                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                                        data-bs-target="#editWeightModal">
-                                        <i class="bi bi-pencil"></i> Edit
-                                    </button>
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="weightChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal fade" id="editWeightModal" tabindex="-1"
-                            aria-labelledby="editWeightModalLabel" aria-hidden="true">
+                        <!-- Add Schedule Modal -->
+                        <div class="modal fade" id="addScheduleModal" tabindex="-1"
+                             aria-labelledby="addScheduleModalLabel"
+                             aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
-                                    <form method="POST" action="{{ url_for('browse.body_measurement') }}">
+                                    <form method="POST" action="{{ url_for('dashboard.add_schedule') }}">
+                                        {{ schedule_form.hidden_tag() }}
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="editWeightModalLabel">Edit Weight</h5>
+                                            <h5 class="modal-title" id="addScheduleModalLabel">Add Exercise</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
+                                                    aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <input type="hidden" name="referrer"
-                                                value="{{ url_for('dashboard.index') }}">
-                                            {{ body_measurement_form.hidden_tag() }}
-                                            {{ body_measurement_form.type(class="d-none", value="WEIGHT") }}
-                                            <div class="mb-3">
-                                                {{ body_measurement_form.value.label(class="form-label", text="Weight
-                                                (KG)") }}
-                                                {{ body_measurement_form.value(class="form-control") }}
-                                            </div>
-                                            <div class="mb-3">
-                                                {{ body_measurement_form.date.label(class="form-label") }}
-                                                {{ body_measurement_form.date(class="form-control",
-                                                max=now.strftime('%Y-%m-%d')) }}
-                                            </div>
-                                            <div class="mb-3">
-                                                {{ body_measurement_form.time.label(class="form-label") }}
-                                                {{ body_measurement_form.time(class="form-control") }}
-                                            </div>
-                                            <div class="mb-3">
-                                                {{ body_measurement_form.timezone.label(class="form-label") }}
-                                                {{ body_measurement_form.timezone(class="form-select") }}
+                                            <div class="mb-2">{{ schedule_form.day_of_week.label }} {{ schedule_form.day_of_week(class="form-select") }}</div>
+                                            <div class="mb-2">{{ schedule_form.exercise_type.label }} {{ schedule_form.exercise_type(class="form-select") }}</div>
+                                            <div class="mb-2">{{ schedule_form.scheduled_time.label }} {{ schedule_form.scheduled_time(class="form-control") }}</div>
+                                            <div class="mb-2">{{ schedule_form.note.label }} {{ schedule_form.note(class="form-control") }}
                                             </div>
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="submit" class="btn btn-primary">Save</button>
+                                            <button type="submit" class="btn btn-primary">{{ schedule_form.submit(class="btn
+                                            btn-primary") }}</button>
                                         </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Goals Card -->
+                        <!-- Goals List Card -->
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <strong>My Goals</strong>
+                                <button class="btn btn-circle btn-add" data-bs-toggle="modal"
+                                        data-bs-target="#addGoalModal">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                {% if current_user.goals %}
+                                    <ul class="list-group">
+                                        {% for goal in current_user.goals %}
+                                            <li class="list-group-item d-flex align-items-center position-relative goal-item"
+                                                style="gap: 0.75rem;">
+                                                <div
+                                                        style="flex-shrink:0; width:48px; height:48px; display:flex; align-items:center; justify-content:center;">
+                                                    <canvas id="goal-progress-{{ goal.id }}" width="40"
+                                                            height="40"></canvas>
+                                                </div>
+                                                <div style="flex:1; min-width:0;">
+                                                    <strong style="font-size:1.1em;">{{ goal.description }}</strong><br>
+                                                    <span class="text-muted">{{ goal.exercise_type }}</span><br>
+                                                    <span style="font-size:0.95em;">Target: {{ goal.target_value }} {{ goal.unit }}</span><br>
+                                                    <span style="font-weight:bold; color:#007bff; font-size:1em;">
+                                            {{ goal.current_value }} / {{ goal.target_value }} &rarr;
+                                            {{ ((goal.current_value / goal.target_value * 100) if goal.target_value else
+                                            0)|round(1) }}% Complete
+                                        </span>
+                                                    <!-- ...existing badge/buttons... -->
+                                                    {% if goal.current_value >= goal.target_value %}
+                                                        <span class="badge bg-success rounded-pill mb-2">
+                                            Completed <i class="bi bi-check-circle-fill ms-1"></i>
+                                        </span>
+                                                        <form method="POST"
+                                                              action="{{ url_for('dashboard.delete_goal', goal_id=goal.id) }}"
+                                                              onsubmit="return confirm('Are you sure you want to delete this completed goal?');"
+                                                              class="delete-goal-form d-inline">
+                                                            <button type="submit"
+                                                                    class="badge rounded-pill bg-white text-danger border border-danger give-up-badge-btn"
+                                                                    style="font-size: 0.8rem;" title="Delete Goal">
+                                                                Delete
+                                                            </button>
+                                                        </form>
+                                                    {% else %}
+                                                        {% if goal.current_value > 0 %}
+                                                            <span class="badge bg-warning text-dark rounded-pill mb-2">
+                                            In Progress: {{ goal.current_value }} / {{ goal.target_value }}
+                                        </span>
+                                                        {% else %}
+                                                            <span class="badge bg-primary rounded-pill mb-2">
+                                            {{ goal.current_value }} / {{ goal.target_value }}
+                                        </span>
+                                                        {% endif %}
+                                                        <form method="POST"
+                                                              action="{{ url_for('dashboard.delete_goal', goal_id=goal.id) }}"
+                                                              onsubmit="return confirm('Are you sure you want to give up this goal?');"
+                                                              class="delete-goal-form d-inline">
+                                                            <button type="submit"
+                                                                    class="badge rounded-pill bg-white text-danger border border-danger give-up-badge-btn"
+                                                                    style="font-size: 0.8rem;" title="Give Up Goal">
+                                                                Give Up
+                                                            </button>
+                                                        </form>
+                                                    {% endif %}
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <div class="text-muted">No goals set yet.</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <!-- BMI Chart Card -->
+                        <div class="card chart-card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-light d-flex align-items-center">
+                                <strong>BMI</strong>
+                                <a href="https://en.wikipedia.org/wiki/Body_mass_index" target="_blank" class="ms-auto"
+                                   title="Learn more about BMI" style="color: #007bff; text-decoration: none;">
+                                    <i class="bi bi-question-circle"
+                                       style="font-size: 1.2em; vertical-align: middle;"></i>
+                                </a>
+                            </div>
+                            <div class="card-body text-center">
+                                <div style="font-weight:bold;">
+                                    Current BMI=
+                                    <span style="color:#bfa000; font-weight:700;">
+                                    {{ bmi if bmi is not none else 'N/A' }}
+                                </span>
+                                </div>
+                                <div style="color: #bfa000; font-weight:600; font-size:1.1rem;">
+                                    {{ bmi_category or '' }}
+                                </div>
+                                <div class="bmi-bar-container my-3" style="position:relative; height:48px;">
+                                    <canvas id="bmiBar" height="48"></canvas>
+                                </div>
+                                <div class="d-flex justify-content-between" style="font-size:0.95rem;">
+                                    <span>15</span>
+                                    <span>18.5</span>
+                                    <span>25</span>
+                                    <span>30</span>
+                                    <span>40</span>
+                                </div>
+                                {% if bmi is not none %}
+                                    {% if bmi < 18.5 %}
+                                        <div class="alert alert-info mt-3 py-2 px-3" style="font-size:1em;">
+                                            Underweight (BMI &lt; 18.5): Consider gaining weight for better health.
+                                        </div>
+                                    {% elif 18.5 <= bmi <=24.9 %}
+                                        <div class="alert alert-success mt-3 py-2 px-3"
+                                             style="font-size:1em;">
+                                            Normal range (18.5–24.9): You're in a healthy weight zone!
+                                        </div>
+                                    {% elif 25 <= bmi <=29.9 %}
+                                        <div class="alert alert-warning mt-3 py-2 px-3" style="font-size:1em;">
+                                            Overweight (25–29.9): Consider healthy lifestyle changes.
+                                        </div>
+                                    {% elif 30 <= bmi <=39.9 %}
+                                        <div class="alert alert-danger mt-3 py-2 px-3" style="font-size:1em;">
+                                            Obesity (30–39.9): Increased health risks. Consult your doctor.
+                                        </div>
+                                    {% elif bmi >= 40 %}
+                                        <div class="alert alert-danger mt-3 py-2 px-3" style="font-size:1em;">
+                                            Severe Obesity (BMI ≥ 40): High health risk. Seek medical advice.
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <!-- Exercise Log Card -->
+                        <div class="card chart-card shadow-sm border-0">
+                            <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                                <strong>Exercise Log</strong>
+                            </div>
+                            <div class="card-body p-3">
+                                {% if current_user.exercises %}
+                                    <table class="table table-striped">
+                                        <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Type</th>
+                                            <th>Date</th>
+                                            <th>Details</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for ex in current_user.exercises[:10] %}
+                                            <tr>
+                                                <td>{{ loop.index }}</td>
+                                                <td>{{ ex.type }}</td>
+                                                <td>{{ ex.created_at.strftime('%Y/%m/%d') if ex.created_at else 'N/A' }}</td>
+                                                </td>
+                                                <td>
+                                                    {% if ex.metrics %}
+                                                        {% for key, value in ex.metrics.items() %}
+                                                            {{ key.replace('_', ' ').capitalize() }}: {{ value }}<br>
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        N/A
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                {% else %}
+                                    <div class="text-muted text-center">No exercise data yet.</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <!-- Add Goal Modal -->
+                        <div class="modal fade" id="addGoalModal" tabindex="-1" aria-labelledby="addGoalModalLabel"
+                             aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form method="POST" action="{{ url_for('dashboard.add_goal') }}">
+                                        {{ goal_form.hidden_tag() }}
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="addGoalModalLabel">Add Goal</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="mb-2">{{ goal_form.description.label }} {{ goal_form.description(class="form-control") }}</div>
+                                            <div class="mb-2">{{ goal_form.exercise_type.label }} {{ goal_form.exercise_type(class="form-select") }}</div>
+                                            <div class="mb-2">{{ goal_form.metric.label }} {{ goal_form.metric(class="form-select") }}</div>
+                                            <div class="mb-2">{{ goal_form.target_value.label }} {{ goal_form.target_value(class="form-control") }}</div>
+                                            <div class="mb-2">{{ goal_form.unit.label }} {{ goal_form.unit(class="form-control",
+                            readonly=True) }}</div>
+                                            <div class="modal-footer">
+                                                <button type="submit" class="btn btn-primary">{{ goal_form.submit(class="btn
+                                btn-primary") }}</button>
+                                            </div>
                                     </form>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Right: Schedule & Goals -->
-                <div class="col-lg-4 mb-4">
-                    <!-- Schedule Card -->
-                    <div class="card shadow-sm border-0 mb-4">
-                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                            <strong>My Schedule</strong>
-                            <!-- Add Button (opens modal) -->
-                            <button class="btn btn-circle btn-add" data-bs-toggle="modal"
-                                data-bs-target="#addScheduleModal">
-                                <i class="bi bi-plus"></i>
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-2 text-muted">
-                                {{ now.strftime('%A, %d %b %y') }}
-                            </div>
-                            {% if current_user.scheduled_exercises %}
-                            <ul class="list-unstyled">
-                                {% for se in current_user.scheduled_exercises %}
-                                <li class="schedule-item d-flex align-items-start mb-3">
-                                    <button class="btn btn-check me-3" title="Mark as done">
-                                        <i class="bi bi-circle"></i>
-                                    </button>
-                                    <div class="flex-grow-1">
-                                        <div class="fw-bold" style="font-size:1.1rem;">
-                                            {{ se.exercise_type }}
-                                        </div>
-                                        <div class="text-muted small">
-                                            {{ se.day_of_week }} {{ se.scheduled_time.strftime('%I:%M %p').lstrip('0')
-                                            }}
-                                            {% if se.note %} <br /> {{ se.note }}{% endif %}
-                                        </div>
-                                    </div>
-                                    <!-- Edit button -->
-                                    <button class="btn btn-edit ms-2" title="Edit" data-bs-toggle="modal"
-                                        data-bs-target="#editScheduleModal-{{ se.id }}">
-                                        <i class="bi bi-three-dots"></i>
-                                    </button>
-                                    <!-- Edit Modal for each schedule item -->
-                                    <div class="modal fade" id="editScheduleModal-{{ se.id }}" tabindex="-1"
-                                        aria-labelledby="editScheduleModalLabel-{{ se.id }}" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <form method="POST"
-                                                    action="{{ url_for('dashboard.edit_schedule', schedule_id=se.id) }}">
-                                                    {{ schedule_form.hidden_tag() }}
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="editScheduleModalLabel-{{ se.id }}">
-                                                            Edit or Delete Exercise</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                            aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <div class="mb-2">
-                                                            <label>Day</label>
-                                                            <select name="day_of_week" class="form-select">
-                                                                {% for val, label in schedule_form.day_of_week.choices
-                                                                %}
-                                                                <option value="{{ val }}" {% if se.day_of_week==val
-                                                                    %}selected{% endif %}>{{ label }}</option>
-                                                                {% endfor %}
-                                                            </select>
-                                                        </div>
-                                                        <div class="mb-2">
-                                                            <label>Exercise</label>
-                                                            <select name="exercise_type" class="form-select">
-                                                                {% for val, label in schedule_form.exercise_type.choices
-                                                                %}
-                                                                <option value="{{ val }}" {% if
-                                                                    se.exercise_type.value==val or se.exercise_type==val
-                                                                    %}selected{% endif %}>{{ label }}</option>
-                                                                {% endfor %}
-                                                            </select>
-                                                        </div>
-                                                        <div class="mb-2">
-                                                            <label>Time</label>
-                                                            <input type="time" name="scheduled_time"
-                                                                class="form-control"
-                                                                value="{{ se.scheduled_time.strftime('%H:%M') }}">
-                                                        </div>
-                                                        <div class="mb-2">
-                                                            <label>Note</label>
-                                                            <input type="text" name="note" class="form-control"
-                                                                value="{{ se.note }}">
-                                                        </div>
-                                                    </div>
-                                                    <div class="modal-footer d-flex justify-content-between">
-                                                        <button type="submit" class="btn btn-primary">Save
-                                                            Changes
-                                                        </button>
-                                                </form>
-                                                <form method="POST"
-                                                    action="{{ url_for('dashboard.delete_schedule', schedule_id=se.id) }}"
-                                                    onsubmit="return confirm('Delete this schedule?');">
-                                                    <button type="submit" class="btn btn-danger">Delete
-                                                    </button>
-                                                </form>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                </li>
-                                {% endfor %}
-                            </ul>
-                            {% else %}
-                            <div class="text-muted">No scheduled exercises.</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <!-- Add Schedule Modal -->
-                    <div class="modal fade" id="addScheduleModal" tabindex="-1" aria-labelledby="addScheduleModalLabel"
-                        aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <form method="POST" action="{{ url_for('dashboard.add_schedule') }}">
-                                    {{ schedule_form.hidden_tag() }}
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="addScheduleModalLabel">Add Exercise</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="mb-2">{{ schedule_form.day_of_week.label }} {{
-                                            schedule_form.day_of_week(class="form-select") }}</div>
-                                        <div class="mb-2">{{ schedule_form.exercise_type.label }} {{
-                                            schedule_form.exercise_type(class="form-select") }}</div>
-                                        <div class="mb-2">{{ schedule_form.scheduled_time.label }} {{
-                                            schedule_form.scheduled_time(class="form-control") }}</div>
-                                        <div class="mb-2">{{ schedule_form.note.label }} {{
-                                            schedule_form.note(class="form-control") }}
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="submit" class="btn btn-primary">{{ schedule_form.submit(class="btn
-                                            btn-primary") }}</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Goals Card -->
-                    <!-- Goals List Card -->
-                    <div class="card shadow-sm border-0 mb-4">
-                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                            <strong>My Goals</strong>
-                            <button class="btn btn-circle btn-add" data-bs-toggle="modal"
-                                data-bs-target="#addGoalModal">
-                                <i class="bi bi-plus"></i>
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            {% if current_user.goals %}
-                            <ul class="list-group">
-                                {% for goal in current_user.goals %}
-                                <li class="list-group-item d-flex align-items-center position-relative goal-item"
-                                    style="gap: 0.75rem;">
-                                    <div
-                                        style="flex-shrink:0; width:48px; height:48px; display:flex; align-items:center; justify-content:center;">
-                                        <canvas id="goal-progress-{{ goal.id }}" width="40" height="40"></canvas>
-                                    </div>
-                                    <div style="flex:1; min-width:0;">
-                                        <strong style="font-size:1.1em;">{{ goal.description }}</strong><br>
-                                        <span class="text-muted">{{ goal.exercise_type }}</span><br>
-                                        <span style="font-size:0.95em;">Target: {{ goal.target_value }} {{ goal.unit
-                                            }}</span><br>
-                                        <span style="font-weight:bold; color:#007bff; font-size:1em;">
-                                            {{ goal.current_value }} / {{ goal.target_value }} &rarr;
-                                            {{ ((goal.current_value / goal.target_value * 100) if goal.target_value else
-                                            0)|round(1) }}% Complete
-                                        </span>
-                                        <!-- ...existing badge/buttons... -->
-                                        {% if goal.current_value >= goal.target_value %}
-                                        <span class="badge bg-success rounded-pill mb-2">
-                                            Completed <i class="bi bi-check-circle-fill ms-1"></i>
-                                        </span>
-                                        <form method="POST"
-                                            action="{{ url_for('dashboard.delete_goal', goal_id=goal.id) }}"
-                                            onsubmit="return confirm('Are you sure you want to delete this completed goal?');"
-                                            class="delete-goal-form d-inline">
-                                            <button type="submit"
-                                                class="badge rounded-pill bg-white text-danger border border-danger give-up-badge-btn"
-                                                style="font-size: 0.8rem;" title="Delete Goal">
-                                                Delete
-                                            </button>
-                                        </form>
-                                        {% else %}
-                                        {% if goal.current_value > 0 %}
-                                        <span class="badge bg-warning text-dark rounded-pill mb-2">
-                                            In Progress: {{ goal.current_value }} / {{ goal.target_value }}
-                                        </span>
-                                        {% else %}
-                                        <span class="badge bg-primary rounded-pill mb-2">
-                                            {{ goal.current_value }} / {{ goal.target_value }}
-                                        </span>
-                                        {% endif %}
-                                        <form method="POST"
-                                            action="{{ url_for('dashboard.delete_goal', goal_id=goal.id) }}"
-                                            onsubmit="return confirm('Are you sure you want to give up this goal?');"
-                                            class="delete-goal-form d-inline">
-                                            <button type="submit"
-                                                class="badge rounded-pill bg-white text-danger border border-danger give-up-badge-btn"
-                                                style="font-size: 0.8rem;" title="Give Up Goal">
-                                                Give Up
-                                            </button>
-                                        </form>
-                                        {% endif %}
-                                    </div>
-                                </li>
-                                {% endfor %}
-                            </ul>
-                            {% else %}
-                            <div class="text-muted">No goals set yet.</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <!-- BMI Chart Card -->
-                    <div class="card chart-card shadow-sm border-0 mb-4">
-                        <div class="card-header bg-light d-flex align-items-center">
-                            <strong>BMI</strong>
-                            <a href="https://en.wikipedia.org/wiki/Body_mass_index" target="_blank" class="ms-auto"
-                                title="Learn more about BMI" style="color: #007bff; text-decoration: none;">
-                                <i class="bi bi-question-circle" style="font-size: 1.2em; vertical-align: middle;"></i>
-                            </a>
-                        </div>
-                        <div class="card-body text-center">
-                            <div style="font-weight:bold;">
-                                Current BMI=
-                                <span style="color:#bfa000; font-weight:700;">
-                                    {{ bmi if bmi is not none else 'N/A' }}
-                                </span>
-                            </div>
-                            <div style="color: #bfa000; font-weight:600; font-size:1.1rem;">
-                                {{ bmi_category or '' }}
-                            </div>
-                            <div class="bmi-bar-container my-3" style="position:relative; height:48px;">
-                                <canvas id="bmiBar" height="48"></canvas>
-                            </div>
-                            <div class="d-flex justify-content-between" style="font-size:0.95rem;">
-                                <span>15</span>
-                                <span>18.5</span>
-                                <span>25</span>
-                                <span>30</span>
-                                <span>40</span>
-                            </div>
-                            {% if bmi is not none %}
-                            {% if bmi < 18.5 %} <div class="alert alert-info mt-3 py-2 px-3" style="font-size:1em;">
-                                Underweight (BMI &lt; 18.5): Consider gaining weight for better health.
-                        </div>
-                        {% elif 18.5 <= bmi <=24.9 %} <div class="alert alert-success mt-3 py-2 px-3"
-                            style="font-size:1em;">
-                            Normal range (18.5–24.9): You're in a healthy weight zone!
-                    </div>
-                    {% elif 25 <= bmi <=29.9 %} <div class="alert alert-warning mt-3 py-2 px-3" style="font-size:1em;">
-                        Overweight (25–29.9): Consider healthy lifestyle changes.
-                </div>
-                {% elif 30 <= bmi <=39.9 %} <div class="alert alert-danger mt-3 py-2 px-3" style="font-size:1em;">
-                    Obesity (30–39.9): Increased health risks. Consult your doctor.
-            </div>
-            {% elif bmi >= 40 %}
-            <div class="alert alert-danger mt-3 py-2 px-3" style="font-size:1em;">
-                Severe Obesity (BMI ≥ 40): High health risk. Seek medical advice.
-            </div>
-            {% endif %}
-            {% endif %}
-        </div>
-    </div>
-    <!-- Exercise Log Card -->
-    <div class="card chart-card shadow-sm border-0">
-        <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
-            <strong>Exercise Log</strong>
-        </div>
-        <div class="card-body p-3">
-            {% if current_user.exercises %}
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Type</th>
-                        <th>Date</th>
-                        <th>Details</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for ex in current_user.exercises[:10] %}
-                    <tr>
-                        <td>{{ loop.index }}</td>
-                        <td>{{ ex.type }}</td>
-                        <td>{{ ex.created_at.strftime('%Y/%m/%d') if ex.created_at else 'N/A' }}</td>
-                        </td>
-                        <td>
-                            {% if ex.metrics %}
-                            {% for key, value in ex.metrics.items() %}
-                            {{ key.replace('_', ' ').capitalize() }}: {{ value }}<br>
-                            {% endfor %}
-                            {% else %}
-                            N/A
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <div class="text-muted text-center">No exercise data yet.</div>
-            {% endif %}
-        </div>
-    </div>
-    <!-- Add Goal Modal -->
-    <div class="modal fade" id="addGoalModal" tabindex="-1" aria-labelledby="addGoalModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form method="POST" action="{{ url_for('dashboard.add_goal') }}">
-                    {{ goal_form.hidden_tag() }}
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addGoalModalLabel">Add Goal</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-2">{{ goal_form.description.label }} {{
-                            goal_form.description(class="form-control") }}</div>
-                        <div class="mb-2">{{ goal_form.exercise_type.label }} {{
-                            goal_form.exercise_type(class="form-select") }}</div>
-                        <div class="mb-2">{{ goal_form.metric.label }} {{
-                            goal_form.metric(class="form-select") }}</div>
-                        <div class="mb-2">{{ goal_form.target_value.label }} {{
-                            goal_form.target_value(class="form-control") }}</div>
-                        <div class="mb-2">{{ goal_form.unit.label }} {{
-                            goal_form.unit(class="form-control",
-                            readonly=True) }}</div>
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary">{{ goal_form.submit(class="btn
-                                btn-primary") }}</button>
-                        </div>
-                </form>
             </div>
         </div>
+
+
     </div>
-</div>
-</div>
-</div>
-</div>
-
-
-</div>
 {% endblock %}
 
 {% block js %}
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    document.getElementById("avatar").addEventListener("change", function () {
-        if (this.files.length > 0) {
-            document.getElementById("avatar-form").submit()
-        }
-    })
-    document.addEventListener("DOMContentLoaded", function () {
-        const lastLogin = new Date('{{ current_user.last_login }}' + 'Z')
-        const today = new Date();
-        let lastLoginString;
-        if (
-            lastLogin.getDate() === today.getDate() &&
-            lastLogin.getMonth() === today.getMonth() &&
-            lastLogin.getFullYear() === today.getFullYear()
-        ) {
-            lastLoginString = 'Today, ' + lastLogin.toLocaleTimeString([],
-                {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-                }
-            );
-        } else {
-            lastLoginString = lastLogin.toLocaleString([], {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-            });
-        }
-        document.getElementById('lastLogin').textContent = lastLoginString
-
-        const createdAt = new Date('{{ current_user.created_at }}' + 'Z')
-        document.getElementById('createdAt').textContent = createdAt.toLocaleDateString()
-    })
-    document.addEventListener("DOMContentLoaded", function () {
-        const greetingLine = document.getElementById("greeting-line")
-        if (greetingLine) {
-            const hour = new Date().getHours()
-            let greeting = "Hello"
-            let emoji = "👋"
-            if (hour >= 5 && hour < 12) {
-                greeting = "Good morning"
-                emoji = "🌅"
-            } else if (hour >= 12 && hour < 18) {
-                greeting = "Good afternoon"
-                emoji = "☀️"
-            } else if (hour >= 18 && hour < 22) {
-                greeting = "Good evening"
-                emoji = "🌇"
-            } else {
-                greeting = "Good night"
-                emoji = "🌙"
-            }
-            greetingLine.innerHTML = `<span>${emoji} ${greeting}, <strong>{{ current_user.nickname }}</strong></span>`
-        }
-    })
-</script>
-<script>
-    function getLast14DaysLabels() {
-        const labels = []
-        const today = new Date()
-        for (let i = 13; i >= 0; i--) {
-            const date = new Date(today)
-            date.setDate(today.getDate() - i)
-            const label = date.toLocaleDateString()
-            labels.push(label)
-        }
-        return labels
-    }
-
-    const UserBodyMeasurements = {{ current_user.body_measurements | tojson }}
-    const UserWeightByDate = Object.fromEntries(getLast14DaysLabels().map(key => [key, null]))
-    UserBodyMeasurements.forEach(measurement => {
-        if (measurement.type !== "WEIGHT") return
-        const date = new Date(measurement.created_at).toLocaleDateString()
-        if (UserWeightByDate[date] === null) {
-            UserWeightByDate[date] = measurement.value
-        }
-    })
-
-    const UserCalorieBurnedByDate = {{ burned_by_date | tojson }}
-
-    const UserCalorieIntakes = {{ current_user.calorie_intakes | tojson }}
-    const UserCalorieIntakeByDate = {}
-    UserCalorieIntakes.forEach(intake => {
-        const date = new Date(intake.created_at).toLocaleDateString()
-        if (!UserCalorieIntakeByDate[date]) {
-            UserCalorieIntakeByDate[date] = 0
-        }
-        UserCalorieIntakeByDate[date] += intake.calories
-    })
-
-    new Chart(document.getElementById("exerciseChart"), {
-        type: "bar",
-        data: {
-            labels: Object.keys(UserCalorieBurnedByDate).map(date => new Date(date).toLocaleDateString()),
-            datasets: [{
-                label: "Calories Burned",
-                data: Object.values(UserCalorieBurnedByDate),
-                backgroundColor: "rgba(75, 192, 192, 0.6)",
-                borderColor: "rgba(75, 192, 192, 1)",
-                borderWidth: 1
-            }]
-        },
-        options: { responsive: true, scales: { y: { beginAtZero: true } } }
-    })
-    new Chart(document.getElementById("intakeChart"), {
-        type: "bar",
-        data: {
-            labels: Object.keys(UserCalorieIntakeByDate),
-            datasets: [{
-                label: "Calories Intake",
-                data: Object.values(UserCalorieIntakeByDate),
-                backgroundColor: "rgba(255, 159, 64, 0.6)",
-                borderColor: "rgba(255, 159, 64, 1)",
-                borderWidth: 1
-            }]
-        },
-        options: { responsive: true, scales: { y: { beginAtZero: true } } }
-    })
-
-    new Chart(document.getElementById("weightChart"), {
-        type: "line",
-        data: {
-            labels: Object.keys(UserWeightByDate),
-            datasets: [{
-                label: "Weight (kg)",
-                data: Object.values(UserWeightByDate),
-                backgroundColor: "rgba(54, 162, 235, 0.2)",
-                borderColor: "rgba(54, 162, 235, 1)",
-                fill: false,
-                tension: 0.3,
-                pointRadius: 5,
-                pointBackgroundColor: "rgba(54, 162, 235, 1)"
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: { y: { beginAtZero: false, title: { display: true, text: "kg" } } },
-            spanGaps: true // <-- Move spanGaps here
-        }
-
-    })
-</script>
-<script>
-    function getNextDateForDay(dayName) {
-        const dayMap = {
-            "sunday": 0,
-            "monday": 1,
-            "tuesday": 2,
-            "wednesday": 3,
-            "thursday": 4,
-            "friday": 5,
-            "saturday": 6
-        }
-
-        const targetDay = dayName.toLowerCase()
-        const targetIdx = dayMap[targetDay]
-
-        if (targetIdx === undefined) {
-            throw new Error(`Invalid day name: ${dayName}`)
-        }
-
-        const today = new Date()
-        const todayIdx = today.getDay() // 0-6 (Sunday=0)
-
-        let delta = targetIdx - todayIdx
-        if (delta <= 0) {
-            delta += 7
-        }
-
-        const nextDate = new Date(today)
-        nextDate.setDate(today.getDate() + delta)
-        return nextDate
-    }
-
-    const UserScheduledExercises = {{ current_user.scheduled_exercises | tojson }}
-    const calendar_events = []
-    UserScheduledExercises.forEach(event => {
-        calendar_events.push({
-            title: "",
-            start: getNextDateForDay(event.day_of_week),
-            color: "#b3d8fd",
-            extendedProps: {
-                "tooltip": event.exercise_type
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.getElementById("avatar").addEventListener("change", function () {
+            if (this.files.length > 0) {
+                document.getElementById("avatar-form").submit()
             }
         })
-    })
-    document.addEventListener("DOMContentLoaded", function () {
-        const calendarEl = document.getElementById("calendar")
-        if (calendarEl) {
-            const calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: "dayGridMonth",
-                height: 330,
-                headerToolbar: {
-                    start: "title",
-                    center: "",
-                    end: "prev,next"
-                },
-                buttonText: {
-                    today: "Today"
-                },
-                events: calendar_events,
-                eventDisplay: "auto",
-                dayHeaders: true,
-                dayHeaderFormat: { weekday: "narrow" },
-                eventDidMount: function (info) {
-                    // Find the day cell
-                    const dayCell = info.el.closest(".fc-daygrid-day")
-                    if (dayCell) {
-                        dayCell.classList.add("fc-blue-circle")
-                        // Collect all events for this day
-                        const dateStr = info.event.startStr
-                        const eventsForDay = info.view.calendar.getEvents().filter(function (ev) {
-                            return ev.startStr === dateStr
-                        })
-                        // Combine tooltips
-                        var tooltip = eventsForDay.map(function (ev) {
-                            return ev.extendedProps.tooltip
-                        }).join("\n")
-                        // Set tooltip on the day cell (not just the event)
-                        dayCell.setAttribute("title", tooltip)
+        document.addEventListener("DOMContentLoaded", function () {
+            const lastLogin = new Date('{{ current_user.last_login }}' + "Z")
+            const today = new Date()
+            let lastLoginString
+            if (
+                lastLogin.getDate() === today.getDate() &&
+                lastLogin.getMonth() === today.getMonth() &&
+                lastLogin.getFullYear() === today.getFullYear()
+            ) {
+                lastLoginString = "Today, " + lastLogin.toLocaleTimeString([],
+                    {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
                     }
-                },
-                eventContent: function (arg) {
-                    return false
-                }
-            })
+                )
+            } else {
+                lastLoginString = lastLogin.toLocaleString([], {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                })
+            }
+            document.getElementById("lastLogin").textContent = lastLoginString
 
-            calendar.render()
-
-            function updateTodayButton() {
-                const todayBtn = calendarEl.querySelector(".fc-today-button")
-                if (todayBtn) {
-                    const today = new Date()
-                    const weekday = today.toLocaleDateString("en-US", { weekday: "short" })
-                    todayBtn.textContent = `Today (${weekday})`
+            const createdAt = new Date('{{ current_user.created_at }}' + "Z")
+            document.getElementById("createdAt").textContent = createdAt.toLocaleDateString()
+        })
+        document.addEventListener("DOMContentLoaded", function () {
+            const greetingLine = document.getElementById("greeting-line")
+            if (greetingLine) {
+                const hour = new Date().getHours()
+                let greeting = "Hello"
+                let emoji = "👋"
+                if (hour >= 5 && hour < 12) {
+                    greeting = "Good morning"
+                    emoji = "🌅"
+                } else if (hour >= 12 && hour < 18) {
+                    greeting = "Good afternoon"
+                    emoji = "☀️"
+                } else if (hour >= 18 && hour < 22) {
+                    greeting = "Good evening"
+                    emoji = "🌇"
+                } else {
+                    greeting = "Good night"
+                    emoji = "🌙"
                 }
+                greetingLine.innerHTML = `<span>${emoji} ${greeting}, <strong>{{ current_user.nickname }}</strong></span>`
+            }
+        })
+    </script>
+    <script>
+        function getLast14DaysLabels() {
+            const labels = []
+            const today = new Date()
+            for (let i = 13; i >= 0; i--) {
+                const date = new Date(today)
+                date.setDate(today.getDate() - i)
+                const label = date.toLocaleDateString()
+                labels.push(label)
+            }
+            return labels
+        }
+
+        const UserBodyMeasurements = {{ current_user.body_measurements | tojson }}
+        const UserWeightByDate = Object.fromEntries(getLast14DaysLabels().map(key => [key, null]))
+        UserBodyMeasurements.forEach(measurement => {
+            if (measurement.type !== "WEIGHT") return
+            const date = new Date(measurement.created_at).toLocaleDateString()
+            if (UserWeightByDate[date] === null) {
+                UserWeightByDate[date] = measurement.value
+            }
+        })
+
+        const UserCalorieBurnedByDate = {{ burned_by_date | tojson }}
+
+        const UserCalorieIntakes = {{ current_user.calorie_intakes | tojson }}
+        const UserCalorieIntakeByDate = {}
+        UserCalorieIntakes.forEach(intake => {
+            const date = new Date(intake.created_at).toLocaleDateString()
+            if (!UserCalorieIntakeByDate[date]) {
+                UserCalorieIntakeByDate[date] = 0
+            }
+            UserCalorieIntakeByDate[date] += intake.calories
+        })
+
+        new Chart(document.getElementById("exerciseChart"), {
+            type: "bar",
+            data: {
+                labels: Object.keys(UserCalorieBurnedByDate).map(date => new Date(date).toLocaleDateString()),
+                datasets: [{
+                    label: "Calories Burned",
+                    data: Object.values(UserCalorieBurnedByDate),
+                    backgroundColor: "rgba(75, 192, 192, 0.6)",
+                    borderColor: "rgba(75, 192, 192, 1)",
+                    borderWidth: 1
+                }]
+            },
+            options: {responsive: true, scales: {y: {beginAtZero: true}}}
+        })
+        new Chart(document.getElementById("intakeChart"), {
+            type: "bar",
+            data: {
+                labels: Object.keys(UserCalorieIntakeByDate),
+                datasets: [{
+                    label: "Calories Intake",
+                    data: Object.values(UserCalorieIntakeByDate),
+                    backgroundColor: "rgba(255, 159, 64, 0.6)",
+                    borderColor: "rgba(255, 159, 64, 1)",
+                    borderWidth: 1
+                }]
+            },
+            options: {responsive: true, scales: {y: {beginAtZero: true}}}
+        })
+
+        new Chart(document.getElementById("weightChart"), {
+            type: "line",
+            data: {
+                labels: Object.keys(UserWeightByDate),
+                datasets: [{
+                    label: "Weight (kg)",
+                    data: Object.values(UserWeightByDate),
+                    backgroundColor: "rgba(54, 162, 235, 0.2)",
+                    borderColor: "rgba(54, 162, 235, 1)",
+                    fill: false,
+                    tension: 0.3,
+                    pointRadius: 5,
+                    pointBackgroundColor: "rgba(54, 162, 235, 1)"
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {y: {beginAtZero: false, title: {display: true, text: "kg"}}},
+                spanGaps: true // <-- Move spanGaps here
             }
 
-            updateTodayButton()
-            calendar.on("datesSet", updateTodayButton)
+        })
+    </script>
+    <script>
+        function getNextDateForDay(dayName) {
+            const dayMap = {
+                "sunday": 0,
+                "monday": 1,
+                "tuesday": 2,
+                "wednesday": 3,
+                "thursday": 4,
+                "friday": 5,
+                "saturday": 6
+            }
 
+            const targetDay = dayName.toLowerCase()
+            const targetIdx = dayMap[targetDay]
+
+            if (targetIdx === undefined) {
+                throw new Error(`Invalid day name: ${dayName}`)
+            }
+
+            const today = new Date()
+            const todayIdx = today.getDay() // 0-6 (Sunday=0)
+
+            let delta = targetIdx - todayIdx
+            if (delta <= 0) {
+                delta += 7
+            }
+
+            const nextDate = new Date(today)
+            nextDate.setDate(today.getDate() + delta)
+            return nextDate
         }
-    })
 
-</script>
+        const UserScheduledExercises = {{ current_user.scheduled_exercises | tojson }}
+        const calendar_events = []
+        UserScheduledExercises.forEach(event => {
+            calendar_events.push({
+                title: "",
+                start: getNextDateForDay(event.day_of_week),
+                color: "#b3d8fd",
+                extendedProps: {
+                    "tooltip": event.exercise_type
+                }
+            })
+        })
+        document.addEventListener("DOMContentLoaded", function () {
+            const calendarEl = document.getElementById("calendar")
+            if (calendarEl) {
+                const calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: "dayGridMonth",
+                    height: 330,
+                    headerToolbar: {
+                        start: "title",
+                        center: "",
+                        end: "prev,next"
+                    },
+                    buttonText: {
+                        today: "Today"
+                    },
+                    events: calendar_events,
+                    eventDisplay: "auto",
+                    dayHeaders: true,
+                    dayHeaderFormat: {weekday: "narrow"},
+                    eventDidMount: function (info) {
+                        // Find the day cell
+                        const dayCell = info.el.closest(".fc-daygrid-day")
+                        if (dayCell) {
+                            dayCell.classList.add("fc-blue-circle")
+                            // Collect all events for this day
+                            const dateStr = info.event.startStr
+                            const eventsForDay = info.view.calendar.getEvents().filter(function (ev) {
+                                return ev.startStr === dateStr
+                            })
+                            // Combine tooltips
+                            var tooltip = eventsForDay.map(function (ev) {
+                                return ev.extendedProps.tooltip
+                            }).join("\n")
+                            // Set tooltip on the day cell (not just the event)
+                            dayCell.setAttribute("title", tooltip)
+                        }
+                    },
+                    eventContent: function (arg) {
+                        return false
+                    }
+                })
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // Only target the Add Goal modal
-        const addGoalModal = document.getElementById("addGoalModal")
-        if (!addGoalModal) return
-        addGoalModal.addEventListener("shown.bs.modal", function () {
-            const exerciseType = addGoalModal.querySelector("[name=\"exercise_type\"]")
-            const metric = addGoalModal.querySelector("[name=\"metric\"]")
-            const unit = addGoalModal.querySelector("[name=\"unit\"]")
-            const metricsByType = {{ metrics_by_type| tojson
+                calendar.render()
+
+                function updateTodayButton() {
+                    const todayBtn = calendarEl.querySelector(".fc-today-button")
+                    if (todayBtn) {
+                        const today = new Date()
+                        const weekday = today.toLocaleDateString("en-US", {weekday: "short"})
+                        todayBtn.textContent = `Today (${weekday})`
+                    }
+                }
+
+                updateTodayButton()
+                calendar.on("datesSet", updateTodayButton)
+
+            }
+        })
+
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Only target the Add Goal modal
+            const addGoalModal = document.getElementById("addGoalModal")
+            if (!addGoalModal) return
+            addGoalModal.addEventListener("shown.bs.modal", function () {
+                const exerciseType = addGoalModal.querySelector("[name=\"exercise_type\"]")
+                const metric = addGoalModal.querySelector("[name=\"metric\"]")
+                const unit = addGoalModal.querySelector("[name=\"unit\"]")
+                const metricsByType = {{ metrics_by_type| tojson
         }};
 
-    function getUnit(metric) {
-        switch (metric) {
-            case "distance":
-                return "m"
-            case "duration":
-                return "min"
-            case "weight":
-                return "kg"
-            default:
-                return ""
-        }
-    }
-
-    function updateMetricAndUnit() {
-        const metrics = metricsByType[exerciseType.value] || []
-        metric.innerHTML = ""
-        metrics.forEach(function (m) {
-            const opt = document.createElement("option")
-            opt.value = m
-            opt.textContent = m.charAt(0).toUpperCase() + m.slice(1)
-            metric.appendChild(opt)
-        })
-        if (metrics.length > 0) {
-            unit.value = getUnit(metrics[0])
-        } else {
-            unit.value = ""
-        }
-    }
-
-    if (exerciseType && metric && unit) {
-        exerciseType.addEventListener("change", updateMetricAndUnit)
-        metric.addEventListener("change", function () {
-            const metrics = metricsByType[exerciseType.value] || []
-            const selected = metrics.find(m => m === this.value)
-            if (selected) {
-                unit.value = getUnit(selected)
-            }
-        })
-        // Run on modal open
-        updateMetricAndUnit()
-    }
-            })
-        })
-</script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const bmi = {{ bmi| tojson
-    }};
-    const bmiBar = document.getElementById("bmiBar")
-    if (bmiBar) {
-        const ctx = bmiBar.getContext("2d")
-        // Draw colored ranges
-        const ranges = [
-            { min: 15, max: 18.5, color: "#4fc3f7" }, // Underweight
-            { min: 18.5, max: 25, color: "#81c784" }, // Normal
-            { min: 25, max: 30, color: "#ffe066" },   // Overweight
-            { min: 30, max: 40, color: "#ffb74d" }    // Obesity
-        ]
-        const width = bmiBar.width, height = bmiBar.height
-        ranges.forEach(r => {
-            const x1 = ((r.min - 15) / 25) * width
-            const x2 = ((r.max - 15) / 25) * width
-            ctx.fillStyle = r.color
-            ctx.fillRect(x1, 0, x2 - x1, height)
-        })
-        // Draw pointer for user's BMI if available and in range
-        if (bmi !== null && !isNaN(bmi) && bmi >= 15 && bmi <= 40) {
-            const x = ((bmi - 15) / 25) * width
-            ctx.beginPath()
-            ctx.moveTo(x, 0)
-            ctx.lineTo(x - 7, height)
-            ctx.lineTo(x + 7, height)
-            ctx.closePath()
-            ctx.fillStyle = "#f44336"
-            ctx.fill()
-        }
-    }
-        })
-</script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // Data for all goals
-        const goals = [
-            {% for goal in current_user.goals %}
-        {
-            id: {{ goal.id }},
-        current: {{ goal.current_value }},
-        target: {{ goal.target_value if goal.target_value else 1 }}
-        },
-        {% endfor %}
-    ];
-    goals.forEach(goal => {
-        const percent = Math.min(100, Math.round((goal.current / goal.target) * 100));
-        const ctx = document.getElementById(`goal-progress-${goal.id}`);
-        if (ctx) {
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    datasets: [{
-                        data: [percent, 100 - percent],
-                        backgroundColor: [
-                            percent >= 100 ? '#28a745' : '#007bff',
-                            '#e9ecef'
-                        ],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    cutout: '70%',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { enabled: false }
+                function getUnit(metric) {
+                    switch (metric) {
+                        case "distance":
+                            return "m"
+                        case "duration":
+                            return "min"
+                        case "weight":
+                            return "kg"
+                        default:
+                            return ""
                     }
                 }
-            });
-        }
-    });
-});
-</script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const messages = [
-            "You’re one step closer to your goals!",
-            "Keep pushing, your future self will thank you!",
-            "Every workout counts. Stay strong!",
-            "Consistency is key. You’ve got this!",
-            "Small steps lead to big changes!",
-            "Believe in yourself and all that you are.",
-            "Your only limit is you. Go for it!",
-            "Sweat now, shine later!",
-            "Progress, not perfection!"
-        ];
-        const msg = messages[Math.floor(Math.random() * messages.length)];
-        const el = document.getElementById("motivation-message");
-        if (el) el.textContent = msg;
-    });
-</script>
-<script>
-    function updateWaterUI(amount) {
-        const goal = 2000;
-        document.getElementById("water-amount").textContent = amount;
-        document.getElementById("water-goal").textContent = goal;
-        const percent = Math.min(100, (amount / goal) * 100);
-        const bar = document.getElementById("water-progress");
-        bar.style.width = percent + "%";
-        bar.setAttribute("aria-valuenow", amount);
-    }
 
-    function fetchWaterAmount() {
-        fetch('/dashboard/water')
-            .then(res => res.json())
-            .then(data => updateWaterUI(data.amount));
-    }
+                function updateMetricAndUnit() {
+                    const metrics = metricsByType[exerciseType.value] || []
+                    metric.innerHTML = ""
+                    metrics.forEach(function (m) {
+                        const opt = document.createElement("option")
+                        opt.value = m
+                        opt.textContent = m.charAt(0).toUpperCase() + m.slice(1)
+                        metric.appendChild(opt)
+                    })
+                    if (metrics.length > 0) {
+                        unit.value = getUnit(metrics[0])
+                    } else {
+                        unit.value = ""
+                    }
+                }
 
-    function addWater(ml) {
-        const current = parseInt(document.getElementById("water-amount").textContent) || 0;
-        fetch('/dashboard/water', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ amount: current + ml })
-        }).then(fetchWaterAmount);
-    }
-
-    function resetWater() {
-        fetch('/dashboard/water', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ amount: 0 })
-        }).then(fetchWaterAmount);
-    }
-    function updateWaterUI(amount) {
-        const goal = 2000;
-        document.getElementById("water-amount").textContent = amount;
-        document.getElementById("water-goal").textContent = goal;
-        const percent = Math.min(100, (amount / goal) * 100);
-        const bar = document.getElementById("water-progress");
-        bar.style.width = percent + "%";
-        bar.setAttribute("aria-valuenow", amount);
-
-        // Fun motivational messages
-        const msgEl = document.getElementById("hydration-progress-message");
-        let msg = "";
-        if (amount === 0) msg = "Start your day with a glass of water! 💦";
-        else if (percent < 50) msg = "Keep going! Your body thanks you. 🚰";
-        else if (percent < 100) msg = "Almost there! Just a bit more to go! 🏃‍♂️";
-        else msg = "Awesome! You've hit your hydration goal! 🎉";
-        if (msgEl) msgEl.textContent = msg;
-    }
-
-    document.addEventListener("DOMContentLoaded", fetchWaterAmount);
-</script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // Example: Use the first day in weather_forecast for today's weather
-        const weather = {{ weather_forecast| tojson
+                if (exerciseType && metric && unit) {
+                    exerciseType.addEventListener("change", updateMetricAndUnit)
+                    metric.addEventListener("change", function () {
+                        const metrics = metricsByType[exerciseType.value] || []
+                        const selected = metrics.find(m => m === this.value)
+                        if (selected) {
+                            unit.value = getUnit(selected)
+                        }
+                    })
+                    // Run on modal open
+                    updateMetricAndUnit()
+                }
+            })
+        })
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const bmi = {{ bmi| tojson
     }};
-    let suggestion = "Stay active!";
-    if (weather && weather.length > 0) {
-        const today = weather[0];
-        const desc = today.description.toLowerCase();
-        if (desc.includes("rain") || desc.includes("storm")) {
-            suggestion = "It's wet outside. Try an indoor workout like yoga or bodyweight exercises!";
-        } else if (desc.includes("clear") || desc.includes("sunny")) {
-            suggestion = "Great weather! Go for a run, walk, or cycle outdoors.";
-        } else if (desc.includes("cloud")) {
-            suggestion = "Mild weather. A brisk walk or outdoor stretching is perfect!";
-        } else if (desc.includes("snow")) {
-            suggestion = "Snowy day! Consider an indoor HIIT or dance workout.";
-        } else {
-            suggestion = "Check the weather and choose your favorite activity!";
+            const bmiBar = document.getElementById("bmiBar")
+            if (bmiBar) {
+                const ctx = bmiBar.getContext("2d")
+                // Draw colored ranges
+                const ranges = [
+                    {min: 15, max: 18.5, color: "#4fc3f7"}, // Underweight
+                    {min: 18.5, max: 25, color: "#81c784"}, // Normal
+                    {min: 25, max: 30, color: "#ffe066"},   // Overweight
+                    {min: 30, max: 40, color: "#ffb74d"}    // Obesity
+                ]
+                const width = bmiBar.width, height = bmiBar.height
+                ranges.forEach(r => {
+                    const x1 = ((r.min - 15) / 25) * width
+                    const x2 = ((r.max - 15) / 25) * width
+                    ctx.fillStyle = r.color
+                    ctx.fillRect(x1, 0, x2 - x1, height)
+                })
+                // Draw pointer for user's BMI if available and in range
+                if (bmi !== null && !isNaN(bmi) && bmi >= 15 && bmi <= 40) {
+                    const x = ((bmi - 15) / 25) * width
+                    ctx.beginPath()
+                    ctx.moveTo(x, 0)
+                    ctx.lineTo(x - 7, height)
+                    ctx.lineTo(x + 7, height)
+                    ctx.closePath()
+                    ctx.fillStyle = "#f44336"
+                    ctx.fill()
+                }
+            }
+        })
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Data for all goals
+            const goals = [
+                {% for goal in current_user.goals %}
+                    {
+                        id: {{ goal.id }},
+                        current: {{ goal.current_value }},
+                        target: {{ goal.target_value if goal.target_value else 1 }}
+                    },
+                {% endfor %}
+            ]
+            goals.forEach(goal => {
+                const percent = Math.min(100, Math.round((goal.current / goal.target) * 100))
+                const ctx = document.getElementById(`goal-progress-${goal.id}`)
+                if (ctx) {
+                    new Chart(ctx, {
+                        type: "doughnut",
+                        data: {
+                            datasets: [{
+                                data: [percent, 100 - percent],
+                                backgroundColor: [
+                                    percent >= 100 ? "#28a745" : "#007bff",
+                                    "#e9ecef"
+                                ],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            cutout: "70%",
+                            plugins: {
+                                legend: {display: false},
+                                tooltip: {enabled: false}
+                            }
+                        }
+                    })
+                }
+            })
+        })
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const messages = [
+                "You’re one step closer to your goals!",
+                "Keep pushing, your future self will thank you!",
+                "Every workout counts. Stay strong!",
+                "Consistency is key. You’ve got this!",
+                "Small steps lead to big changes!",
+                "Believe in yourself and all that you are.",
+                "Your only limit is you. Go for it!",
+                "Sweat now, shine later!",
+                "Progress, not perfection!"
+            ]
+            const msg = messages[Math.floor(Math.random() * messages.length)]
+            const el = document.getElementById("motivation-message")
+            if (el) el.textContent = msg
+        })
+    </script>
+    <script>
+        function updateWaterUI(amount) {
+            const goal = 2000
+            document.getElementById("water-amount").textContent = amount
+            document.getElementById("water-goal").textContent = goal
+            const percent = Math.min(100, (amount / goal) * 100)
+            const bar = document.getElementById("water-progress")
+            bar.style.width = percent + "%"
+            bar.setAttribute("aria-valuenow", amount)
         }
-    }
-    const el = document.getElementById("weather-workout-suggestion");
-    if (el) {
-        el.innerHTML = `
-            <div style="font-size:1.2em;">
-                <span style="font-size:2em;">💡</span>
-                <strong>${suggestion}</strong>
-            </div>
-            <div class="mt-2 text-muted" style="font-size:0.95em;">
-                Weather: ${weather && weather.length > 0 ? weather[0].description : "N/A"}, 
-                Temp: ${weather && weather.length > 0 ? weather[0].temp + "°C" : "N/A"}
-            </div>
-        `;
-    }
-});
-</script>
-<script data-id="cmajmm6yi000nk00bsg5t7xw1" src="https://tinychat.ai/tinychat.js" async defer></script>
+
+        function fetchWaterAmount() {
+            fetch("/dashboard/water")
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error("Network response was not ok")
+                    }
+                    return res.json()
+                })
+                .then(data => updateWaterUI(data.data))
+        }
+
+        function addWater(ml) {
+            fetch("/dashboard/water", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({amount: ml})
+            }).then(fetchWaterAmount)
+        }
+
+        function undoLastWater() {
+            fetch("/dashboard/water", {
+                method: "DELETE",
+                headers: {"Content-Type": "application/json"}
+            }).then(fetchWaterAmount)
+        }
+
+        function updateWaterUI(amount) {
+            const goal = 2000
+            document.getElementById("water-amount").textContent = amount
+            document.getElementById("water-goal").textContent = goal
+            const percent = Math.min(100, (amount / goal) * 100)
+            const bar = document.getElementById("water-progress")
+            bar.style.width = percent + "%"
+            bar.setAttribute("aria-valuenow", amount)
+
+            // Fun motivational messages
+            const msgEl = document.getElementById("hydration-progress-message")
+            let msg = ""
+            if (amount === 0) msg = "Start your day with a glass of water! 💦"
+            else if (percent < 50) msg = "Keep going! Your body thanks you. 🚰"
+            else if (percent < 100) msg = "Almost there! Just a bit more to go! 🏃‍♂️"
+            else msg = "Awesome! You've hit your hydration goal! 🎉"
+            if (msgEl) msgEl.textContent = msg
+        }
+
+        document.addEventListener("DOMContentLoaded", fetchWaterAmount)
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Example: Use the first day in weather_forecast for today's weather
+            const weather = {{ weather_forecast| tojson }};
+            let suggestion = "Stay active!"
+            if (weather && weather.length > 0) {
+                const today = weather[0]
+                const desc = today.description.toLowerCase()
+                if (desc.includes("rain") || desc.includes("storm")) {
+                    suggestion = "It's wet outside. Try an indoor workout like yoga or bodyweight exercises!"
+                } else if (desc.includes("clear") || desc.includes("sunny")) {
+                    suggestion = "Great weather! Go for a run, walk, or cycle outdoors."
+                } else if (desc.includes("cloud")) {
+                    suggestion = "Mild weather. A brisk walk or outdoor stretching is perfect!"
+                } else if (desc.includes("snow")) {
+                    suggestion = "Snowy day! Consider an indoor HIIT or dance workout."
+                } else {
+                    suggestion = "Check the weather and choose your favorite activity!"
+                }
+            }
+            const el = document.getElementById("weather-workout-suggestion")
+            if (el) {
+                el.innerHTML = `
+                    <div style="font-size:1.2em;">
+                        <span style="font-size:2em;">💡</span>
+                        <strong>${suggestion}</strong>
+                    </div>
+                    <div class="mt-2 text-muted" style="font-size:0.95em;">
+                        Weather: ${weather && weather.length > 0 ? weather[0].description : "N/A"},
+                        Temp: ${weather && weather.length > 0 ? weather[0].temp + "°C" : "N/A"}
+                    </div>
+                `
+            }
+        })
+    </script>
+    <script data-id="cmajmm6yi000nk00bsg5t7xw1" src="https://tinychat.ai/tinychat.js" async defer></script>
 {% endblock %}

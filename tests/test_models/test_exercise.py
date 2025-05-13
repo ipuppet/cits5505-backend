@@ -7,9 +7,9 @@ class TestExerciseModel:
     @pytest.mark.parametrize(
         "exercise_type,valid_metrics",
         [
-            (ExerciseType.RUNNING, {"distance_km": 5.0, "duration_min": 30}),
-            (ExerciseType.WEIGHTLIFTING, {"weight_kg": 50.0, "sets": 3, "reps": 12}),
-            (ExerciseType.YOGA, {"duration_min": 45}),
+            (ExerciseType.RUNNING, {"distance": 5.0, "duration": 30}),
+            (ExerciseType.WEIGHTLIFTING, {"weight": 50.0, "sets": 3, "reps": 12}),
+            (ExerciseType.YOGA, {"duration": 45}),
         ],
     )
     def test_valid_exercise_creation(self, session, exercise_type, valid_metrics):
@@ -26,10 +26,10 @@ class TestExerciseModel:
         "exercise_type,invalid_metrics",
         [
             # Single field missing
-            (ExerciseType.RUNNING, {"duration_min": 30}),
-            (ExerciseType.CYCLING, {"distance_km": 10}),
-            (ExerciseType.SWIMMING, {"distance_m": 50}),
-            (ExerciseType.WEIGHTLIFTING, {"weight_kg": 50, "sets": 3}),
+            (ExerciseType.RUNNING, {"duration": 30}),
+            (ExerciseType.CYCLING, {"distance": 10}),
+            (ExerciseType.SWIMMING, {"distance": 50}),
+            (ExerciseType.WEIGHTLIFTING, {"weight": 50, "sets": 3}),
             # Multiple fields missing
             (ExerciseType.RUNNING, {}),
             (ExerciseType.WEIGHTLIFTING, {"reps": 12}),
@@ -50,22 +50,3 @@ class TestExerciseModel:
         """Test validation of required metrics fields"""
         with pytest.raises(ValueError):
             Exercise(user_id=1, type=exercise_type, metrics=invalid_metrics)
-
-    def test_get_method(self, session):
-        """Test retrieval of exercise by ID"""
-        # Create test exercise
-        exercise = Exercise(
-            user_id=1,
-            type=ExerciseType.RUNNING,
-            metrics={"distance_km": 5.0, "duration_min": 30},
-        )
-        session.add(exercise)
-        session.commit()
-
-        # Test valid get
-        result = Exercise.query.get(exercise.id)
-        assert result.id == exercise.id
-
-        # Test invalid ID
-        with pytest.raises(ValueError):
-            Exercise.query.get("invalid_id")

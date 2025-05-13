@@ -4,7 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from flask_login import current_user
 from collections import defaultdict
 
-from server.models import ScheduledExercise, Goal, db, BodyMeasurementType
+from server.models import ScheduledExercise, Goal, db, BodyMeasurementType, WaterIntake
 from server.utils.constants import ExerciseType, ACHIEVEMENTS
 
 
@@ -198,3 +198,38 @@ def edit_goal(
     except SQLAlchemyError as e:
         db.session.rollback()
         raise RuntimeError(f"Error editing goal: {str(e)}")
+
+
+def add_water_intake(amount: float):
+    try:
+        new_water_intake = WaterIntake(
+            user_id=current_user.id,
+            amount=amount,
+        )
+        db.session.add(new_water_intake)
+        db.session.commit()
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise RuntimeError(f"Error adding water intake: {str(e)}")
+
+
+def get_water_intake() -> float:
+    water_intakes = current_user.water_intakes.all()
+    water_today = 0
+    for intake in water_intakes:
+        if intake.created_at.date() == datetime.now().date():
+            water_today += intake.amount
+    return water_today
+
+
+def delete_latest_water_intake():
+    try:
+        water_intake = current_user.water_intakes.order_by(
+            WaterIntake.created_at.desc()
+        ).first()
+        if water_intake:
+            db.session.delete(water_intake)
+            db.session.commit()
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise RuntimeError(f"Error deleting water intake: {str(e)}")

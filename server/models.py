@@ -4,7 +4,7 @@ from flask_migrate import Migrate
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import validates
 from flask_login import UserMixin
-from werkzeug.security import generate_password_hash, check_password_hash
+
 from server.utils.validators import validate_metrics, validate_scope
 from server.utils.constants import ExerciseType, BodyMeasurementType
 
@@ -18,12 +18,6 @@ class User(UserMixin, db.Model):
     password = db.Column(db.Text, nullable=False)
     email = db.Column(db.Text, nullable=False, unique=True)
     nickname = db.Column(db.Text, nullable=False)
-    water_today = db.Column(db.Integer, default=0)
-    def set_password(self, password):
-        self.password = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password, password)
     avatar = db.Column(
         db.String(256), nullable=True
     )  # Stores the relative path to the avatar image
@@ -54,6 +48,12 @@ class User(UserMixin, db.Model):
         lazy="dynamic",
         cascade="all, delete-orphan",
         order_by="CalorieIntake.created_at.desc()",
+    )
+    water_intakes = db.relationship(
+        "WaterIntake",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+        order_by="WaterIntake.created_at.desc()",
     )
     achievements = db.relationship(
         "Achievement",
@@ -176,6 +176,20 @@ class CalorieIntake(db.Model):
     )
     calories = db.Column(db.Float, nullable=False)  # in kcal
     description = db.Column(db.Text, nullable=True)
+    created_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=db.func.current_timestamp(),
+        index=True,
+    )
+
+
+class WaterIntake(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+    )
+    amount = db.Column(db.Float, nullable=False)  # in liters
     created_at = db.Column(
         db.DateTime,
         nullable=False,
