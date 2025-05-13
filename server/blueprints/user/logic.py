@@ -28,7 +28,7 @@ def get_user_by_id(user_id: int) -> User | None:
     """Finds a user by their ID."""
     if not user_id:
         return None
-    user = db.session.get(User, int(user_id))
+    user = db.session.get(User, user_id)
     return user
 
 
