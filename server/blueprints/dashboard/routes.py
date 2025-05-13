@@ -4,7 +4,7 @@ from datetime import datetime
 
 from server.blueprints.browse.forms import BodyMeasurementForm
 from server.blueprints.dashboard import logic
-from server.models import ExerciseType, METRICS_REQUIREMENTS
+from server.utils.constants import ExerciseType, EXERCISE_METRICS
 from server.blueprints.dashboard.forms import ScheduleExerciseForm, GoalForm
 
 dashboard_bp = Blueprint("dashboard", __name__, template_folder="templates")
@@ -28,7 +28,7 @@ def index():
         weather_forecast=weather_forecast,
         bmi=bmi,
         bmi_category=bmi_category,
-        metrics_by_type={e.name: METRICS_REQUIREMENTS[e] for e in ExerciseType},
+        metrics_by_type={e.name: EXERCISE_METRICS[e] for e in ExerciseType},
         achievements_by_type=logic.get_achievements_by_type(),
         all_achievements=logic.get_all_achievements(),
         burned_by_date=logic.get_burned_calories(),
@@ -42,7 +42,7 @@ def add_schedule():
     if form.validate_on_submit():
         try:
             logic.add_schedule(
-                form.exercise_type.data,
+                ExerciseType[form.exercise_type.data],
                 form.scheduled_time.data,
                 form.day_of_week.data,
                 form.note.data,
@@ -51,7 +51,7 @@ def add_schedule():
         except Exception as e:
             flash(str(e), "danger")
     else:
-        flash(form.errors, "danger")
+        flash(str(form.errors), "danger")
     return redirect(url_for("dashboard.index"))
 
 
@@ -62,7 +62,7 @@ def add_goal():
     if form.validate_on_submit():
         try:
             logic.add_goal(
-                form.exercise_type.data,
+                ExerciseType[form.exercise_type.data],
                 form.metric.data,
                 form.target_value.data,
                 form.description.data,
@@ -71,15 +71,15 @@ def add_goal():
         except Exception as e:
             flash(str(e), "danger")
     else:
-        flash(form.errors, "danger")
+        flash(str(form.errors), "danger")
     return redirect(url_for("dashboard.index"))
 
 
-@dashboard_bp.route("/delete_schedule/<int:id>", methods=["POST"])
+@dashboard_bp.route("/delete_schedule/<int:schedule_id>", methods=["POST"])
 @login_required
-def delete_schedule(id):
+def delete_schedule(schedule_id):
     try:
-        logic.delete_schedule(id)
+        logic.delete_schedule(schedule_id)
         flash("Schedule deleted.", "success")
     except Exception as e:
         flash(str(e), "danger")
@@ -87,14 +87,14 @@ def delete_schedule(id):
     return redirect(url_for("dashboard.index"))
 
 
-@dashboard_bp.route("/edit_schedule/<int:id>", methods=["POST"])
+@dashboard_bp.route("/edit_schedule/<int:schedule_id>", methods=["POST"])
 @login_required
-def edit_schedule(id):
+def edit_schedule(schedule_id):
     form = ScheduleExerciseForm()
     try:
         logic.edit_schedule(
-            id,
-            form.exercise_type.data,
+            schedule_id,
+            ExerciseType[form.exercise_type.data],
             form.scheduled_time.data,
             form.day_of_week.data,
             form.note.data,
@@ -106,11 +106,11 @@ def edit_schedule(id):
     return redirect(url_for("dashboard.index"))
 
 
-@dashboard_bp.route("/delete_goal/<int:id>", methods=["POST"])
+@dashboard_bp.route("/delete_goal/<int:goal_id>", methods=["POST"])
 @login_required
-def delete_goal(id):
+def delete_goal(goal_id):
     try:
-        logic.delete_goal(id)
+        logic.delete_goal(goal_id)
         flash("Goal deleted.", "success")
     except Exception as e:
         flash(str(e), "danger")
@@ -118,13 +118,13 @@ def delete_goal(id):
     return redirect(url_for("dashboard.index"))
 
 
-@dashboard_bp.route("/edit_goal/<int:id>", methods=["POST"])
+@dashboard_bp.route("/edit_goal/<int:goal_id>", methods=["POST"])
 @login_required
-def edit_goal(id):
+def edit_goal(goal_id):
     form = GoalForm()
     try:
         logic.edit_goal(
-            id,
+            goal_id,
             form.exercise_type.data,
             form.metric.data,
             form.target_value.data,

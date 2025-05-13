@@ -201,19 +201,10 @@ Share Data
 {{ super() }}
 <script>
 const rawData = {
-  exercise: {{ current_user.exercises_to_list() | tojson }},
-  measurement: {{ current_user.body_measurements_to_list() | tojson }},
-  calorie_intake: {{ current_user.calorie_intakes_to_list() | tojson }},
-  achievement: [
-    {% for a in current_user.achievements %}
-    {
-      "id": {{ a.id }},
-      "type": "{{ a.exercise_type }}",
-      "milestone": {{ a.milestone }},
-      "created_at": "{{ a.achieved_at.isoformat() }}"
-    }{% if not loop.last %},{% endif %}
-    {% endfor %}
-  ]
+  exercise: {{ current_user.exercises | tojson }},
+  measurement: {{ current_user.body_measurements | tojson }},
+  calorie_intake: {{ current_user.calorie_intakes | tojson }},
+  achievement: {{ current_user.achievements | tojson }}
 };
 
 // Function definitions in global scope

@@ -272,38 +272,38 @@ Dashboard
                             <div class="mb-2 text-muted">
                                 {{ now.strftime('%A, %d %b %y') }}
                             </div>
-                            {% if current_user.scheduled_exercises.all() %}
+                            {% if current_user.scheduled_exercises %}
                             <ul class="list-unstyled">
-                                {% for ex in current_user.scheduled_exercises %}
+                                {% for se in current_user.scheduled_exercises %}
                                 <li class="schedule-item d-flex align-items-start mb-3">
                                     <button class="btn btn-check me-3" title="Mark as done">
                                         <i class="bi bi-circle"></i>
                                     </button>
                                     <div class="flex-grow-1">
                                         <div class="fw-bold" style="font-size:1.1rem;">
-                                            {{ ex.exercise_type }}
+                                            {{ se.exercise_type }}
                                         </div>
                                         <div class="text-muted small">
-                                            {{ ex.day_of_week }} {{ ex.scheduled_time.strftime('%I:%M %p').lstrip('0')
+                                            {{ se.day_of_week }} {{ se.scheduled_time.strftime('%I:%M %p').lstrip('0')
                                             }}
-                                            {% if ex.note %} <br /> {{ ex.note }}{% endif %}
+                                            {% if se.note %} <br /> {{ se.note }}{% endif %}
                                         </div>
                                     </div>
                                     <!-- Edit button -->
                                     <button class="btn btn-edit ms-2" title="Edit" data-bs-toggle="modal"
-                                        data-bs-target="#editScheduleModal-{{ ex.id }}">
+                                        data-bs-target="#editScheduleModal-{{ se.id }}">
                                         <i class="bi bi-three-dots"></i>
                                     </button>
                                     <!-- Edit Modal for each schedule item -->
-                                    <div class="modal fade" id="editScheduleModal-{{ ex.id }}" tabindex="-1"
-                                        aria-labelledby="editScheduleModalLabel-{{ ex.id }}" aria-hidden="true">
+                                    <div class="modal fade" id="editScheduleModal-{{ se.id }}" tabindex="-1"
+                                        aria-labelledby="editScheduleModalLabel-{{ se.id }}" aria-hidden="true">
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <form method="POST"
-                                                    action="{{ url_for('dashboard.edit_schedule', id=ex.id) }}">
+                                                    action="{{ url_for('dashboard.edit_schedule', schedule_id=se.id) }}">
                                                     {{ schedule_form.hidden_tag() }}
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title" id="editScheduleModalLabel-{{ ex.id }}">
+                                                        <h5 class="modal-title" id="editScheduleModalLabel-{{ se.id }}">
                                                             Edit or Delete Exercise</h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                             aria-label="Close"></button>
@@ -314,7 +314,7 @@ Dashboard
                                                             <select name="day_of_week" class="form-select">
                                                                 {% for val, label in schedule_form.day_of_week.choices
                                                                 %}
-                                                                <option value="{{ val }}" {% if ex.day_of_week==val
+                                                                <option value="{{ val }}" {% if se.day_of_week==val
                                                                     %}selected{% endif %}>{{ label }}</option>
                                                                 {% endfor %}
                                                             </select>
@@ -325,7 +325,7 @@ Dashboard
                                                                 {% for val, label in schedule_form.exercise_type.choices
                                                                 %}
                                                                 <option value="{{ val }}" {% if
-                                                                    ex.exercise_type.value==val or ex.exercise_type==val
+                                                                    se.exercise_type.value==val or se.exercise_type==val
                                                                     %}selected{% endif %}>{{ label }}</option>
                                                                 {% endfor %}
                                                             </select>
@@ -334,12 +334,12 @@ Dashboard
                                                             <label>Time</label>
                                                             <input type="time" name="scheduled_time"
                                                                 class="form-control"
-                                                                value="{{ ex.scheduled_time.strftime('%H:%M') }}">
+                                                                value="{{ se.scheduled_time.strftime('%H:%M') }}">
                                                         </div>
                                                         <div class="mb-2">
                                                             <label>Note</label>
                                                             <input type="text" name="note" class="form-control"
-                                                                value="{{ ex.note }}">
+                                                                value="{{ se.note }}">
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer d-flex justify-content-between">
@@ -348,7 +348,7 @@ Dashboard
                                                         </button>
                                                 </form>
                                                 <form method="POST"
-                                                    action="{{ url_for('dashboard.delete_schedule', id=ex.id) }}"
+                                                    action="{{ url_for('dashboard.delete_schedule', schedule_id=se.id) }}"
                                                     onsubmit="return confirm('Delete this schedule?');">
                                                     <button type="submit" class="btn btn-danger">Delete
                                                     </button>
@@ -407,7 +407,7 @@ Dashboard
                             </button>
                         </div>
                         <div class="card-body">
-                            {% if current_user.goals.all() %}
+                            {% if current_user.goals %}
                             <ul class="list-group">
                                 {% for goal in current_user.goals %}
                                 <li class="list-group-item d-flex align-items-center position-relative goal-item"
@@ -431,7 +431,7 @@ Dashboard
                                         <span class="badge bg-success rounded-pill mb-2">
                                             Completed <i class="bi bi-check-circle-fill ms-1"></i>
                                         </span>
-                                        <form method="POST" action="{{ url_for('dashboard.delete_goal', id=goal.id) }}"
+                                        <form method="POST" action="{{ url_for('dashboard.delete_goal', goal_id=goal.id) }}"
                                             onsubmit="return confirm('Are you sure you want to delete this completed goal?');"
                                             class="delete-goal-form d-inline">
                                             <button type="submit"
@@ -450,7 +450,7 @@ Dashboard
                                             {{ goal.current_value }} / {{ goal.target_value }}
                                         </span>
                                         {% endif %}
-                                        <form method="POST" action="{{ url_for('dashboard.delete_goal', id=goal.id) }}"
+                                        <form method="POST" action="{{ url_for('dashboard.delete_goal', goal_id=goal.id) }}"
                                             onsubmit="return confirm('Are you sure you want to give up this goal?');"
                                             class="delete-goal-form d-inline">
                                             <button type="submit"
@@ -676,7 +676,7 @@ Dashboard
         return labels
     }
 
-    const UserBodyMeasurements = {{ current_user.body_measurements_to_list() | tojson }}
+    const UserBodyMeasurements = {{ current_user.body_measurements | tojson }}
     const UserWeightByDate = Object.fromEntries(getLast14DaysLabels().map(key => [key, null]))
     UserBodyMeasurements.forEach(measurement => {
         if (measurement.type !== "WEIGHT") return
@@ -688,7 +688,7 @@ Dashboard
 
     const UserCalorieBurnedByDate = {{ burned_by_date | tojson }}
 
-    const UserCalorieIntakes = {{ current_user.calorie_intakes_to_list() | tojson }}
+    const UserCalorieIntakes = {{ current_user.calorie_intakes | tojson }}
     const UserCalorieIntakeByDate = {}
     UserCalorieIntakes.forEach(intake => {
         const date = new Date(intake.created_at).toLocaleDateString()
@@ -782,7 +782,7 @@ Dashboard
         return nextDate
     }
 
-    const UserScheduledExercises = {{ current_user.scheduled_exercises_to_list() | tojson }}
+    const UserScheduledExercises = {{ current_user.scheduled_exercises | tojson }}
     const calendar_events = []
     UserScheduledExercises.forEach(event => {
         calendar_events.push({

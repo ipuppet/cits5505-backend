@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import IntegerField, DateField
 from wtforms.validators import ValidationError, InputRequired, DataRequired
 
+from server.utils.validators import validate_scope
 from server.utils.wtforms_custom import JSONField
 
 
@@ -12,19 +13,7 @@ class ShareForm(FlaskForm):
     end_date = DateField("End Date", validators=[DataRequired()])
 
     def validate_scope(self, scope):
-        if not isinstance(scope.data, dict):
-            raise ValidationError("Scope must be a dictionary.")
-        scopes = [
-            "exercise_types",
-            "body_measurement_types",
-            "achievements",
-        ]
-        has_scope = False
-        for key in scopes:
-            if key in scope.data:
-                has_scope = True
-                break
-        if not has_scope:
-            raise ValidationError(
-                f"At least one of {', '.join(scopes)} must be present in scope."
-            )
+        try:
+            validate_scope(scope.data)
+        except ValueError as e:
+            raise ValidationError(str(e))
