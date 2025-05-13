@@ -27,7 +27,7 @@ class BodyMeasurementType(Enum):
 
 
 EXERCISE_METRICS = {
-    ExerciseType.CYCLING: ["distance", "duration"],  # in miters and minutes
+    ExerciseType.CYCLING: ["distance", "duration"],  # in meters and minutes
     ExerciseType.RUNNING: ["distance", "duration"],
     ExerciseType.SWIMMING: ["distance", "duration"],
     ExerciseType.WEIGHTLIFTING: ["weight", "sets", "reps"],  # in kg
