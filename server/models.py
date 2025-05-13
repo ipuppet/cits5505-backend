@@ -84,9 +84,6 @@ class User(UserMixin, db.Model):
         order_by="Share.created_at.desc()",
     )
 
-    def __init__(self, **kwargs):
-        super(db.Model, self).__init__(**kwargs)
-
 
 class Exercise(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -191,12 +188,6 @@ class ScheduledExercise(db.Model):
     note = db.Column(db.Text, nullable=True)
     day_of_week = db.Column(db.String(10), nullable=False)  # "Monday", "Tuesday" etc.
 
-    @staticmethod
-    def get(schedule_id: int):
-        if not schedule_id:
-            raise ValueError("ID cannot be empty")
-        return db.session.get(ScheduledExercise, int(schedule_id))
-
 
 class Goal(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -230,12 +221,6 @@ class Goal(db.Model):
             self.achieved = True
         return total
 
-    @staticmethod
-    def get(goal_id: int):
-        if not goal_id:
-            raise ValueError("ID cannot be empty")
-        return db.session.get(Goal, int(goal_id))
-
 
 class Share(db.Model):
     id = db.Column(db.Uuid, primary_key=True, default=uuid.uuid4)
@@ -246,6 +231,8 @@ class Share(db.Model):
         db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
     )
     scope = db.Column(db.JSON, nullable=False)
+    start_date = db.Column(db.DateTime, nullable=False)
+    end_date = db.Column(db.DateTime, nullable=False)
     created_at = db.Column(
         db.DateTime,
         nullable=False,
@@ -262,14 +249,3 @@ class Share(db.Model):
     @validates("scope")
     def validate_scope(self, _key, scope: dict):
         return validate_scope(scope)
-
-    @staticmethod
-    def get(share_id: uuid.UUID, include_deleted: bool = False):
-        if not share_id:
-            raise ValueError("ID cannot be empty")
-
-        query = db.session.query(Share).filter_by(id=share_id)
-        if not include_deleted:
-            query = query.filter_by(deleted=False)
-
-        return query.one_or_none()

@@ -26,10 +26,7 @@
                             {{ exercise_form.type(class="form-select", onchange="exerciseTypeChange()") }}
                         </div>
                         <div id="exerciseFormContainer"></div>
-                        <div class="d-none">
-                            {{ exercise_form.metrics.label() }}
-                            {{ exercise_form.metrics() }}
-                        </div>
+                        <input type="hidden" name="metrics" id="exerciseForm.metrics">
                         <div class="mb-3">
                             {{ exercise_form.date.label(class="form-label") }}
                             {{ exercise_form.date(class="form-control") }}

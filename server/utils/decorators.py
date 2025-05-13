@@ -9,13 +9,13 @@ def api_response(func):
             response = {
                 "code": 1,
                 "message": "success",
-                "data": func(*args, **kwargs)
+                "data": func(*args, **kwargs),
             }
         except Exception as e:
             response = {
                 "code": 0,
                 "message": str(e),
-                "data": None
+                "data": None,
             }
         return jsonify(response)
 
