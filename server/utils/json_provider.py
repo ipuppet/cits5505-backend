@@ -1,5 +1,5 @@
 from flask.json.provider import DefaultJSONProvider
-from datetime import datetime, time, timezone
+from datetime import time
 
 from server.models import db
 from server.utils.constants import ExerciseType, BodyMeasurementType
