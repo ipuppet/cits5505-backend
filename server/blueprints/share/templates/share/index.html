@@ -15,8 +15,8 @@
                 <div class="card shadow-sm border-0" style="border-radius: 1rem;">
                     <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
                         <h4 class="mb-0">Share with Friends</h4>
-                        <div class="text-muted small mt-1">Current User: {{ current_user.nickname }}
-                            ({{ current_user.username }})
+                        <div class="text-muted small mt-1">
+                            Current User: {{ current_user.nickname }} (@{{ current_user.username }})
                         </div>
                     </div>
                     <div class="card-body">
@@ -76,13 +76,12 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <h5 class="mb-0">Sent Shares</h5>
                                     <button class="btn btn-circle btn-add" data-bs-toggle="modal"
-                                            data-bs-target="#sentSharesModal">
+                                            data-bs-target="#sharesSentModal">
                                         <i class="bi bi-three-dots"></i>
                                     </button>
                                 </div>
-                                <div id="shareSent"></div>
-                                <div id="sentCountText" class="text-muted mt-2">You have successfully shared 0
-                                    records.
+                                <div class="text-muted mt-2">
+                                    You have successfully shared {{ shares_sent | length }} records.
                                 </div>
                             </div>
                             <hr class="my-2" style="border-top: 1px solid #e0e7ef; opacity: 1;">
@@ -90,12 +89,13 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <h5 class="mb-0">Received Shares</h5>
                                     <button class="btn btn-circle btn-add" data-bs-toggle="modal"
-                                            data-bs-target="#receivedSharesModal">
+                                            data-bs-target="#sharesReceivedModal">
                                         <i class="bi bi-three-dots"></i>
                                     </button>
                                 </div>
-                                <div id="shareReceived"></div>
-                                <div id="receivedCountText" class="text-muted mt-2">You have received 0 records.</div>
+                                <div class="text-muted mt-2">
+                                    You have received {{ shares_received | length }} records.
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -128,31 +128,31 @@
     </div>
 
     <!-- Sent Shares Modal -->
-    <div class="modal fade" id="sentSharesModal" tabindex="-1" aria-labelledby="sentSharesModalLabel"
+    <div class="modal fade" id="sharesSentModal" tabindex="-1" aria-labelledby="sharesSentModalLabel"
          aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="sentSharesModalLabel">All Sent Shares</h5>
+                    <h5 class="modal-title" id="sharesSentModalLabel">All Sent Shares</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div id="sentSharesDetail"></div>
+                    <div id="sharesSentDetail"></div>
                 </div>
             </div>
         </div>
     </div>
     <!-- Received Shares Modal -->
-    <div class="modal fade" id="receivedSharesModal" tabindex="-1" aria-labelledby="receivedSharesModalLabel"
+    <div class="modal fade" id="sharesReceivedModal" tabindex="-1" aria-labelledby="sharesReceivedModalLabel"
          aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="receivedSharesModalLabel">All Received Shares</h5>
+                    <h5 class="modal-title" id="sharesReceivedModalLabel">All Received Shares</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div id="receivedSharesDetail"></div>
+                    <div id="sharesReceivedDetail"></div>
                 </div>
             </div>
         </div>
@@ -165,8 +165,8 @@
         const ExercisesTypes = {{ exercise_types | tojson }}
         const BodyMeasurementTypes = {{ body_measurement_types | tojson }}
 
-        const Shared = {{ current_user.shares_sent | tojson }}
-        const Received = {{ current_user.shares_received | tojson }}
+        const SharesSent = {{ shares_sent | tojson }}
+        const SharesReceived = {{ shares_received | tojson }}
     </script>
     <script src="{{ url_for('static', filename='js/share/index.js') }}"></script>
     <script src="{{ url_for('static', filename='js/share/onload.js') }}"></script>

@@ -9,9 +9,23 @@ window.addEventListener("scroll", () => {
     }
 })
 
-function toReadable(str) {
-    return str.replace(/([a-z])([A-Z])/g, "$1 $2")
-        .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
-        .replace(/_/g, " ")
-        .replace(/\b\w/g, char => char.toUpperCase())
+function formatName(name) {
+    return name
+        .split("_")
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(" ")
+}
+
+// Add timezone conversion function, consistent with browse page
+function convertTimezone(data, key = "created_at") {
+    if (!Array.isArray(data)) return data
+
+    const result = JSON.parse(JSON.stringify(data)) // Deep copy of the array
+    for (let i = 0; i < result.length; i++) {
+        if (result[i][key]) {
+            const date = new Date(result[i][key])
+            result[i][key] = date.toLocaleString()
+        }
+    }
+    return result
 }

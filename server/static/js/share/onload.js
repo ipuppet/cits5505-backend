@@ -2,35 +2,18 @@ restoreFilterState()
 
 // Search friends functionality
 document.getElementById("searchFriend").addEventListener("input", function () {
-    const username = this.value.trim()
-    const friendSelect = document.getElementById("friendacSelect")
-    friendSelect.innerHTML = ""
-    if (!username) return
-    fetch(`/user/${encodeURIComponent(username)}`)
-        .then(res => res.json())
-        .then(res => {
-            if (res.code === 1 && Array.isArray(res.data)) {
-                res.data.forEach(user => {
-                    const option = document.createElement("option")
-                    option.value = user.id
-                    option.text = user.nickname ? `${user.nickname}（${user.username}）` : user.username
-                    friendSelect.appendChild(option)
-                })
-            }
-        })
+    searchFriend()
 })
 
 // Modal event handlers
-const sentModal = document.getElementById("sentSharesModal")
-sentModal && sentModal.addEventListener("show.bs.modal", function () {
-    renderSharesDetail("sent", [])
+document.getElementById("sharesSentModal").addEventListener("show.bs.modal", function () {
+    renderSharesDetail("sent", SharesSent)
 })
-const receivedModal = document.getElementById("receivedSharesModal")
-receivedModal && receivedModal.addEventListener("show.bs.modal", function () {
-    renderSharesDetail("received", [])
+document.getElementById("sharesReceivedModal").addEventListener("show.bs.modal", function () {
+    renderSharesDetail("received", SharesReceived)
 })
 
-const fieldIdList = ["start_date", "end_date", "chartType", "subTypeCheckboxes",]
+const fieldIdList = ["start_date", "end_date", "subTypeCheckboxes",]
 fieldIdList.forEach(id => {
     const field = document.getElementById(id)
     if (field) {
@@ -40,8 +23,6 @@ fieldIdList.forEach(id => {
         })
     }
 })
-
-// Data type selection handler - generates appropriate sub-type filters
 document.getElementById("chartType").addEventListener("change", function () {
     sharedDataTypeChanged()
     fetchAndPreviewShareData()
