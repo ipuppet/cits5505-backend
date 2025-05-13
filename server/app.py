@@ -1,5 +1,6 @@
 import os
 from flask import Flask
+import wtforms_json
 
 from server.models import db, migrate
 from server.utils.context_processors import inject_pytz
@@ -38,6 +39,9 @@ def create_app(config_class=None):
 
     # Set the JSON provider to use the custom JSONProvider
     app.json = JSONProvider(app)
+
+    # Initialize WTForms JSON support
+    wtforms_json.init()
 
     # Initialize the database
     db.init_app(app)

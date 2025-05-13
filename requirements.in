@@ -3,6 +3,7 @@ Flask-SQLAlchemy
 Flask-Migrate
 bcrypt
 Flask-WTF
+wtforms-json
 wtforms[email]
 Flask-Mail
 pytest

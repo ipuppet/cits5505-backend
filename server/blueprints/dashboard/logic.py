@@ -126,7 +126,7 @@ def add_schedule(exercise_type: ExerciseType, scheduled_time, day_of_week, note)
 
 def delete_schedule(schedule_id: int):
     try:
-        schedule = db.session.get(ScheduledExercise, schedule_id)
+        schedule = db.session.get(ScheduledExercise, schedule_id).first()
         if not schedule:
             raise ValueError("Schedule not found")
         db.session.delete(schedule)
@@ -143,7 +143,7 @@ def edit_schedule(
     note,
 ):
     try:
-        schedule = db.session.get(ScheduledExercise, schedule_id)
+        schedule = db.session.get(ScheduledExercise, schedule_id).first()
         schedule.day_of_week = day_of_week
         schedule.exercise_type = exercise_type
         schedule.scheduled_time = scheduled_time
@@ -172,7 +172,7 @@ def add_goal(exercise_type: ExerciseType, metric, target_value, description):
 
 def delete_goal(goal_id: int):
     try:
-        goal = db.session.get(Goal, goal_id)
+        goal = db.session.get(Goal, goal_id).first()
         if not goal:
             raise ValueError("Goal not found")
         db.session.delete(goal)
@@ -189,7 +189,7 @@ def edit_goal(
     description,
 ):
     try:
-        goal = db.session.get(Goal, goal_id)
+        goal = db.session.get(Goal, goal_id).first()
         goal.exercise_type = exercise_type
         goal.metric = metric
         goal.target_value = target_value
