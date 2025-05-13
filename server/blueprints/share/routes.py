@@ -40,16 +40,32 @@ def preview():
     )
 
 
-@share_bp.route("/<uuid:share_id>", methods=["GET", "DELETE"])
+@share_bp.route("/<uuid:share_id>", methods=["GET"])
 @login_required
-@api_response
-def shared(share_id):
+def view(share_id):
     if not share_id:
         raise ValueError("Share ID is required.")
-    # Handle DELETE request
-    if request.method == "DELETE":
-        return share_logic.delete_share(share_id)
-    return share_logic.get_shared(share_id)
+    try:
+        shared_data = share_logic.get_shared(share_id)
+        return render_template(
+            "share/view.html",
+            shared_data=shared_data,
+            exercise_metrics=browse_logic.get_exercises_metrics(),
+            exercise_types=browse_logic.get_exercise_types(),
+            body_measurement_types=browse_logic.get_body_measurement_types(),
+        )
+    except Exception as e:
+        flash(str(e), "danger")
+        return redirect(url_for("share.index"))
+
+
+@share_bp.route("/<uuid:share_id>", methods=["DELETE"])
+@login_required
+@api_response
+def delete(share_id):
+    if not share_id:
+        raise ValueError("Share ID is required.")
+    return share_logic.delete_share(share_id)
 
 
 @share_bp.route("/create", methods=["POST"])

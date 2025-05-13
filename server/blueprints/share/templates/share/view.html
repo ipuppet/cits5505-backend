@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Shared Data
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/share/view.css') }}"/>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="col-12">
+            <div class="card shadow border-0 mb-4">
+                <div class="card-body p-lg-4">
+                    {% if shared_data["exercises"] | length > 0 %}
+                        <!-- Exercise Data Dashboard -->
+                        <h5 class="card-title text-center mb-4">Exercise Analytics</h5>
+                        <div class="row g-4">
+                            <!-- Pie Chart -->
+                            <div class="col-12 col-lg-6">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <h3 class="h5 fw-semibold mb-3">Type Distribution</h3>
+                                        <canvas id="typeDistribution" class="chart-container"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Radar Chart -->
+                            <div class="col-12 col-lg-6">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <h3 class="h5 fw-semibold mb-3">Strength Analysis</h3>
+                                        <canvas id="strengthRadar" class="chart-container"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cardio Statistics -->
+                            <div class="col-12">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <h3 class="h5 fw-semibold mb-3">Cardio Statistics</h3>
+                                        <canvas id="cardioChart" class="chart-container"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Training -->
+                            <div class="col-12">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <h3 class="h5 fw-semibold mb-3">Daily Activity</h3>
+                                        <canvas id="dailyTrend" class="chart-container"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    {% elif shared_data["body_measurements"] | length > 0 %}
+                        <!-- Body Measurement Dashboard -->
+                        <h5 class="card-title text-center mb-4">Body Metrics</h5>
+
+                        <!-- Weights, Body Fat, and Height -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-12 col-md-4">
+                                <div class="card bg-primary text-white shadow-lg">
+                                    <div class="card-body text-center py-4">
+                                        <h3 class="h6 fw-normal mb-3">Latest Weight</h3>
+                                        <div class="display-5 fw-bold mb-1" id="latestWeight">-</div>
+                                        <div class="text-white-50 small" id="weightUnit">kg</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <div class="card bg-info text-white shadow-lg">
+                                    <div class="card-body text-center py-4">
+                                        <h3 class="h6 fw-normal mb-3">Body Fat</h3>
+                                        <div class="display-5 fw-bold mb-1" id="bodyFatPercentage">-</div>
+                                        <div class="text-white-50 small">%</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <div class="card bg-success text-white shadow-lg">
+                                    <div class="card-body text-center py-4">
+                                        <h3 class="h6 fw-normal mb-3">Height</h3>
+                                        <div class="display-5 fw-bold mb-1" id="heightDisplay">-</div>
+                                        <div class="text-white-50 small">cm</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chart Section -->
+                        <div class="row g-4">
+                            <div class="col-12 col-xl-6">
+                                <div class="card border-0 shadow">
+                                    <div class="card-body">
+                                        <h3 class="h5 fw-semibold mb-3">Weight Trend</h3>
+                                        <canvas id="weightChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-xl-6">
+                                <div class="card border-0 shadow">
+                                    <div class="card-body">
+                                        <h3 class="h5 fw-semibold mb-3">Body Fat Trend</h3>
+                                        <canvas id="bodyFatChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        const ExercisesMetrics = {{ exercise_metrics | tojson }}
+        const ExercisesTypes = {{ exercise_types | tojson }}
+        const BodyMeasurementTypes = {{ body_measurement_types | tojson }}
+        const SharedData = {{ shared_data | tojson }}
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {% if shared_data["exercises"] | length > 0 %}
+        <script src="{{ url_for('static', filename='js/share/view.exercises.js') }}"></script>
+    {% elif shared_data["body_measurements"] | length > 0 %}
+        <script src="{{ url_for('static', filename='js/share/view.body_measurements.js') }}"></script>
+    {% endif %}
+{% endblock %}
