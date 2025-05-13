@@ -1,51 +1,3 @@
-async function fetchSharedRecords(scope) {
-    const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-    const timezoneInput = document.getElementById("timezone")
-    timezoneInput.value = browserTimezone
-    const response = await fetch(`/share/preview`, {
-        method: "POST", headers: {
-            "Content-Type": "application/json"
-        }, body: JSON.stringify({
-            scope,
-            timezone: timezoneInput.value,
-            start_date: document.getElementById("start_date").value,
-            end_date: document.getElementById("end_date").value,
-        })
-    })
-    const data = await response.json()
-    if (data.code === 1) {
-        return data.data
-    } else {
-        console.error("Failed to fetch shared records:", data.message)
-        return null
-    }
-}
-
-// Function definitions in global scope
-function deleteShareRecord(id) {
-    fetch("/share/" + id, {method: "DELETE"})
-        .then(response => response.json())
-        .then(data => {
-            alert("Share record deleted successfully.")
-            // Reload share records
-            location.reload()
-        })
-}
-
-// Add timezone conversion function, consistent with browse page
-function convertTimezone(data, key = "created_at") {
-    if (!Array.isArray(data)) return data
-
-    const result = JSON.parse(JSON.stringify(data)) // Deep copy of the array
-    for (let i = 0; i < result.length; i++) {
-        if (result[i][key]) {
-            const date = new Date(result[i][key])
-            result[i][key] = date.toLocaleString()
-        }
-    }
-    return result
-}
-
 // Save filter conditions to sessionStorage
 function saveFilterState() {
     const state = {
@@ -119,17 +71,139 @@ function restoreFilterState() {
     }
 }
 
-// TODO: Expand all Sent Shares/Received Shares
-function renderSharesDetail(type, data) {
-    let html = ""
-    data.forEach(record => {
-        html += `<div class="card mb-2"><div class="card-body">
-            <h6 class="card-title">${type === "sent" ? record.receiver.nickname : record.sender.nickname}</h6>
-            <p class="card-text">${record.message}</p>
-            <div class="text-muted small">${record.time || ""}</div>
-        </div></div>`
+function searchFriend() {
+    const username = document.getElementById("searchFriend").value.trim()
+    const friendSelect = document.getElementById("friendacSelect")
+    friendSelect.innerHTML = ""
+    if (!username) return
+    fetch(`/user/${encodeURIComponent(username)}`)
+        .then(res => res.json())
+        .then(res => {
+            if (res.code === 1 && Array.isArray(res.data)) {
+                res.data.forEach(user => {
+                    const option = document.createElement("option")
+                    option.value = user.id
+                    option.text = `${user.nickname}（@${user.username}）`
+                    friendSelect.appendChild(option)
+                })
+            }
+        })
+}
+
+async function fetchSharedRecords(scope) {
+    const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+    const timezoneInput = document.getElementById("timezone")
+    timezoneInput.value = browserTimezone
+    const response = await fetch(`/share/preview`, {
+        method: "POST", headers: {
+            "Content-Type": "application/json"
+        }, body: JSON.stringify({
+            scope,
+            timezone: timezoneInput.value,
+            start_date: document.getElementById("start_date").value,
+            end_date: document.getElementById("end_date").value,
+        })
     })
-    document.getElementById(type === "sent" ? "sentSharesDetail" : "receivedSharesDetail").innerHTML = html
+    const data = await response.json()
+    if (data.code === 1) {
+        return data.data
+    } else {
+        console.error("Failed to fetch shared records:", data.message)
+        return null
+    }
+}
+
+// Function definitions in global scope
+function deleteShareRecord(id) {
+    fetch("/share/" + id, {method: "DELETE"})
+        .then(response => response.json())
+        .then(data => {
+            alert("Share record deleted successfully.")
+            // Reload share records
+            location.reload()
+        })
+}
+
+function renderSharesDetail(type, data) {
+    const detailId = type === "sent" ? "sharesSentDetail" : "sharesReceivedDetail"
+    const container = document.getElementById(detailId)
+    container.innerHTML = ""
+
+    data.forEach(record => {
+        // Create card element
+        const card = document.createElement("div")
+        card.className = "card mb-2"
+
+        const cardBody = document.createElement("div")
+        cardBody.className = "card-body"
+
+        const headerRow = document.createElement("div")
+        headerRow.className = "d-flex justify-content-between align-items-center mb-2"
+
+        const title = document.createElement("h6")
+        title.className = "card-title mb-0"
+        title.textContent = type === "sent" ? record.receiver : record.sender
+
+        const deleteButton = document.createElement("button")
+        deleteButton.className = "btn btn-sm btn-outline-danger"
+        deleteButton.setAttribute("type", "button")
+        deleteButton.setAttribute("aria-label", "Delete")
+
+        const deleteIcon = document.createElement("i")
+        deleteIcon.className = "bi bi-trash"
+        deleteButton.appendChild(deleteIcon)
+
+        deleteButton.addEventListener("click", () => {
+            // 这里添加删除逻辑
+            deleteShareRecord(record.id)
+        })
+
+        headerRow.appendChild(title)
+        headerRow.appendChild(deleteButton)
+
+        const scopeContainer = document.createElement("div")
+        scopeContainer.className = "card-text"
+
+        // Render scope data
+        renderScope(scopeContainer, record.scope)
+
+        const timeInfo = document.createElement("div")
+        timeInfo.className = "text-muted small"
+        timeInfo.textContent = record.created_at || ""
+
+        cardBody.appendChild(headerRow)
+        cardBody.appendChild(scopeContainer)
+        cardBody.appendChild(timeInfo)
+        card.appendChild(cardBody)
+        container.appendChild(card)
+    })
+}
+
+function renderScope(container, scope) {
+    if (!scope) return
+
+    Object.entries(scope).forEach(([category, items]) => {
+        if (items.length === 0) return
+
+        // Create category title
+        const categoryTitle = document.createElement("div")
+        categoryTitle.className = "fw-bold mt-2"
+        categoryTitle.textContent = formatName(category) + ":"
+        container.appendChild(categoryTitle)
+
+        // Create items list
+        const itemsList = document.createElement("div")
+        itemsList.className = "ms-3"
+
+        items.forEach(item => {
+            const itemElement = document.createElement("span")
+            itemElement.className = "badge bg-light text-dark me-2 mb-1"
+            itemElement.textContent = formatName(item)
+            itemsList.appendChild(itemElement)
+        })
+
+        container.appendChild(itemsList)
+    })
 }
 
 function sharedDataTypeChanged() {
@@ -179,7 +253,7 @@ function sharedDataTypeChanged() {
     })
 }
 
-function get_columns(type) {
+function getColumns(type) {
     let columns = ["created_at", "type"]
     if (type === "exercises") {
         // Get selected subtypes for specific header rendering
@@ -203,7 +277,7 @@ function get_columns(type) {
 // Dynamic render table headers based on data type
 function renderSharePreviewHeader(columns) {
     const header = document.getElementById("sharePreviewHeader")
-    header.innerHTML = columns.map(col => `<th>${toReadable(col)}</th>`).join("")
+    header.innerHTML = columns.map(col => `<th>${formatName(col)}</th>`).join("")
 }
 
 // Render preview table with filtered data
@@ -254,7 +328,7 @@ async function fetchAndPreviewShareData() {
     const scope = JSON.parse(document.getElementById("scopeHidden").value)
     const type = document.getElementById("chartType").value
 
-    const columns = get_columns(type)
+    const columns = getColumns(type)
 
     // Render appropriate headers based on data type
     renderSharePreviewHeader(columns)

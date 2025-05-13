@@ -1,3 +1,6 @@
+import pytz
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
 from server.models import db
@@ -150,4 +153,7 @@ def water():
     if request.method == "DELETE":
         return logic.delete_latest_water_intake()
     # GET
-    return logic.get_water_intake()
+    now = request.args.get("now")
+    naive_time = datetime.fromisoformat(now.replace("Z", "+00:00"))
+    utc_time = naive_time.replace(tzinfo=timezone.utc)
+    return logic.get_water_intake(utc_time)
