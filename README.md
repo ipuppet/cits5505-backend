@@ -1,6 +1,29 @@
 # CITS5505 Project: Sport Tracker
 This is our web application project for CITS5505. The application is built using Flask, SQLite, and various front-end technologies. It is designed to be user-friendly and visually appealing, with a focus on data visualization and user engagement.
 
+## Group Member
+
+
+**Name:**  Samuel Wei
+**ID:** 24115652 
+**GitHub Username:** ipuppet
+
+
+**Name:** Brandon Ge  
+**ID:** 23813666  
+**GitHub Username:** bag026
+
+
+**Name:** Xiaoqin Fan
+**ID:** 24055569
+**GitHub Username:** Fan Xiaoqin
+
+
+**Name:**  Xiaotong Yin
+**ID:** 24491566  
+**GitHub Username:** wisermonk
+
+
 ## Project Overview
 
 Our project is a modern, sport tracker web application built with Flask and SQLite. It helps users log workouts, track hydration, monitor progress, and set personal goals—all within a friendly, interactive dashboard. Unlike typical fitness apps, our platform emphasizes social features, data visualization, and user motivation.
@@ -15,26 +38,6 @@ Our project is a modern, sport tracker web application built with Flask and SQLi
 - **Modern UI:** Responsive, accessible interface using Bootstrap and Chart.js for a smooth user experience.
 - **Easy Setup:** Designed for quick local deployment with clear instructions and minimal dependencies.
 - **Test-Driven Development:** Comprehensive unit tests ensure reliability and maintainability.
-
-## Group Member
-
-**Name:**  Samuel Wei
-**ID:** 24115652 
-**GitHub Username:** ipuppet
-
-**Name:** Brandon Ge  
-**ID:** 23813666  
-**GitHub Username:** bag026
-
-**Name:** Xiaoqin Fan
-**ID:** 24055569
-**GitHub Username:** Fan Xiaoqin
-
-
-**Name:**  Xiaotong Yin
-**ID:** 24491566  
-**GitHub Username:** wisermonk
-
 
 ## Prerequisites
 
