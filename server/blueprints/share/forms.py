@@ -14,6 +14,6 @@ class ShareForm(FlaskForm):
 
     def validate_scope(self, scope):
         try:
-            validate_scope(scope)
+            validate_scope(scope.data)
         except ValueError as e:
             raise ValidationError(str(e))
