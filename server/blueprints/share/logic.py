@@ -1,4 +1,6 @@
 import uuid
+
+from flask_login import current_user
 from sqlalchemy.exc import SQLAlchemyError
 
 from server.models import db, Share, Exercise, BodyMeasurement, Achievement
@@ -139,3 +141,38 @@ def delete_share(share_id: uuid.UUID):
     except SQLAlchemyError as e:
         db.session.rollback()
         raise RuntimeError(f"Error deleting share: {str(e)}")
+
+
+def get_user_shares() -> tuple[list[dict], list[dict]]:
+    """
+    Retrieve shares for a user.
+
+    Args:
+        user_id (int): The ID of the user.
+
+    Returns:
+        dict: A dictionary containing shares sent and received.
+    """
+
+    def get_share_data(item):
+        return {
+            "id": item.id,
+            "scope": item.scope,
+            "start_date": item.start_date,
+            "end_date": item.end_date,
+            "created_at": item.created_at,
+            "sender": f"{item.sender.nickname} (@{item.sender.username})",
+            "receiver": f"{item.receiver.nickname} (@{item.receiver.username})",
+        }
+
+    try:
+        shares_received = []
+        for share in current_user.shares_received:
+            shares_received.append(get_share_data(share))
+
+        shares_sent = []
+        for share in current_user.shares_sent:
+            shares_sent.append(get_share_data(share))
+        return shares_sent, shares_received
+    except SQLAlchemyError as e:
+        raise RuntimeError(f"Error retrieving user shares: {str(e)}")

@@ -42,7 +42,7 @@ function updateBrowseTable(headers, data) {
     for (let i = 0; i < headersWithID.length; i++) {
         const thDom = document.createElement("th")
         thDom.setAttribute("scope", "col")
-        thDom.innerText = toReadable(headersWithID[i])
+        thDom.innerText = formatName(headersWithID[i])
         tableHeaderRowDom.appendChild(thDom)
     }
     tableHeaderDom.appendChild(tableHeaderRowDom)

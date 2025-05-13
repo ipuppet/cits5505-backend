@@ -1064,7 +1064,7 @@ Dashboard
     }
 
     function fetchWaterAmount() {
-        fetch("/dashboard/water")
+        fetch("/dashboard/water?now=" + new Date().toISOString())
             .then(res => {
                 if (!res.ok) {
                     throw new Error("Network response was not ok")

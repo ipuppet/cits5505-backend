@@ -1,5 +1,5 @@
 import requests
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 from sqlalchemy.exc import SQLAlchemyError
 from flask_login import current_user
 from collections import defaultdict
@@ -213,11 +213,11 @@ def add_water_intake(amount: float):
         raise RuntimeError(f"Error adding water intake: {str(e)}")
 
 
-def get_water_intake() -> float:
+def get_water_intake(target_date: datetime) -> float:
     water_intakes = current_user.water_intakes.all()
     water_today = 0
     for intake in water_intakes:
-        if intake.created_at.date() == datetime.now().date():
+        if intake.created_at.date() == target_date.date():
             water_today += intake.amount
     return water_today
 
