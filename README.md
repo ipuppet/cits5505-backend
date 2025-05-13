@@ -22,11 +22,9 @@ Our project is a modern, sport tracker web application built with Flask and SQLi
 **ID:** 24115652 
 **GitHub Username:** ipuppet
 
-
 **Name:** Brandon Ge  
 **ID:** 23813666  
 **GitHub Username:** bag026
-
 
 **Name:** Xiaoqin Fan
 **ID:** 24055569
