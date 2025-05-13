@@ -4,14 +4,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from flask_login import current_user
 from collections import defaultdict
 
-from server.models import (
-    ScheduledExercise,
-    Goal,
-    db,
-    ExerciseType,
-    ACHIEVEMENTS,
-    BodyMeasurementType,
-)
+from server.models import ScheduledExercise, Goal, db, BodyMeasurementType
+from server.utils.constants import ExerciseType, ACHIEVEMENTS
 
 
 def fetch_weather_forecast(city, days=5):
@@ -103,24 +97,23 @@ def get_burned_calories():
     for ex in current_user.exercises.all():
         if ex.type == ExerciseType.WEIGHTLIFTING:
             # Estimate duration: assume 4 seconds per rep
-            sets = int(ex.metrics.get("sets", 0))
-            reps = int(ex.metrics.get("reps", 0))
+            sets = int(ex.metrics.get("sets"))
+            reps = int(ex.metrics.get("reps"))
             duration = (sets * reps * 4) / 60  # duration in minutes
         else:
-            value = ex.metrics.get("duration", 0)
-            duration = float(value) if value not in (None, '', 'None') else 0.0
+            duration = float(ex.metrics.get("duration"))
         met = met_values.get(ex.type, 6.0)  # default MET if not found
         burned = round(0.0175 * met * weight_kg * duration, 2)
         burned_by_date[str(ex.created_at.date())] += burned
     return burned_by_date
 
 
-def add_schedule(exercise_type, scheduled_time, day_of_week, note):
+def add_schedule(exercise_type: ExerciseType, scheduled_time, day_of_week, note):
     try:
         new_se = ScheduledExercise(
             user_id=current_user.id,
             day_of_week=day_of_week,
-            exercise_type=ExerciseType[exercise_type],
+            exercise_type=exercise_type,
             scheduled_time=scheduled_time,
             note=note,
         )
@@ -129,39 +122,43 @@ def add_schedule(exercise_type, scheduled_time, day_of_week, note):
     except SQLAlchemyError as e:
         db.session.rollback()
         raise RuntimeError(f"Error adding scheduled exercise: {str(e)}")
-    except Exception as e:
-        db.session.rollback()
-        raise RuntimeError(f"Unexpected error: {str(e)}")
 
 
-def delete_schedule(schedule_id):
+def delete_schedule(schedule_id: int):
     try:
-        ScheduledExercise.delete(schedule_id)
+        schedule = db.session.get(ScheduledExercise, schedule_id).first()
+        if not schedule:
+            raise ValueError("Schedule not found")
+        db.session.delete(schedule)
+        db.session.commit()
     except Exception as e:
         raise RuntimeError(f"Error deleting schedule: {str(e)}")
 
 
-def edit_schedule(schedule_id, exercise_type, scheduled_time, day_of_week, note):
+def edit_schedule(
+    schedule_id: int,
+    exercise_type: ExerciseType,
+    scheduled_time,
+    day_of_week,
+    note,
+):
     try:
-        schedule = ScheduledExercise.get(schedule_id)
+        schedule = db.session.get(ScheduledExercise, schedule_id).first()
         schedule.day_of_week = day_of_week
-        schedule.exercise_type = ExerciseType[exercise_type]
+        schedule.exercise_type = exercise_type
         schedule.scheduled_time = scheduled_time
         schedule.note = note
         db.session.commit()
     except SQLAlchemyError as e:
         db.session.rollback()
         raise RuntimeError(f"Error editing schedule: {str(e)}")
-    except Exception as e:
-        db.session.rollback()
-        raise RuntimeError(f"Unexpected error: {str(e)}")
 
 
-def add_goal(exercise_type, metric, target_value, description):
+def add_goal(exercise_type: ExerciseType, metric, target_value, description):
     try:
         new_goal = Goal(
             user_id=current_user.id,
-            exercise_type=ExerciseType[exercise_type],
+            exercise_type=exercise_type,
             metric=metric,
             target_value=target_value,
             description=description,
@@ -171,22 +168,29 @@ def add_goal(exercise_type, metric, target_value, description):
     except SQLAlchemyError as e:
         db.session.rollback()
         raise RuntimeError(f"Error adding goal: {str(e)}")
-    except Exception as e:
-        db.session.rollback()
-        raise RuntimeError(f"Unexpected error: {str(e)}")
 
 
-def delete_goal(goal_id):
+def delete_goal(goal_id: int):
     try:
-        Goal.delete(goal_id)
+        goal = db.session.get(Goal, goal_id).first()
+        if not goal:
+            raise ValueError("Goal not found")
+        db.session.delete(goal)
+        db.session.commit()
     except SQLAlchemyError as e:
         raise RuntimeError(f"Error deleting goal: {str(e)}")
 
 
-def edit_goal(goal_id, exercise_type, metric, target_value, description):
+def edit_goal(
+    goal_id: int,
+    exercise_type: ExerciseType,
+    metric,
+    target_value,
+    description,
+):
     try:
-        goal = Goal.get(goal_id)
-        goal.exercise_type = ExerciseType[exercise_type]
+        goal = db.session.get(Goal, goal_id).first()
+        goal.exercise_type = exercise_type
         goal.metric = metric
         goal.target_value = target_value
         goal.description = description
@@ -194,6 +198,3 @@ def edit_goal(goal_id, exercise_type, metric, target_value, description):
     except SQLAlchemyError as e:
         db.session.rollback()
         raise RuntimeError(f"Error editing goal: {str(e)}")
-    except Exception as e:
-        db.session.rollback()
-        raise RuntimeError(f"Unexpected error: {str(e)}")

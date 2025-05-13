@@ -1,0 +1,58 @@
+.card {
+    border-radius: 1rem !important;
+    margin-bottom: 1rem;
+}
+
+.card-header.bg-light {
+    background: #f8fafc !important;
+    font-size: 1.15rem;
+    font-weight: 600;
+    border-bottom: 1px solid #e0e7ef;
+    letter-spacing: 0.01em;
+}
+
+.btn-circle {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff86a;
+    color: #222;
+    border: none;
+    font-size: 1.3rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    transition: background 0.2s;
+}
+
+.btn-circle:hover {
+    background: #ffe066;
+}
+
+.btn-add {
+    background: #fff86a;
+    color: #222;
+}
+
+.btn-copy {
+    font-size: 1rem;
+    margin-left: 1rem;
+}
+
+.card h4, .card h5 {
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+
+.form-control, .form-select {
+    border-radius: 0.7rem;
+}
+
+.form-text {
+    color: #888;
+}
+
+.input-group .form-control {
+    font-size: 1rem;
+}

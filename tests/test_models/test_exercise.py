@@ -1,5 +1,6 @@
 import pytest
-from server.models import Exercise, ExerciseType
+from server.models import Exercise
+from server.utils.constants import ExerciseType
 
 
 class TestExerciseModel:
@@ -47,7 +48,7 @@ class TestExerciseModel:
     )
     def test_invalid_metrics_validation(self, exercise_type, invalid_metrics):
         """Test validation of required metrics fields"""
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(ValueError):
             Exercise(user_id=1, type=exercise_type, metrics=invalid_metrics)
 
     def test_get_method(self, session):
