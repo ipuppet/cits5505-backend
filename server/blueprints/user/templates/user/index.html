@@ -1,15 +1,14 @@
-{% extends "base.html" %}
+{% extends "single.html" %}
 
-{% block title %}
-    Hello, {{ current_user.nickname }}!
-{% endblock %}
+{% block title %}Hello, {{ current_user.nickname }}!{% endblock %}
+{% block card_title %}Hello, {{ current_user.nickname }}!{% endblock %}
 
-{% block content %}
-    <h1>Hello, {{ current_user.nickname }}!</h1>
+{% block card_body %}
     <form method="POST">
         {{ form.csrf_token }}
         <label for="username" class="form-label">Username:</label>
-        <input type="text" name="username" class="form-control" id="username" value="{{ current_user.username }}" disabled/>
+        <input type="text" name="username" class="form-control" id="username" value="{{ current_user.username }}"
+               disabled/>
         <br/>
         <label for="nickname" class="form-label">Nickname:</label>
         <input type="text" name="nickname" class="form-control" id="nickname" value="{{ current_user.nickname }}"/>

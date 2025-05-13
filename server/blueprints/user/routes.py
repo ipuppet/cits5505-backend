@@ -92,17 +92,12 @@ def register():
         return redirect(url_for("user.register"))
 
 
-@user_bp.route("/password", methods=["GET"])
-@login_required
-def password():
+@user_bp.route("/password/reset/<token>", methods=["GET", "POST"])
+def password(token):
     form = PasswordForm()
-    return render_template("user/reset_password.html", form=form)
+    if request.method == "GET":
+        return render_template("user/reset_password.html", form=form)
 
-
-@user_bp.route("/password/reset/<token>", methods=["POST"])
-@login_required
-def reset_password(token):
-    form = PasswordForm()
     if not form.validate_on_submit():
         flash(str(form.errors), "danger")
         return redirect(url_for("user.reset_password"))
