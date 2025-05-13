@@ -113,10 +113,11 @@ automatically on save.
 
 ## Running the project
 
-If you don't have the `SECRET_KEY` environment variable set, you can set it using the following command:
+If you don't have the `SECRET_KEY` and `SECURITY_PASSWORD_SALT` environment variable set, you can set it using the following command:
 
 ```bash
 export SECRET_KEY="your_secret_key"
+export SECURITY_PASSWORD_SALT="your_security_password_salt"
 ```
 
 Or you can set it in the `instance/config.py` file.

@@ -1,27 +1,15 @@
-{% extends "base.html" %}
+{% extends "single.html" %}
 
 {% block title %}
     Terms of Service
 {% endblock %}
 
-{% block content %}
-    <div class="container py-5">
-        <div class="row mb-5 text-center">
-            <div class="col-12">
-                <h1 class="display-4 fw-bold">
-                    <i class="bi bi-file-text"></i>
-                    Terms of Service
-                </h1>
-            </div>
-        </div>
-        <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6">
-                <div class="card shadow">
-                    <div class="card-body p-4">
-                        Terms of Service for Sport Track
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+{% block card_title %}
+    <i class="bi bi-file-text"></i>
+    Terms of Service
 {% endblock %}
+
+{% block card_body %}
+    Terms of Service for Sport Track
+{% endblock %}
+

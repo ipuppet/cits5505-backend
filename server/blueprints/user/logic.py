@@ -132,6 +132,7 @@ def update_user(
     date_of_birth: datetime.date | None = None,
     sex: str | None = None,
     new_password: str | None = None,
+    user: User | None = None,
 ):
     if not any(
         [
@@ -144,23 +145,25 @@ def update_user(
         ]
     ):
         return
+    if user is None:
+        user = current_user
 
-    if not current_user.is_authenticated:
+    if not user.is_authenticated:
         raise ValueError("User not found.")
 
     try:
         if username is not None:
-            current_user.username = username
+            user.username = username
         if email is not None:
-            current_user.email = email
+            user.email = email
         if nickname is not None:
-            current_user.nickname = nickname
+            user.nickname = nickname
         if date_of_birth is not None:
-            current_user.date_of_birth = date_of_birth
+            user.date_of_birth = date_of_birth
         if sex is not None:
-            current_user.sex = sex
+            user.sex = sex
         if new_password is not None:
-            current_user.password = hash_password(new_password)
+            user.password = hash_password(new_password)
         db.session.commit()
     except IntegrityError as e:
         db.session.rollback()
@@ -210,7 +213,8 @@ def reset_password(token: str, new_password: str):
     )
     if not email:
         raise ValueError("Invalid or expired token.")
-    update_user(new_password=new_password)
+    user = get_user_by_email(email)
+    update_user(new_password=new_password, user=user)
 
 
 def send_reset_email(email: str) -> str:

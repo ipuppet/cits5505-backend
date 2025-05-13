@@ -269,3 +269,13 @@ class Share(db.Model):
     @validates("scope")
     def validate_scope(self, _key, scope: dict):
         return validate_scope(scope)
+
+    @hybrid_property
+    def sender(self):
+        user = db.session.query(User).get(self.sender_id)
+        return f"{user.nickname} ({user.username})" if user else None
+
+    @hybrid_property
+    def receiver(self):
+        user = db.session.query(User).get(self.receiver_id)
+        return f"{user.nickname} ({user.username})" if user else None
