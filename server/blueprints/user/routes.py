@@ -93,7 +93,7 @@ def register():
 
 
 @user_bp.route("/password/reset/<token>", methods=["GET", "POST"])
-def password(token):
+def reset_password(token):
     form = PasswordForm()
     if request.method == "GET":
         return render_template("user/reset_password.html", form=form)
