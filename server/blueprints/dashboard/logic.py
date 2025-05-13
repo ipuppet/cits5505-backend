@@ -97,11 +97,11 @@ def get_burned_calories():
     for ex in current_user.exercises.all():
         if ex.type == ExerciseType.WEIGHTLIFTING:
             # Estimate duration: assume 4 seconds per rep
-            sets = int(ex.metrics.get("sets", 0))
-            reps = int(ex.metrics.get("reps", 0))
+            sets = int(ex.metrics.get("sets"))
+            reps = int(ex.metrics.get("reps"))
             duration = (sets * reps * 4) / 60  # duration in minutes
         else:
-            duration = float(ex.metrics.get("duration", 0))
+            duration = float(ex.metrics.get("duration"))
         met = met_values.get(ex.type, 6.0)  # default MET if not found
         burned = round(0.0175 * met * weight_kg * duration, 2)
         burned_by_date[str(ex.created_at.date())] += burned
