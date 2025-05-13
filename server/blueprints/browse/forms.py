@@ -80,9 +80,9 @@ class ExerciseForm(DatetimeForm):
     metrics = JSONField("metrics", validators=[Optional()])
     submit = SubmitField("Submit")
 
-    def validate_metrics(self, field):
+    def validate_metrics(self, metrics):
         try:
-            validate_metrics(ExerciseType[self.type.data], field.data)
+            validate_metrics(ExerciseType[self.type.data], metrics.data)
         except ValueError as e:
             raise ValidationError(str(e))
 

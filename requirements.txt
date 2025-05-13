@@ -89,6 +89,8 @@ pytz==2025.2
     # via -r requirements.in
 requests==2.32.3
     # via -r requirements.in
+six==1.17.0
+    # via wtforms-json
 sqlalchemy==2.0.38
     # via
     #   alembic
@@ -107,3 +109,6 @@ wtforms[email]==3.2.1
     # via
     #   -r requirements.in
     #   flask-wtf
+    #   wtforms-json
+wtforms-json==0.3.5
+    # via -r requirements.in
