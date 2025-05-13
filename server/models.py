@@ -18,6 +18,7 @@ class User(UserMixin, db.Model):
     password = db.Column(db.Text, nullable=False)
     email = db.Column(db.Text, nullable=False, unique=True)
     nickname = db.Column(db.Text, nullable=False)
+    water_today = db.Column(db.Integer, default=0)
     avatar = db.Column(
         db.String(256), nullable=True
     )  # Stores the relative path to the avatar image

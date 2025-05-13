@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, redirect, url_for, flash
-from flask_login import login_required
+from flask import Blueprint, render_template, redirect, url_for, flash, request,jsonify
+from flask_login import login_required,current_user
+from server.models import db
 from datetime import datetime
 
 from server.blueprints.browse.forms import BodyMeasurementForm
@@ -136,3 +137,14 @@ def edit_goal(goal_id):
         return redirect(url_for("dashboard.index"))
     flash("Goal updated.", "success")
     return redirect(url_for("dashboard.index"))
+
+@dashboard_bp.route("/water", methods=["GET", "POST"])
+@login_required
+def water():
+    if request.method == "POST":
+        amount = request.json.get("amount", 0)
+        current_user.water_today = amount
+        db.session.commit()
+        return jsonify(success=True)
+    else:
+        return jsonify(amount=current_user.water_today or 0)
