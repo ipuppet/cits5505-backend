@@ -193,7 +193,7 @@ function renderSharesDetail(type, data) {
 
         const timeInfo = document.createElement("div")
         timeInfo.className = "text-muted small"
-        timeInfo.textContent = record.created_at || ""
+        timeInfo.textContent = new Date(record.created_at).toLocaleString()
 
         cardBody.appendChild(headerRow)
         cardBody.appendChild(scopeContainer)

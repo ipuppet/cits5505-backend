@@ -13,7 +13,7 @@ share_bp = Blueprint("share", __name__, template_folder="templates")
 @login_required
 def index():
     form = ShareForm()
-    shares_received, shares_sent = share_logic.get_user_shares()
+    shares_sent, shares_received = share_logic.get_user_shares()
     return render_template(
         "share/index.html",
         form=form,
