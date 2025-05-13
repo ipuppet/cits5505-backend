@@ -5,7 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from werkzeug.utils import secure_filename
 from flask import current_app
 from flask_login import login_user, current_user, logout_user
-
+from itsdangerous import URLSafeTimedSerializer
 from server.models import db, User
 from server.utils.security import hash_password, check_password
 from server.utils.login_manager import login_manager
@@ -78,7 +78,7 @@ def check_user_integrity(e, username, email):
 
 def login(email: str, plain_password: str, remember_me: bool) -> User:
     user = get_user_by_email(email)
-    if user and check_password(plain_password, user.password):
+    if user and user.check_password(plain_password):
         try:
             # Update the last login time
             user.last_login = datetime.datetime.now(datetime.UTC)
@@ -107,11 +107,11 @@ def create_user(
         new_user = User(
             username=username,
             nickname=nickname,
-            password=hash_password(password),  # Hash the password
             email=email,
             date_of_birth=date_of_birth,
             sex=sex,
         )
+        new_user.set_password(password)
         db.session.add(new_user)
         db.session.commit()
     except IntegrityError as e:
@@ -157,7 +157,7 @@ def update_user(
         if sex is not None:
             current_user.sex = sex
         if new_password is not None:
-            current_user.password = hash_password(new_password)
+            current_user.set_password(new_password)         
         db.session.commit()
     except IntegrityError as e:
         db.session.rollback()
@@ -198,3 +198,23 @@ def update_avatar(file: FileStorage):
         if os.path.exists(file_path):
             os.remove(file_path)
         raise RuntimeError(f"Failed to save avatar: {e}") from e
+
+
+def reset_user_password(email, new_password):
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        raise Exception("User not found.")
+    user.set_password(new_password)
+    db.session.commit()
+    
+def generate_reset_token(email):
+    s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    return s.dumps(email, salt='password-reset-salt')
+
+def verify_reset_token(token, expiration=3600):
+    s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    try:
+        email = s.loads(token, salt='password-reset-salt', max_age=expiration)
+    except Exception:
+        return None
+    return email

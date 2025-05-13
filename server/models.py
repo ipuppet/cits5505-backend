@@ -4,7 +4,7 @@ from flask_migrate import Migrate
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import validates
 from flask_login import UserMixin
-
+from werkzeug.security import generate_password_hash, check_password_hash
 from server.utils.validators import validate_metrics, validate_scope
 from server.utils.constants import ExerciseType, BodyMeasurementType
 
@@ -19,6 +19,11 @@ class User(UserMixin, db.Model):
     email = db.Column(db.Text, nullable=False, unique=True)
     nickname = db.Column(db.Text, nullable=False)
     water_today = db.Column(db.Integer, default=0)
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
     avatar = db.Column(
         db.String(256), nullable=True
     )  # Stores the relative path to the avatar image

@@ -14,8 +14,9 @@ def create_app(config_class=None):
     app = Flask(__name__, instance_relative_config=True)
     # Load the default configuration
     if config_class is None:
-        env = os.getenv("FLASK_ENV", "production")
-        config_class = f"server.config.{env.capitalize()}Config"
+        env = os.getenv("FLASK_ENV", "production").capitalize()
+        from server import config as config_module
+        config_class = getattr(config_module, f"{env}Config")
     app.config.from_object(config_class)
     # Ensure the instance folder and config file exist
     try:
