@@ -5,6 +5,7 @@ from server.models import db, migrate
 from server.utils.context_processors import inject_pytz
 from server.utils.mail import mail
 from server.utils.login_manager import login_manager
+from server.utils.json_provider import JSONProvider
 
 
 def create_app(config_class=None):
@@ -34,6 +35,9 @@ def create_app(config_class=None):
 
     # Initialize the context processors
     app.context_processor(inject_pytz)
+
+    # Set the JSON provider to use the custom JSONProvider
+    app.json = JSONProvider(app)
 
     # Initialize the database
     db.init_app(app)

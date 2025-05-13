@@ -183,17 +183,17 @@
 {% block js %}
     <script src="{{ url_for('static', filename='js/browse/index.js') }}"></script>
     <script>
-        const ExercisesMetrics = {{ exercise_metrics| tojson }}
-        const ExercisesTypes = {{ exercise_types| tojson }}
+        const ExercisesMetrics = {{ exercise_metrics | tojson }}
+        const ExercisesTypes = {{ exercise_types | tojson }}
         const BodyMeasurementUnits = {
             WEIGHT: ["kg", "lb"],
             HEIGHT: ["cm", "in"],
             BODY_FAT: ["%"],
         }
-        const BodyMeasurementTypes = {{ body_measurement_types| tojson }}
-        const UserExercises = {{ current_user.exercises_to_list() | tojson }}
-        const UserBodyMeasurements = {{ current_user.body_measurements_to_list() | tojson }}
-        const UserCalorieIntakes = {{ current_user.calorie_intakes_to_list() | tojson }}
+        const BodyMeasurementTypes = {{ body_measurement_types | tojson }}
+        const UserExercises = {{ current_user.exercises | tojson }}
+        const UserBodyMeasurements = {{ current_user.body_measurements | tojson }}
+        const UserCalorieIntakes = {{ current_user.calorie_intakes | tojson }}
 
         const Dataset = {headers: undefined, data: undefined}
 
@@ -237,7 +237,7 @@
             const metrics = ExercisesMetrics[type]
             const data = {}
             for (const metric of metrics) {
-                data[metric] = form[metric].value
+                data[metric] = Number(form[metric].value)
             }
             form.metrics.value = JSON.stringify(data)
         }
@@ -311,15 +311,20 @@
         function browseDatasetChange(dateset = "browseExercise") {
             if (dateset === "browseExercise") {
                 Dataset.headers = type => ExercisesMetrics[type].concat(["created_at"])
-                Dataset.data = type => convertTimezone(UserExercises.filter(exercise => exercise.type === type))
+                Dataset.data = type => UserExercises.filter(exercise => exercise.type === type).map(
+                    exercise => ({
+                        ...exercise.metrics,
+                        created_at: exercise.created_at
+                    })
+                )
                 updateBrowseTableOptions(ExercisesTypes)
             } else if (dateset === "browseCalorieIntake") {
                 Dataset.headers = () => ["calories", "description", "created_at"]
-                Dataset.data = () => convertTimezone(UserCalorieIntakes)
+                Dataset.data = () => UserCalorieIntakes
                 updateBrowseTableOptions(["calories"])
             } else if (dateset === "browseBodyMeasurement") {
                 Dataset.headers = () => ["value", "created_at"]
-                Dataset.data = type => convertTimezone(UserBodyMeasurements.filter(bodyMeasurement => bodyMeasurement.type === type))
+                Dataset.data = type => UserBodyMeasurements.filter(bodyMeasurement => bodyMeasurement.type === type)
                 updateBrowseTableOptions(BodyMeasurementTypes)
             }
             browseTableChange(document.querySelector("#browseTableTypeSelect").value)
