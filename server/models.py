@@ -53,7 +53,7 @@ class User(UserMixin, db.Model):
         "Achievement",
         lazy="dynamic",
         cascade="all, delete-orphan",
-        order_by="Achievement.achieved_at.desc()",
+        order_by="Achievement.created_at.desc()",
     )
     scheduled_exercises = db.relationship(
         "ScheduledExercise",
@@ -124,7 +124,7 @@ class Achievement(db.Model):
     )
     exercise_type = db.Column(db.Enum(ExerciseType), nullable=False)
     milestone = db.Column(db.Integer, nullable=False)
-    achieved_at = db.Column(
+    created_at = db.Column(
         db.DateTime,
         nullable=False,
         default=db.func.current_timestamp(),
@@ -137,7 +137,7 @@ class Achievement(db.Model):
         return (
             db.session.query(Achievement)
             .filter_by(user_id=user_id, **kwargs)
-            .order_by(Achievement.achieved_at.desc())
+            .order_by(Achievement.created_at.desc())
         )
 
 
@@ -189,9 +189,7 @@ class ScheduledExercise(db.Model):
     exercise_type = db.Column(db.Enum(ExerciseType), nullable=False)
     scheduled_time = db.Column(db.Time, nullable=False)
     note = db.Column(db.Text, nullable=True)
-    day_of_week = db.Column(
-        db.String(10), nullable=False
-    )  # e.g. "Monday", "Tuesday", etc.
+    day_of_week = db.Column(db.String(10), nullable=False)  # "Monday", "Tuesday" etc.
 
     @staticmethod
     def get(schedule_id: int):

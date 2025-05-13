@@ -44,10 +44,24 @@ def search_user(username: str) -> list[dict]:
     """Fuzzy search for a user by username."""
     if not username:
         raise ValueError("Username cannot be empty")
-    users = db.session.query(User).filter(User.username.ilike(f"%{username}%")).all()
+    users = (
+        db.session.query(User)
+        .filter(
+            User.username.ilike(f"%{username}%"),
+            User.id != current_user.id,  # Exclude the current user
+        )
+        .all()
+    )
     user_list = []
     for user in users:
-        user_list.append(user.to_dict())
+        user_list.append(
+            {
+                "id": user.id,
+                "username": user.username,
+                "nickname": user.nickname,
+                "avatar": user.avatar,
+            }
+        )
     if not user_list:
         raise UserNotFoundError(username)
     return user_list
