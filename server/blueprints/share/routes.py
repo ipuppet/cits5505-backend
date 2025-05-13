@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash
+from flask import Blueprint, render_template, request, flash, url_for, redirect
 from flask_login import login_required, current_user
 
 from server.blueprints.share.forms import ShareForm, PreviewForm
@@ -58,8 +58,7 @@ def create_share():
     form = ShareForm()
     if not form.validate():
         flash(str(form.errors), "danger")
-        return render_template("share/index.html", form=form)
-    share = None
+        return redirect(url_for("share.index"))
     try:
         share = share_logic.create_share(
             sender_id=current_user.id,
@@ -71,4 +70,4 @@ def create_share():
         flash(f"Share {share.id} created successfully!", "success")
     except Exception as e:
         flash(str(e), "danger")
-    return render_template("share/index.html", share=share)
+    return redirect(url_for("share.index"))

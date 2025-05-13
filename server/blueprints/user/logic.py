@@ -218,6 +218,9 @@ def reset_password(token: str, new_password: str):
 
 
 def send_reset_email(email: str) -> str:
+    if current_user.is_authenticated:
+        if current_user.email != email:
+            raise ValueError("Email does not match the logged-in user.")
     user = get_user_by_email(email)
     if not user:
         raise UserNotFoundError(email)
