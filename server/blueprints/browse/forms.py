@@ -82,7 +82,7 @@ class ExerciseForm(DatetimeForm):
 
     def validate_metrics(self, field):
         try:
-            validate_metrics(self.type.data, field.data)
+            validate_metrics(ExerciseType[self.type.data], field.data)
         except ValueError as e:
             raise ValidationError(str(e))
 
