@@ -4,7 +4,7 @@ This is our web application project for CITS5505. The application is built using
 ## Group Member
 
 
-**Name:**  Samuel Wei
+**Name:** Samuel Wei
 **ID:** 24115652 
 **GitHub Username:** ipuppet
 
@@ -19,7 +19,7 @@ This is our web application project for CITS5505. The application is built using
 **GitHub Username:** Fan Xiaoqin
 
 
-**Name:**  Xiaotong Yin
+**Name:** Xiaotong Yin
 **ID:** 24491566  
 **GitHub Username:** wisermonk
 
