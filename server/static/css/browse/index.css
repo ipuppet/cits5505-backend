@@ -9,17 +9,37 @@ body{
     height:60vh; */
 }
 .left-block, .right-block{
-    /* flex:1; */
-    padding-right: calc(var(--bs-gutter-x)*.5);
-    padding-right:calc(var(--bs-gutter-x)*.5);
     border-radius: 1rem;
 }
-.left-block, .btn-group{
-    display: flex;
-    flex-direction:column;
-    gap:1rem;
-    justify-content: space-around;
-}
+
 .r2{
-    display:none;
+    display:none; 
+}
+.buttons{
+    display: flex;
+     margin-top: 1rem;
+    margin-bottom: 1rem;
+   
+}
+.btn-group{
+    display: flex;
+    max-width: 100%;
+}
+#tableButton, #chartButton{
+    width:45%;
+}
+.btn-add{
+    background-color:#fff86a;
+    color:#222;
+}
+.btn-circle{
+    width:2.2rem;
+    height:2.2rem;
+    border-radius: 50%;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    border:none;
+    font-size:1.3rem;
+    box-shadow:0 1px 4px gba(0, 0, 0, 0.04);
 }
