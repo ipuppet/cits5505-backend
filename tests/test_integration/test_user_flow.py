@@ -54,7 +54,6 @@ class TestUserFlow:
         assert b"Login successful" in response.data
         assert b"Dashboard" in response.data  # Assuming dashboard page contains "Dashboard" text
         
-    @pytest.mark.skip(reason="This test requires debugging of the user.index endpoint")
     def test_profile_update_flow(self, app, session):
         """Test user profile update flow (requires authenticated state)"""
-        # This test is skipped for now as it requires authentication setup 
+        # This test was previously skipped as it requires authentication setup 

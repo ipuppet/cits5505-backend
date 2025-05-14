@@ -10,7 +10,6 @@ from server.utils.security import hash_password
 class TestScheduleFlow:
     """Test exercise scheduling functionality"""
 
-    @pytest.mark.skip(reason="Schedule creation endpoint not implemented yet")
     def test_create_schedule_flow(self, app, session):
         """Test the complete flow of creating a scheduled exercise"""
         # Create test client
@@ -52,12 +51,11 @@ class TestScheduleFlow:
             day_of_week="Monday"
         ).first()
         
-        # Skip this assertion if endpoint is not yet implemented
+        # Only run these assertions if endpoint is implemented
         if schedule:
             assert schedule.scheduled_time == time(7, 30)
             assert schedule.note == "Morning run"
     
-    @pytest.mark.skip(reason="Authentication required for dashboard access")
     def test_view_schedule(self, app, session):
         """Test viewing exercise schedule"""
         # Create test client
@@ -122,7 +120,6 @@ class TestScheduleFlow:
             assert "7:30" in response_text
             assert "Morning run" in response_text
     
-    @pytest.mark.skip(reason="Schedule update endpoint not implemented yet")
     def test_update_schedule(self, app, session):
         """Test updating an existing scheduled exercise"""
         # Create test client
@@ -174,7 +171,6 @@ class TestScheduleFlow:
             assert updated_schedule.scheduled_time == time(8, 0)
             assert updated_schedule.note == "Updated morning run"
     
-    @pytest.mark.skip(reason="Schedule deletion endpoint not implemented yet")
     def test_delete_schedule(self, app, session):
         """Test deleting a scheduled exercise"""
         # Create test client

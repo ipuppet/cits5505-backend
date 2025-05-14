@@ -11,7 +11,6 @@ from server.utils.security import hash_password
 class TestApiEndpoints:
     """Test API endpoints for data access and manipulation"""
     
-    @pytest.mark.skip(reason="API endpoint not implemented yet")
     def test_exercise_api_get(self, app, session):
         """Test retrieving exercises through API"""
         # Create test client
@@ -68,7 +67,6 @@ class TestApiEndpoints:
             assert any(ex.get('type') == ExerciseType.RUNNING.value for ex in response_data)
             assert any(ex.get('type') == ExerciseType.CYCLING.value for ex in response_data)
     
-    @pytest.mark.skip(reason="API endpoint not implemented yet")
     def test_exercise_api_post(self, app, session):
         """Test adding exercises through API"""
         # Create test client
@@ -118,7 +116,6 @@ class TestApiEndpoints:
             assert exercise.metrics.get("distance") == 10.0
             assert exercise.metrics.get("duration") == 60
     
-    @pytest.mark.skip(reason="API endpoint not implemented yet")
     def test_measurements_api_get(self, app, session):
         """Test retrieving measurements through API"""
         # Create test client
@@ -181,7 +178,6 @@ class TestApiEndpoints:
             assert any(m.get('type') == BodyMeasurementType.WEIGHT.value for m in response_data)
             assert any(m.get('type') == BodyMeasurementType.BODY_FAT.value for m in response_data)
     
-    @pytest.mark.skip(reason="API endpoint not implemented yet")
     def test_measurements_api_post(self, app, session):
         """Test adding measurements through API"""
         # Create test client
@@ -228,7 +224,6 @@ class TestApiEndpoints:
         if measurement:
             assert measurement.value == 73.5
     
-    @pytest.mark.skip(reason="API endpoint not implemented yet")
     def test_api_filtering(self, app, session):
         """Test filtering data via API query parameters"""
         # Create test client
@@ -316,7 +311,6 @@ class TestApiEndpoints:
                 assert all(ex.get('type') == ExerciseType.RUNNING.value for ex in response_data)
                 assert len(response_data) == 2
     
-    @pytest.mark.skip(reason="API endpoint not implemented yet")
     def test_api_error_handling(self, app, session):
         """Test API error handling for invalid requests"""
         # Create test client
