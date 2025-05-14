@@ -26,9 +26,12 @@ def create_app(config_class=None):
                 f.write(
                     "# This file is used to store the configuration for the Flask app instance.\n"
                     "# This file will override the default configuration in server/config.py.\n"
-                    "# You can set the SECRET_KEY here.\n"
+                    "# You can set configurations here.\n"
                     "# For example:\n"
                     "# SECRET_KEY = 'your_secret_key'\n"
+                    "# EMAIL_VERIFY_SALT = 'your_email_verify_salt'\n"
+                    "# MAIL_USERNAME = 'your_email_address'\n"
+                    "# MAIL_PASSWORD = 'your_email_password'\n"
                 )
     except OSError:
         pass
