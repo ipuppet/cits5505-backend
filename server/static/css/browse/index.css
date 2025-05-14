@@ -1,13 +1,6 @@
 body{
     background-color: #292a2c51 !important;
 }
-.main-container{
-   
-    /* gap:8%;
-    padding-left: 8%;
-    padding-right: 8%;
-    height:60vh; */
-}
 .left-block, .right-block{
     border-radius: 1rem;
 }
@@ -38,5 +31,5 @@ body{
     align-items: center;
     border:none;
     font-size:1.3rem;
-    box-shadow:0 1px 4px gba(0, 0, 0, 0.04);
+    box-shadow:0 1px 4px rgba(0, 0, 0, 0.04);
 }

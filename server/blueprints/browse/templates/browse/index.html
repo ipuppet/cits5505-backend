@@ -418,7 +418,6 @@
             else if(datasetType==="browseBodyMeasurement"){
                 updateBrowseTableOptions(BodyMeasurementTypes)
             }           
-            // console.log("Selected dataset type:", datasetType)
             const datasetObj = createDataset(datasetType,visualType)
             browseVisualChange(document.querySelector("#browseTableTypeSelect").value,datasetObj,visualType)
         }
@@ -452,5 +451,4 @@
             if (option) option.selected = true
         })
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
