@@ -1,15 +1,12 @@
-import pytz
 from datetime import datetime, timezone
-from zoneinfo import ZoneInfo
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
-from flask_login import login_required, current_user
-from server.models import db
-from datetime import datetime
+
+from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask_login import login_required
 
 from server.blueprints.browse.forms import BodyMeasurementForm
 from server.blueprints.dashboard import logic
-from server.utils.constants import ExerciseType, EXERCISE_METRICS
 from server.blueprints.dashboard.forms import ScheduleExerciseForm, GoalForm
+from server.utils.constants import ExerciseType, EXERCISE_METRICS
 from server.utils.decorators import api_response
 
 dashboard_bp = Blueprint("dashboard", __name__, template_folder="templates")
@@ -26,7 +23,6 @@ def index():
     bmi, bmi_category = logic.get_bmi()
     return render_template(
         "dashboard/index.html",
-        now=datetime.now(),
         body_measurement_form=body_measurement_form,
         schedule_form=schedule_form,
         goal_form=goal_form,

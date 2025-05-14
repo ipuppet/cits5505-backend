@@ -1,0 +1,143 @@
+<div class="col-lg-3 mb-4">
+    <div class="card shadow-lg border-0 h-100">
+        <div id="motivation-message"
+             style="font-size:1.1em; font-style:italic; font-weight:bold; color:#333; margin-top:1rem; text-align:center;">
+        </div>
+        <div class="card-body">
+            <form id="avatar-form" action="{{ url_for('user.upload_avatar') }}" method="post"
+                  enctype="multipart/form-data" class="mt-2 mb-3 text-center">
+                <label for="avatar" style="cursor:pointer; display:block;">
+                    {% if current_user.avatar %}
+                        <img src="{{ url_for('static', filename=current_user.avatar) }}"
+                             alt="Avatar"
+                             class="rounded-circle shadow mb-3" width="96" height="96"
+                             id="avatar-img">
+                    {% else %}
+                        <img src="https://ui-avatars.com/api/?name={{ current_user.nickname|default('User') }}&size=96&background=0D8ABC&color=fff"
+                             alt="Default Avatar" class="rounded-circle shadow mb-3" width="96"
+                             height="96"
+                             id="avatar-img">
+                    {% endif %}
+                </label>
+                <input type="file" name="avatar" id="avatar" accept="image/*" style="display:none"
+                       required>
+            </form>
+            <h2 class="card-title mb-1 text-center" id="greeting-line">
+                <strong>{{ current_user.nickname }}</strong>
+            </h2>
+            <div class="card mb-3 shadow-sm border-0">
+                <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                    <strong>Personal Information</strong>
+                </div>
+                <div class="card-body p-3">
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted"><strong>Username:</strong></div>
+                        <div class="col-7">{{ current_user.username }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted"><strong>Email:</strong></div>
+                        <div class="col-7">{{ current_user.email }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted"><strong>Date of Birth:</strong></div>
+                        <div class="col-7">{{ current_user.date_of_birth or 'N/A' }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted"><strong>Sex:</strong></div>
+                        <div class="col-7">{{ current_user.sex or 'N/A' }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted"><strong>Created At:</strong></div>
+                        <div class="col-7" id="createdAt"></div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-5 text-muted"><strong>Last Login:</strong></div>
+                        <div class="col-7" id="lastLogin"></div>
+                    </div>
+                </div>
+                <!-- Weather Forecast Card START -->
+                <div class="card mb-4 shadow-sm border-0">
+                    <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                        <strong>Weather Forecast (Next 5 Days)</strong>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="d-flex justify-content-between flex-nowrap overflow-auto gap-2">
+                            {% for day in weather_forecast %}
+                                <div class="weather-day-card flex-shrink-0 text-center p-2 border rounded bg-light">
+                                    <div class="fw-bold" style="font-size: 1rem;">{{ day.date }}</div>
+                                    <div>
+                                        <img src="{{ day.icon_url }}" alt="weather" width="28" height="28">
+                                    </div>
+                                    <div style="font-size: 1rem;">{{ day.temp }}°C</div>
+                                    <div class="text-muted" style="font-size:0.85em;">{{ day.description }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <!-- Weather Forecast Card END -->
+
+                <!-- Calendar Card START -->
+                <div class="card mb-4 shadow-sm border-0">
+                    <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                        <strong>Calendar</strong>
+                    </div>
+                    <div class="card-body p-3">
+                        <div id="calendar"></div>
+                    </div>
+                </div>
+                <!-- Calendar Card END -->
+                <div class="card mb-4 shadow-sm border-0">
+                    <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                        <strong>Hydration Tracker</strong>
+                    </div>
+                    <div class="card-body text-center">
+                        <div style="font-size:1.2em; font-weight:bold;">
+                            Water Drank Today:
+                            <span id="water-amount" style="color:#007bff;">0</span> / <span
+                                id="water-goal">2000</span>
+                            ml
+                        </div>
+                        <div class="progress my-3" style="height: 24px;">
+                            <div id="water-progress" class="progress-bar bg-info" role="progressbar"
+                                 style="width: 0%;" aria-valuenow="0" aria-valuemin="0"
+                                 aria-valuemax="2000"></div>
+                        </div>
+                        <div id="hydration-progress-message" class="my-2"
+                             style="font-size:1em; font-weight:500; color:#00bcd4;"></div>
+                        <button class="btn btn-outline-primary btn-sm" onclick="addWater(250)">
+                            +250ml
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="undoLastWater()">
+                            Undo
+                        </button>
+                        <div class="hydration-tip mt-3 d-flex align-items-center justify-content-center"
+                             style="background: linear-gradient(90deg, #e0f7fa 0%, #fce4ec 100%); border-radius: 1rem; padding: 0.75em 1em;">
+                            <span style="font-size:1.5em; color:#00bcd4; margin-right:0.5em;">💧</span>
+                            <span style="font-size:1em; color:#333;">
+                                <strong>Stay hydrated!</strong>
+                                Most people need
+                                <span style="color:#007bff;">2L (2000ml)</span> per day.<br>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mini Weather-Based Workout Suggestion Card -->
+                <div class="card mb-4 shadow-sm border-0">
+                    <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                        <strong>Today's Workout Suggestion</strong>
+                    </div>
+                    <div class="card-body text-center" id="weather-workout-suggestion">
+                        <div class="spinner-border text-primary" role="status"
+                             style="width: 2rem; height: 2rem;">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div class="mt-2 text-muted">Fetching suggestion...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -160,14 +160,31 @@
     </div>
 {% endblock %}
 
+{% macro render_share(share) %}
+    {
+    id: "{{ share.id }}",
+    scope: {{ share.scope|tojson }},
+    created_at: "{{ share.created_at }}Z",
+    sender: "{{ share.sender.nickname }} (@{{ share.sender.username }})",
+    receiver: "{{ share.receiver.nickname }} (@{{ share.receiver.username }})",
+    },
+{% endmacro %}
 {% block js %}
     <script>
         const ExercisesMetrics = {{ exercise_metrics | tojson }}
         const ExercisesTypes = {{ exercise_types | tojson }}
         const BodyMeasurementTypes = {{ body_measurement_types | tojson }}
 
-        const SharesSent = {{ shares_sent | tojson }}
-        const SharesReceived = {{ shares_received | tojson }}
+        const SharesSent = [
+            {% for share in current_user.shares_sent %}
+                {{ render_share(share) }}
+            {% endfor %}
+        ]
+        const SharesReceived = [
+            {% for share in current_user.shares_received %}
+                {{ render_share(share) }}
+            {% endfor %}
+        ]
     </script>
     <script src="{{ url_for('static', filename='js/share/index.js') }}"></script>
     <script src="{{ url_for('static', filename='js/share/onload.js') }}"></script>
