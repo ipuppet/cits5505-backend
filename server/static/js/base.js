@@ -16,6 +16,17 @@ function formatName(name) {
         .join(" ")
 }
 
+function getUnit(metric) {
+    if (metric === "distance") {
+        return "m"
+    } else if (metric === "duration") {
+        return "min"
+    } else if (metric === "weight") {
+        return "kg"
+    }
+    return null
+}
+
 // Add timezone conversion function, consistent with browse page
 function convertTimezone(data, key = "created_at") {
     if (!Array.isArray(data)) return data

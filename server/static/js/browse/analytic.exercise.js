@@ -15,7 +15,7 @@ function processExerciseData(exercises) {
         }
 
         // General metrics processing
-        if (ex.metrics.distance) typeStats[type].distance += ex.metrics.distance / 1000
+        if (ex.metrics.distance) typeStats[type].distance += ex.metrics.distance / 1000 // Convert to km
         if (ex.metrics.duration) typeStats[type].duration += ex.metrics.duration
 
         // Strength training specific statistics
