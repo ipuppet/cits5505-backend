@@ -1,4 +1,44 @@
-# CITS5505 Project
+# CITS5505 Project: Sport Tracker
+This is our web application project for CITS5505. The application is built using Flask, SQLite, and various front-end technologies. It is designed to be user-friendly and visually appealing, with a focus on data visualization and user engagement.
+
+## Group Members
+
+- **Name:** Samuel Wei  
+  **ID:** 24115652  
+  **GitHub Username:** ipuppet
+
+- **Name:** Brandon Ge  
+  **ID:** 23813666  
+  **GitHub Username:** bag026
+
+- **Name:** Xiaoqin Fan  
+  **ID:** 24055569  
+  **GitHub Username:** Fan Xiaoqin
+
+- **Name:** Xiaotong Yin  
+  **ID:** 24491566  
+  **GitHub Username:** wisermonk
+  
+
+## Project Overview
+
+Our project is a modern, sport tracker web application built with Flask and SQLite. It helps users log workouts, track hydration, monitor progress, and set personal goals—all within a friendly, interactive dashboard. Unlike typical fitness apps, our platform emphasizes social features, data visualization, and user motivation.
+
+## What Makes This Project Different?
+
+- **Social Fitness Tracking:** Users can share progress, achievements, and workout data with friends for motivation and accountability.
+- **Personalized Dashboard:** Visualize calories burned, calorie intake, weight trends, BMI, hydration, and more—all in one place.
+- **Motivational Features:** Dynamic motivational messages and weather-based workout suggestions keep users engaged and inspired.
+- **Goal Management:** Set, track, and visualize progress toward custom fitness goals with real-time feedback.
+- **Hydration Tracker:** Simple, interactive water intake tracker with motivational feedback.
+- **Modern UI:** Responsive, accessible interface using Bootstrap and Chart.js for a smooth user experience.
+- **Easy Setup:** Designed for quick local deployment with clear instructions and minimal dependencies.
+- **Test-Driven Development:** Comprehensive unit tests ensure reliability and maintainability.
+
+## Prerequisites
+
+This project is intended to operate with Python 3 in an isolated virtual environment. It utilizes the Flask framework for building the web application and relies on SQLite as its database engine. To configure your environment and install all necessary dependencies, please refer to the steps outlined in the `requirements.txt` file.
+
 
 ## Dependencies
 
