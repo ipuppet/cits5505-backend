@@ -315,12 +315,14 @@
                 }
                 dataset.data= type => UserExercises
                 .filter(exercise=>exercise.type===type)
+                .sort((a,b) => new Date(a.created_at)- new Date(b.created_at))
                 .map(
                     exercise => ({
                         ...exercise.metrics,
-                        created_at:exercise.created_at
+                        created_at:new Date(exercise.created_at).toLocaleString()
                     })
                 )
+                
             }
             else if(datasetType === "browseCalorieIntake"){
                 if(visualType==="tableButton"){
@@ -330,6 +332,15 @@
                     dataset.headers= type =>["calories"]
                 }
                 dataset.data=()=>UserCalorieIntakes
+                .sort((a,b) => new Date(a.created_at)-new Date(b.created_at))
+                .map(exercise => {
+                    return {
+                        calories: exercise.calories,
+                        description: exercise.description,
+                        created_at: new Date(exercise.created_at).toLocaleString()
+                    }
+                })
+                
             }
             else if(datasetType === "browseBodyMeasurement"){
                 if(visualType==="tableButton"){
@@ -339,6 +350,13 @@
                     dataset.headers= type =>["value"]
                 }
                 dataset.data= type =>UserBodyMeasurements.filter(bodyMeasurement=>bodyMeasurement.type===type)
+                .sort((a,b) => new Date(a.created_at)-new Date(b.created_at))
+                .map(bodyMeasurement => {
+                    return {
+                        value: bodyMeasurement.value,
+                        created_at: new Date(bodyMeasurement.created_at).toLocaleString()
+                    }
+                })
             }
             return dataset
         }
