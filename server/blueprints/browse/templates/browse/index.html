@@ -10,146 +10,31 @@
 
 {% block content %}
     <div class="container py-5">
-        <div class="modal fade" id="exerciseModal" tabindex="-1" aria-labelledby="exerciseModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exerciseModalLabel">Add Exercise Data</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form method="POST" action="{{ url_for('browse.exercise') }}" id="exerciseForm"
-                            onsubmit="exerciseSubmit()">
-                            {{ exercise_form.hidden_tag() }}
-                            <div class="mb-3">
-                                {{ exercise_form.type.label(class="form-label") }}
-                                {{ exercise_form.type(class="form-select", onchange="exerciseTypeChange()") }}
-                            </div>
-                            <div id="exerciseFormContainer"></div>
-                            <input type="hidden" name="metrics" id="exerciseForm.metrics">
-                            <div class="mb-3">
-                                {{ exercise_form.date.label(class="form-label") }}
-                                {{ exercise_form.date(class="form-control") }}
-                            </div>
-                            <div class="mb-3">
-                                {{ exercise_form.time.label(class="form-label") }}
-                                {{ exercise_form.time(class="form-control") }}
-                            </div>
-                            <div class="mb-3">
-                                {{ exercise_form.timezone.label(class="form-label") }}
-                                {{ exercise_form.timezone(class="form-select") }}
-                            </div>
-                            {{ exercise_form.submit(class="btn btn-primary") }}
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal fade" id="bodyMeasurementModal" tabindex="-1" aria-labelledby="bodyMeasurementModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="bodyMeasurementModalLabel">Add Body Measurement Data</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form method="POST" action="{{ url_for('browse.body_measurement') }}" id="bodyMeasurementForm"
-                            onsubmit="bodyMeasurementSubmit()">
-                            {{ body_measurement_form.hidden_tag() }}
-                            <div class="mb-3">
-                                {{ body_measurement_form.type.label(class="form-label") }}
-                                {{ body_measurement_form.type(class="form-select", onchange="bodyMeasurementTypeChange()") }}
-                            </div>
-                            <div class="mb-3">
-                                {{ body_measurement_form.value.label(class="form-label") }}
-                                {{ body_measurement_form.value(class="form-control") }}
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label" for="bodyMeasurementForm.unit">Unit</label>
-                                <!-- Options for this dropdown are dynamically populated by client-side JavaScript -->
-                                <select class="form-select" id="bodyMeasurementForm.unit" name="unit">
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                {{ body_measurement_form.date.label(class="form-label") }}
-                                {{ body_measurement_form.date(class="form-control") }}
-                            </div>
-                            <div class="mb-3">
-                                {{ body_measurement_form.time.label(class="form-label") }}
-                                {{ body_measurement_form.time(class="form-control") }}
-                            </div>
-                            <div class="mb-3">
-                                {{ body_measurement_form.timezone.label(class="form-label") }}
-                                {{ body_measurement_form.timezone(class="form-select") }}
-                            </div>
-                            {{ body_measurement_form.submit(class="btn btn-primary") }}
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal fade" id="calorieIntakeModal" tabindex="-1" aria-labelledby="calorieIntakeModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="calorieIntakeModalLabel">Add Calorie Intake Data</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form method="POST" action="{{ url_for('browse.calorie_intake') }}" id="calorieIntakeForm"
-                            onsubmit="calorieIntakeSubmit()">
-                            {{ calorie_intake_form.hidden_tag() }}
-                            <div class="mb-3">
-                                {{ calorie_intake_form.calories.label(class="form-label") }}
-                                {{ calorie_intake_form.calories(class="form-control") }}
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label" for="calorieIntakeForm.unit">Unit</label>
-                                <select class="form-select" id="calorieIntakeForm.unit" name="unit">
-                                    <option value="kcal">kcal</option>
-                                    <option value="kJ">kJ</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                {{ calorie_intake_form.description.label(class="form-label") }}
-                                {{ calorie_intake_form.description(class="form-control") }}
-                            </div>
-                            <div class="mb-3">
-                                {{ calorie_intake_form.date.label(class="form-label") }}
-                                {{ calorie_intake_form.date(class="form-control") }}
-                            </div>
-                            <div class="mb-3">
-                                {{ calorie_intake_form.time.label(class="form-label") }}
-                                {{ calorie_intake_form.time(class="form-control") }}
-                            </div>
-                            <div class="mb-3">
-                                {{ calorie_intake_form.timezone.label(class="form-label") }}
-                                {{ calorie_intake_form.timezone(class="form-select") }}
-                            </div>
-                            {{ calorie_intake_form.submit(class="btn btn-primary") }}
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="container">
+        {% include "browse/modal.html" %}
         <div class="row g-4">
             <div class="col-sm-12 col-lg-4">
                 <div class="card shadow-sm border-0 left-block">
-                    <h5 class="card-header">Upload and Visualize your data</h5>
+                    <h5 class="card-header">Visualization</h5>
                     <div class="card-body">
                         <div class="btn-group" role="group" aria-label="Browse data">
-                            <input type="radio" class="btn-check" name="dataset" id="browseExercise" autocomplete="off" checked>
-                            <label class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center" for="browseExercise">Exercise</label>
-                            <input type="radio" class="btn-check" name="dataset" id="browseCalorieIntake" autocomplete="off">
-                            <label class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center" for="browseCalorieIntake">Calorie Intake</label>
-                            <input type="radio" class="btn-check" name="dataset" id="browseBodyMeasurement" autocomplete="off">
-                            <label class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center" for="browseBodyMeasurement">Body Measurement</label>
+                            <input type="radio" class="btn-check" name="dataset" id="browseExercise" checked>
+                            <label class="btn btn-outline-primary btn-sm d-flex align-items-center"
+                                   for="browseExercise">
+                                Exercise
+                            </label>
+                            <input type="radio" class="btn-check" name="dataset" id="browseCalorieIntake">
+                            <label class="btn btn-outline-primary btn-sm d-flex align-items-center"
+                                   for="browseCalorieIntake">
+                                Calorie Intake
+                            </label>
+                            <input type="radio" class="btn-check" name="dataset" id="browseBodyMeasurement">
+                            <label class="btn btn-outline-primary btn-sm d-flex align-items-center"
+                                   for="browseBodyMeasurement">
+                                Body Measurement
+                            </label>
                         </div>
-                        
-                        <div class="buttons btn-group">
+
+                        <div class="mt-3 btn-group">
                             <input type="radio" class="btn-check" id="tableButton" name="visualType" checked>
                             <label class="btn btn-outline-primary btn-sm" for="tableButton">Table</label>
                             <input type="radio" class="btn-check" id="chartButton" name="visualType">
@@ -161,18 +46,18 @@
             <div class="col-sm-12 col-lg-8">
                 <div class="card right-block shadow-sm border-0">
                     <div class="card-header d-flex justify-content-between">
-                            <button class="btn btn-circle btn-add" onclick="showModal()">
-                                <i class="bi bi-plus"></i>
-                            </button>
-                            <select class="form-select" style="width:40%; text-align: center;" aria-label="Data types" id="browseTableTypeSelect">
-                            </select>
+                        <button class="btn btn-circle btn-add" onclick="showModal()">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                        <select class="form-select" style="width:40%; text-align: center;" aria-label="Data types"
+                                id="dataTypeSelect">
+                        </select>
                     </div>
-                    <table class="card-body rb1 table table-striped table-hover">
+                    <table class="card-body table table-striped table-hover" id="tableCard">
                         <thead id="browseTableHeader"></thead>
                         <tbody id="browseTableBody"></tbody>
                     </table>
-                    <div class="card-body rb2 d-none">
-                    </div>
+                    <div class="card-body d-none" id="chartCard"></div>
                 </div>
             </div>
         </div>
@@ -182,8 +67,9 @@
 {% endblock %}
 
 {% block js %}
-    <script src="{{ url_for('static', filename='js/browse/index.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/browse/modal.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/browse/control.js') }}"></script>
     <script>
         const ExercisesMetrics = {{ exercise_metrics | tojson }}
         const ExercisesTypes = {{ exercise_types | tojson }}
@@ -197,258 +83,29 @@
         const UserBodyMeasurements = {{ current_user.body_measurements | tojson }}
         const UserCalorieIntakes = {{ current_user.calorie_intakes | tojson }}
 
-        // const Dataset = {headers: undefined, data: undefined}
-
-        const ExerciseModalModal = new bootstrap.Modal("#exerciseModal")
-        const CalorieIntakeModal = new bootstrap.Modal("#calorieIntakeModal")
-        const BodyMeasurementModal = new bootstrap.Modal("#bodyMeasurementModal")
-
-
-        document.querySelector(".buttons").addEventListener("change",function(){
-            const rb1=document.querySelector(".rb1")
-            const rb2=document.querySelector(".rb2")
-            if(this.querySelector("#tableButton").checked){
-                rb1.classList.remove("d-none")
-                rb2.classList.add("d-none")
-            }
-            else{
-                rb1.classList.add("d-none")
-                rb2.classList.remove("d-none")
-            }
-        })
-        /**
-         * Update the exercise metrics based on the selected type.
-         */
-        function exerciseTypeChange() {
-            const container = document.querySelector("#exerciseFormContainer")
-            container.innerHTML = ""
-            const selectedType = document.querySelector("#exerciseForm").type.value
-            const selectedMetrics = ExercisesMetrics[selectedType]
-            for (const metric of selectedMetrics) {
-                const div = document.createElement("div")
-                div.className = "mb-3"
-                const label = document.createElement("label")
-                label.className = "form-label"
-                label.textContent = formatName(metric)
-                div.appendChild(label)
-                const input = document.createElement("input")
-                input.className = "form-control"
-                input.name = metric
-                div.appendChild(input)
-                container.appendChild(div)
-            }
-        }
-
-        function exerciseSubmit() {
-            const form = document.querySelector("#exerciseForm")
-            const type = form.type.value
-            const metrics = ExercisesMetrics[type]
-            const data = {}
-            for (const metric of metrics) {
-                data[metric] = Number(form[metric].value)
-            }
-            form.metrics.value = JSON.stringify(data)
-        }
-
-        /**
-         * Update the body measurement unit select options based on the selected type.
-         */
-        function bodyMeasurementTypeChange() {
-            const selectedType = document.querySelector("#bodyMeasurementForm").type.value
-            const selectedUnit = BodyMeasurementUnits[selectedType]
-            const unitSelect = document.querySelector("#bodyMeasurementForm").unit
-            unitSelect.innerHTML = ""
-            for (const unit of selectedUnit) {
-                const option = document.createElement("option")
-                option.value = unit
-                option.textContent = unit
-                unitSelect.appendChild(option)
-            }
-        }
-
-        function bodyMeasurementSubmit() {
-            const form = document.querySelector("#bodyMeasurementForm")
-            const type = form.type.value
-            const value = form.value.value
-            const unit = form.unit.value
-            switch (type) {
-                case "WEIGHT":
-                    form.value.value = unit === "kg" ? value : value * 0.453592
-                    break
-                case "HEIGHT":
-                    form.value.value = unit === "cm" ? value : value * 2.54
-                    break
-            }
-        }
-
-        function calorieIntakeSubmit() {
-            const form = document.querySelector("#calorieIntakeForm")
-            const unit = form.unit.value
-            if (unit === "kJ") {
-                // Convert the value to kcal
-                const calories = form.calories.value
-                form.calories.value = calories * 0.239006
-            }
-        }
-
-        function showModal() {
-            const selectedDataset = document.querySelector("input[name=\"dataset\"]:checked").id
-            if (selectedDataset === "browseBodyMeasurement") {
-                bodyMeasurementTypeChange()
-                BodyMeasurementModal.show()
-            } else if (selectedDataset === "browseCalorieIntake") {
-                CalorieIntakeModal.show()
-            } else if (selectedDataset === "browseExercise") {
-                exerciseTypeChange()
-                ExerciseModalModal.show()
-            }
-        }
-
-        function createDataset(datasetType, visualType){
-            const dataset = {}
-            if(datasetType === "browseExercise"){
-                if(visualType==="tableButton"){
-                    dataset.headers= type => (ExercisesMetrics[type] || []).concat(["created_at"])
-                }
-                else{
-                    dataset.headers= type => ExercisesMetrics[type]
-                }
-                dataset.data= type => UserExercises
-                .filter(exercise=>exercise.type===type)
-                .sort((a,b) => new Date(a.created_at)- new Date(b.created_at))
-                .map(
-                    exercise => ({
-                        ...exercise.metrics,
-                        created_at:new Date(exercise.created_at).toLocaleString()
-                    })
-                )
-                
-            }
-            else if(datasetType === "browseCalorieIntake"){
-                if(visualType==="tableButton"){
-                    dataset.headers= type =>["calories", "description", "created_at"]
-                }
-                else{
-                    dataset.headers= type =>["calories"]
-                }
-                dataset.data=()=>UserCalorieIntakes
-                .sort((a,b) => new Date(a.created_at)-new Date(b.created_at))
-                .map(exercise => {
-                    return {
-                        calories: exercise.calories,
-                        description: exercise.description,
-                        created_at: new Date(exercise.created_at).toLocaleString()
-                    }
-                })
-                
-            }
-            else if(datasetType === "browseBodyMeasurement"){
-                if(visualType==="tableButton"){
-                    dataset.headers= type =>["value", "created_at"]
-                }
-                else{
-                    dataset.headers= type =>["value"]
-                }
-                dataset.data= type =>UserBodyMeasurements.filter(bodyMeasurement=>bodyMeasurement.type===type)
-                .sort((a,b) => new Date(a.created_at)-new Date(b.created_at))
-                .map(bodyMeasurement => {
-                    return {
-                        value: bodyMeasurement.value,
-                        created_at: new Date(bodyMeasurement.created_at).toLocaleString()
-                    }
-                })
-            }
-            return dataset
-        }
-
-        /**
-         * Update the browse table data.
-         */
-        function browseVisualChange(type,dataset,visualType) {
-            const headers = dataset.headers(type)
-            const data = dataset.data(type)
-            if (visualType === "tableButton") {
-                updateBrowseTable(headers, data)
-            } else {
-                updateBrowseChart(headers, data)
-            }
-        }
-        /**
-         * Update the charts based on the selected type.
-         */
-        function updateBrowseChart(headers,data){
-            const chartContainer=document.querySelector(".rb2")
-            chartContainer.innerHTML=""
-            if(data.length===0 || headers.length===0){
-                return
-            }
-            for(let i=0; i<headers.length; i++){
-               
-                    const chartDiv=document.createElement("div")
-                    chartDiv.classList.add("chart","mb-4")
-                    const canvas=document.createElement("canvas")
-                    chartDiv.appendChild(canvas)
-                    chartContainer.appendChild(chartDiv)
-                    new Chart(canvas,{
-                        type:"line",
-                        data:{
-                            labels: data.map(item=>item.created_at),
-                            datasets:[{
-                                label:headers[i],
-                                data:data.map(item=>item[headers[i]]),
-                                borderColor:"rgba(75, 192, 192, 1)",
-                                backgroundColor:"rgba(75, 192, 192, 0.2)",
-                                borderWidth:1
-                            }]
-                        }
-                    })
-            }
-        }
-        /**
-         * Update the browse table data based on the selected type(exercise or body measurement).
-         */
-        function browseDatasetChange(datasetType = "browseExercise") {
-            const visualType = document.querySelector("input[name=\"visualType\"]:checked").id
-            if(datasetType === "browseExercise"){
-                updateBrowseTableOptions(ExercisesTypes)
-            }
-            else if(datasetType==="browseCalorieIntake"){
-                updateBrowseTableOptions(["Calories"])
-            }
-            else if(datasetType==="browseBodyMeasurement"){
-                updateBrowseTableOptions(BodyMeasurementTypes)
-            }           
-            const datasetObj = createDataset(datasetType,visualType)
-            browseVisualChange(document.querySelector("#browseTableTypeSelect").value,datasetObj,visualType)
-        }
-       
-
 
         // Initialize
-        browseDatasetChange()
-        document.querySelectorAll("input[name=\"dataset\"]").forEach(radio => {
-            radio.addEventListener("change", function () {
-                browseDatasetChange(this.id)
-            })
-        })
-        document.querySelectorAll("input[name=\"visualType\"]").forEach(radio => {
-            radio.addEventListener("change", function () {
-                browseDatasetChange(document.querySelector("input[name=\"dataset\"]:checked").id)
-            })
-        })
-        document.querySelector("#browseTableTypeSelect").addEventListener("change", function () {
-            const selectedType = this.value
-            const datasetObj = createDataset(document.querySelector("input[name=\"dataset\"]:checked").id,document.querySelector("input[name=\"visualType\"]:checked").id)
-            browseVisualChange(selectedType,datasetObj,document.querySelector("input[name=\"visualType\"]:checked").id)
-        })
-        // Set the default timezone in the select element
-        const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-        document.querySelectorAll("select[name=\"timezone\"]").forEach(select => {
-            const option = Array.from(select.options).find(opt =>
-                opt.value === browserTimezone ||
-                opt.text.includes(browserTimezone)
-            )
-            if (option) option.selected = true
+        renderDataTypeOptions()
+        renderDataView()
+        document.addEventListener("change", function (event) {
+            if (event.target.matches("input[name='dataset']")) {
+                renderDataTypeOptions()
+                renderDataView()
+            } else if (event.target.matches("input[name='visualType']")) {
+                const selectedVisualType = event.target.id
+                const tableCard = document.querySelector("#tableCard")
+                const chartCard = document.querySelector("#chartCard")
+                if (selectedVisualType === "tableButton") {
+                    tableCard.classList.remove("d-none")
+                    chartCard.classList.add("d-none")
+                } else {
+                    tableCard.classList.add("d-none")
+                    chartCard.classList.remove("d-none")
+                }
+                renderDataView()
+            } else if (event.target.matches("#dataTypeSelect")) {
+                renderDataView()
+            }
         })
     </script>
 {% endblock %}
