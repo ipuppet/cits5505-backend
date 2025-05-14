@@ -1,11 +1,6 @@
 import pytest
-import sys
-import os
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import event
-
-# Add the project root directory to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from server.app import create_app
 from server.models import db
