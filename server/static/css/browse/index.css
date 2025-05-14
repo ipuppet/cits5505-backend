@@ -12,9 +12,6 @@ body{
     border-radius: 1rem;
 }
 
-.r2{
-    display:none; 
-}
 .buttons{
     display: flex;
      margin-top: 1rem;

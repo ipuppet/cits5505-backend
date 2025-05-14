@@ -164,15 +164,14 @@
                             <button class="btn btn-circle btn-add" onclick="showModal()">
                                 <i class="bi bi-plus"></i>
                             </button>
-                            <select class="form-select" style="width:auto;" aria-label="Data types" id="browseTableTypeSelect"
-                                    onchange="browseTableChange(this.value)">
+                            <select class="form-select" style="width:40%; text-align: center;" aria-label="Data types" id="browseTableTypeSelect">
                             </select>
                     </div>
                     <table class="card-body rb1 table table-striped table-hover">
                         <thead id="browseTableHeader"></thead>
                         <tbody id="browseTableBody"></tbody>
                     </table>
-                    <div class="card-body rb2" style="display: none;">
+                    <div class="card-body rb2 d-none">
                     </div>
                 </div>
             </div>
@@ -184,6 +183,7 @@
 
 {% block js %}
     <script src="{{ url_for('static', filename='js/browse/index.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         const ExercisesMetrics = {{ exercise_metrics | tojson }}
         const ExercisesTypes = {{ exercise_types | tojson }}
@@ -197,7 +197,7 @@
         const UserBodyMeasurements = {{ current_user.body_measurements | tojson }}
         const UserCalorieIntakes = {{ current_user.calorie_intakes | tojson }}
 
-        const Dataset = {headers: undefined, data: undefined}
+        // const Dataset = {headers: undefined, data: undefined}
 
         const ExerciseModalModal = new bootstrap.Modal("#exerciseModal")
         const CalorieIntakeModal = new bootstrap.Modal("#calorieIntakeModal")
@@ -208,11 +208,12 @@
             const rb1=document.querySelector(".rb1")
             const rb2=document.querySelector(".rb2")
             if(this.querySelector("#tableButton").checked){
-                rb1.style.display="block"
-                rb2.style.display="none"
-            }else{
-                rb1.style.display="none"
-                rb2.style.display="block"
+                rb1.classList.remove("d-none")
+                rb2.classList.add("d-none")
+            }
+            else{
+                rb1.classList.add("d-none")
+                rb2.classList.remove("d-none")
             }
         })
         /**
@@ -303,16 +304,57 @@
             }
         }
 
+        function createDataset(datasetType, visualType){
+            const dataset = {}
+            if(datasetType === "browseExercise"){
+                if(visualType==="tableButton"){
+                    dataset.headers= type => (ExercisesMetrics[type] || []).concat(["created_at"])
+                }
+                else{
+                    dataset.headers= type => ExercisesMetrics[type]
+                }
+                dataset.data= type => UserExercises
+                .filter(exercise=>exercise.type===type)
+                .map(
+                    exercise => ({
+                        ...exercise.metrics,
+                        created_at:exercise.created_at
+                    })
+                )
+            }
+            else if(datasetType === "browseCalorieIntake"){
+                if(visualType==="tableButton"){
+                    dataset.headers= type =>["calories", "description", "created_at"]
+                }
+                else{
+                    dataset.headers= type =>["calories"]
+                }
+                dataset.data=()=>UserCalorieIntakes
+            }
+            else if(datasetType === "browseBodyMeasurement"){
+                if(visualType==="tableButton"){
+                    dataset.headers= type =>["value", "created_at"]
+                }
+                else{
+                    dataset.headers= type =>["value"]
+                }
+                dataset.data= type =>UserBodyMeasurements.filter(bodyMeasurement=>bodyMeasurement.type===type)
+            }
+            return dataset
+        }
+
         /**
          * Update the browse table data.
          */
-        function browseTableChange(type) {
-            const headers = Dataset.headers(type)
-            const data = Dataset.data(type)
-            updateBrowseTable(headers, data)
-            updateBrowseChart(headers, data)
+        function browseVisualChange(type,dataset,visualType) {
+            const headers = dataset.headers(type)
+            const data = dataset.data(type)
+            if (visualType === "tableButton") {
+                updateBrowseTable(headers, data)
+            } else {
+                updateBrowseChart(headers, data)
+            }
         }
-        
         /**
          * Update the charts based on the selected type.
          */
@@ -342,57 +384,28 @@
                             }]
                         }
                     })
-                
             }
         }
-
         /**
          * Update the browse table data based on the selected type(exercise or body measurement).
          */
-        function browseDatasetChange(dateset = "browseExercise") {
-            // const browseTableTypeSelect = document.querySelector("input[name=\"dataset\"]:checked").id
+        function browseDatasetChange(datasetType = "browseExercise") {
             const visualType = document.querySelector("input[name=\"visualType\"]:checked").id
-            if(visualType==="tableButton"){
-                if (dateset === "browseExercise") {
-                    Dataset.headers = type => ExercisesMetrics[type].concat(["created_at"])
-                    Dataset.data = type => UserExercises.filter(exercise => exercise.type === type).map(
-                        exercise => ({
-                            ...exercise.metrics,
-                            created_at: exercise.created_at
-                        })
-                    )
-                    updateBrowseTableOptions(ExercisesTypes)
-                } else if (dateset === "browseCalorieIntake") {
-                    Dataset.headers = () => ["calories", "description", "created_at"]
-                    Dataset.data = () => UserCalorieIntakes
-                    updateBrowseTableOptions(["calories"])
-                } else if (dateset === "browseBodyMeasurement") {
-                    Dataset.headers = () => ["value", "created_at"]
-                    Dataset.data = type => UserBodyMeasurements.filter(bodyMeasurement => bodyMeasurement.type === type)
-                    updateBrowseTableOptions(BodyMeasurementTypes)
-                }
-            }else{
-                if(dataset==="browseExercise"){
-                    Dataset.headers=type=>ExercisesMetrics[type]
-                    Dataset.data=type=>UserExercises.filter(exercise=>exercise.type===type).map(
-                        exercise => ({
-                            ...exercise.metrics,
-                            created_at:exercise.created_at
-                        })
-                    )
-                }
-                else if(dataset==="browseCalorieIntake"){
-                    Dataset.headers=()=>["calories"]
-                    Dataset.data=()=>UserCalorieIntakes
-                }
-                else if(dataset==="browseBodyMeasurement"){
-                    Dataset.headers=()=>["value"]
-                    Dataset.data=type=>UserBodyMeasurements.filter(bodyMeasurement=>bodyMeasurement.type===type)
-                }
+            if(datasetType === "browseExercise"){
+                updateBrowseTableOptions(ExercisesTypes)
             }
-            browseTableChange(document.querySelector("#browseTableTypeSelect").value)
-           
+            else if(datasetType==="browseCalorieIntake"){
+                updateBrowseTableOptions(["Calories"])
+            }
+            else if(datasetType==="browseBodyMeasurement"){
+                updateBrowseTableOptions(BodyMeasurementTypes)
+            }           
+            // console.log("Selected dataset type:", datasetType)
+            const datasetObj = createDataset(datasetType,visualType)
+            browseVisualChange(document.querySelector("#browseTableTypeSelect").value,datasetObj,visualType)
         }
+       
+
 
         // Initialize
         browseDatasetChange()
@@ -400,6 +413,16 @@
             radio.addEventListener("change", function () {
                 browseDatasetChange(this.id)
             })
+        })
+        document.querySelectorAll("input[name=\"visualType\"]").forEach(radio => {
+            radio.addEventListener("change", function () {
+                browseDatasetChange(document.querySelector("input[name=\"dataset\"]:checked").id)
+            })
+        })
+        document.querySelector("#browseTableTypeSelect").addEventListener("change", function () {
+            const selectedType = this.value
+            const datasetObj = createDataset(document.querySelector("input[name=\"dataset\"]:checked").id,document.querySelector("input[name=\"visualType\"]:checked").id)
+            browseVisualChange(selectedType,datasetObj,document.querySelector("input[name=\"visualType\"]:checked").id)
         })
         // Set the default timezone in the select element
         const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
