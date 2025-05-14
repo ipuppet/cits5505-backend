@@ -1,0 +1,142 @@
+<div class="col-lg-5 mb-4 d-flex flex-column" style="height: 100%;">
+    <div class="row g-4">
+        <div class="col-md-12">
+            <div class="card chart-card shadow-sm border-0 mb-4">
+                <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+                    <strong>Achievements</strong>
+                </div>
+                <div class="card-body p-3">
+                    {% if achievements_by_type %}
+                        <div id="achievements-list">
+                            {% set icons = {
+                            'running': '🏃‍♂️',
+                            'cycling': '🚴‍♀️',
+                            'swimming': '🏊‍♂️',
+                            'weight_lifting': '🏋️‍♂️',
+                            'yoga': '🧘‍♂️'
+                            } %}
+                            {% set icon_colors = {
+                            'running': '#ffb700',
+                            'cycling': '#00b894',
+                            'swimming': '#0984e3',
+                            'weight_lifting': '#636e72',
+                            'yoga': '#a29bfe'
+                            } %}
+                            {% set units = {
+                            'running': 'M',
+                            'cycling': 'M',
+                            'swimming': 'M',
+                            'weight_lifting': 'KG',
+                            'yoga': 'MIN'
+                            } %}
+                            {% set badge_classes = ['badge-bronze', 'badge-silver', 'badge-gold'] %}
+                            {% set badge_labels = ['Bronze', 'Silver', 'Gold'] %}
+                            {% for ex_type, milestones in all_achievements.items() %}
+                                <div class="mb-2 d-flex align-items-center">
+                                    <span class="achievement-icon me-2"
+                                          style="background: {{ icon_colors[ex_type.value] }};">
+                                        {{ icons[ex_type.value] }}
+                                    </span>
+                                    <strong style="font-size:1.1em;">{{ ex_type }}</strong>:
+                                    <span class="ms-2">
+                                        {% for milestone in milestones %}
+                                            {% set idx = loop.index0 %}
+                                            {% set badge_label = badge_labels[idx] %}
+                                            {% if milestone in achievements_by_type[ex_type] %}
+                                                {% set badge_class = badge_classes[idx] %}
+                                            {% else %}
+                                                {% set badge_class = 'badge-locked' %}
+                                            {% endif %}
+                                            <span class="badge {{ badge_class }} me-1" title="{{ badge_label }}">
+                                            {{ badge_label }}
+                                                {% if units[ex_type.value] == "M" %}
+                                                    {{ (milestone/1000)|int }}KM
+                                                {% else %}
+                                                    {{ milestone|int }}{{ units[ex_type.value] }}
+                                                {% endif %}
+                                        </span>
+                                        {% endfor %}
+                                    </span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-muted text-center">
+                            No achievements yet. Start logging your activities!
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <!-- Achievements Card END -->
+
+        <div class="col-md-12">
+            <div class="card chart-card shadow-sm border-0 mb-4">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Calories Burned</h5>
+                    <canvas id="exerciseChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="card chart-card shadow-sm border-0 mb-4">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Calorie Intake</h5>
+                    <canvas id="intakeChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="card chart-card shadow-sm border-0">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center"
+                     style="border-radius: 1rem 1rem 0 0;">
+                    <strong>Weight Trend</strong>
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#editWeightModal">
+                        <i class="bi bi-pencil"></i> Edit
+                    </button>
+                </div>
+                <div class="card-body">
+                    <canvas id="weightChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="editWeightModal" tabindex="-1" aria-labelledby="editWeightModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST" action="{{ url_for('browse.body_measurement') }}">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editWeightModalLabel">Edit Weight</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="referrer" value="{{ url_for('dashboard.index') }}">
+                            {{ body_measurement_form.hidden_tag() }}
+                            {{ body_measurement_form.type(class="d-none", value="WEIGHT") }}
+                            <div class="mb-3">
+                                {{ body_measurement_form.value.label(class="form-label", text="Weight (KG)") }}
+                                {{ body_measurement_form.value(class="form-control") }}
+                            </div>
+                            <div class="mb-3">
+                                {{ body_measurement_form.date.label(class="form-label") }}
+                                {{ body_measurement_form.date(class="form-control") }}
+                            </div>
+                            <div class="mb-3">
+                                {{ body_measurement_form.time.label(class="form-label") }}
+                                {{ body_measurement_form.time(class="form-control") }}
+                            </div>
+                            <div class="mb-3">
+                                {{ body_measurement_form.timezone.label(class="form-label") }}
+                                {{ body_measurement_form.timezone(class="form-select") }}
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

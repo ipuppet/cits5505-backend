@@ -1,0 +1,338 @@
+<div class="col-lg-4 mb-4">
+    <!-- Schedule Card -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <strong>My Schedule</strong>
+            <!-- Add Button (opens modal) -->
+            <button class="btn btn-circle btn-add" data-bs-toggle="modal"
+                    data-bs-target="#addScheduleModal">
+                <i class="bi bi-plus"></i>
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="mb-2 text-muted" id="now"></div>
+            {% if current_user.scheduled_exercises %}
+                <ul class="list-unstyled">
+                    {% for se in current_user.scheduled_exercises %}
+                        <li class="schedule-item d-flex align-items-start mb-3">
+                            <button class="btn btn-check me-3" title="Mark as done">
+                                <i class="bi bi-circle"></i>
+                            </button>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold" style="font-size:1.1rem;">
+                                    {{ se.exercise_type }}
+                                </div>
+                                <div class="text-muted small">
+                                    {{ se.day_of_week }} {{ se.scheduled_time.strftime('%I:%M %p').lstrip('0') }}
+                                    {% if se.note %} <br/> {{ se.note }}{% endif %}
+                                </div>
+                            </div>
+                            <!-- Edit button -->
+                            <button class="btn btn-edit ms-2" title="Edit" data-bs-toggle="modal"
+                                    data-bs-target="#editScheduleModal-{{ se.id }}">
+                                <i class="bi bi-three-dots"></i>
+                            </button>
+                            <!-- Edit Modal for each schedule item -->
+                            <div class="modal fade" id="editScheduleModal-{{ se.id }}" tabindex="-1"
+                                 aria-labelledby="editScheduleModalLabel-{{ se.id }}"
+                                 aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form method="POST"
+                                              action="{{ url_for('dashboard.edit_schedule', schedule_id=se.id) }}">
+                                            {{ schedule_form.hidden_tag() }}
+                                            <div class="modal-header">
+                                                <h5 class="modal-title"
+                                                    id="editScheduleModalLabel-{{ se.id }}">
+                                                    Edit or Delete Exercise</h5>
+                                                <button type="button" class="btn-close"
+                                                        data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="mb-2">
+                                                    <label>Day</label>
+                                                    <select name="day_of_week" class="form-select">
+                                                        {% for val, label in schedule_form.day_of_week.choices %}
+                                                            <option value="{{ val }}"
+                                                                    {% if se.day_of_week==val %}selected{% endif %}>
+                                                                {{ label }}
+                                                            </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <label>Exercise</label>
+                                                    <select name="exercise_type" class="form-select">
+                                                        {% for val, label in schedule_form.exercise_type.choices %}
+                                                            <option value="{{ val }}"
+                                                                    {% if se.exercise_type.name==val %}selected{% endif %}>
+                                                                {{ label }}
+                                                            </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <label>Time</label>
+                                                    <input type="time" name="scheduled_time"
+                                                           class="form-control"
+                                                           value="{{ se.scheduled_time.strftime('%H:%M') }}">
+                                                </div>
+                                                <div class="mb-2">
+                                                    <label>Note</label>
+                                                    <input type="text" name="note"
+                                                           class="form-control"
+                                                           value="{{ se.note }}">
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer d-flex justify-content-between">
+                                                <button type="submit" class="btn btn-primary">Save
+                                                    Changes
+                                                </button>
+                                        </form>
+                                        <form method="POST"
+                                              action="{{ url_for('dashboard.delete_schedule', schedule_id=se.id) }}"
+                                              onsubmit="return confirm('Delete this schedule?');">
+                                            <button type="submit" class="btn btn-danger">Delete
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="text-muted">No scheduled exercises.</div>
+            {% endif %}
+        </div>
+    </div>
+    <!-- Add Schedule Modal -->
+    <div class="modal fade" id="addScheduleModal" tabindex="-1"
+         aria-labelledby="addScheduleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" action="{{ url_for('dashboard.add_schedule') }}">
+                    {{ schedule_form.hidden_tag() }}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addScheduleModalLabel">Add Exercise</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-2">{{ schedule_form.day_of_week.label }} {{ schedule_form.day_of_week(class="form-select") }}</div>
+                        <div class="mb-2">{{ schedule_form.exercise_type.label }} {{ schedule_form.exercise_type(class="form-select") }}</div>
+                        <div class="mb-2">{{ schedule_form.scheduled_time.label }} {{ schedule_form.scheduled_time(class="form-control") }}</div>
+                        <div class="mb-2">{{ schedule_form.note.label }} {{ schedule_form.note(class="form-control") }}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">{{ schedule_form.submit(class="btn
+                                            btn-primary") }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Goals Card -->
+    <!-- Goals List Card -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <strong>My Goals</strong>
+            <button class="btn btn-circle btn-add" data-bs-toggle="modal"
+                    data-bs-target="#addGoalModal">
+                <i class="bi bi-plus"></i>
+            </button>
+        </div>
+        <div class="card-body">
+            {% if current_user.goals %}
+                <ul class="list-group">
+                    {% for goal in current_user.goals %}
+                        <li class="list-group-item d-flex align-items-center position-relative goal-item"
+                            style="gap: 0.75rem;">
+                            <div
+                                    style="flex-shrink:0; width:48px; height:48px; display:flex; align-items:center; justify-content:center;">
+                                <canvas id="goal-progress-{{ goal.id }}" width="40"
+                                        height="40"></canvas>
+                            </div>
+                            <div style="flex:1; min-width:0;">
+                                <strong style="font-size:1.1em;">{{ goal.description }}</strong><br>
+                                <span class="text-muted">{{ goal.exercise_type }}</span><br>
+                                <span style="font-size:0.95em;">Target: {{ goal.target_value }} {{ goal.unit }}</span><br>
+                                <span style="font-weight:bold; color:#007bff; font-size:1em;">
+                                            {{ goal.current_value }} / {{ goal.target_value }} &rarr;
+                                            {{ ((goal.current_value / goal.target_value * 100) if goal.target_value else
+                                            0)|round(1) }}% Complete
+                                        </span>
+                                <!-- ...existing badge/buttons... -->
+                                {% if goal.current_value >= goal.target_value %}
+                                    <span class="badge bg-success rounded-pill mb-2">
+                                            Completed <i class="bi bi-check-circle-fill ms-1"></i>
+                                        </span>
+                                    <form method="POST"
+                                          action="{{ url_for('dashboard.delete_goal', goal_id=goal.id) }}"
+                                          onsubmit="return confirm('Are you sure you want to delete this completed goal?');"
+                                          class="delete-goal-form d-inline">
+                                        <button type="submit"
+                                                class="badge rounded-pill bg-white text-danger border border-danger give-up-badge-btn"
+                                                style="font-size: 0.8rem;" title="Delete Goal">
+                                            Delete
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    {% if goal.current_value > 0 %}
+                                        <span class="badge bg-warning text-dark rounded-pill mb-2">
+                                            In Progress: {{ goal.current_value }} / {{ goal.target_value }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-primary rounded-pill mb-2">
+                                            {{ goal.current_value }} / {{ goal.target_value }}
+                                        </span>
+                                    {% endif %}
+                                    <form method="POST"
+                                          action="{{ url_for('dashboard.delete_goal', goal_id=goal.id) }}"
+                                          onsubmit="return confirm('Are you sure you want to give up this goal?');"
+                                          class="delete-goal-form d-inline">
+                                        <button type="submit"
+                                                class="badge rounded-pill bg-white text-danger border border-danger give-up-badge-btn"
+                                                style="font-size: 0.8rem;" title="Give Up Goal">
+                                            Give Up
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="text-muted">No goals set yet.</div>
+            {% endif %}
+        </div>
+    </div>
+    <!-- BMI Chart Card -->
+    <div class="card chart-card shadow-sm border-0 mb-4">
+        <div class="card-header bg-light d-flex align-items-center">
+            <strong>BMI</strong>
+            <a href="https://en.wikipedia.org/wiki/Body_mass_index" target="_blank" class="ms-auto"
+               title="Learn more about BMI" style="color: #007bff; text-decoration: none;">
+                <i class="bi bi-question-circle"
+                   style="font-size: 1.2em; vertical-align: middle;"></i>
+            </a>
+        </div>
+        <div class="card-body text-center">
+            <div style="font-weight:bold;">
+                Current BMI=
+                <span style="color:#bfa000; font-weight:700;">
+                                    {{ bmi if bmi is not none else 'N/A' }}
+                                </span>
+            </div>
+            <div style="color: #bfa000; font-weight:600; font-size:1.1rem;">
+                {{ bmi_category or '' }}
+            </div>
+            <div class="bmi-bar-container my-3" style="position:relative; height:48px;">
+                <canvas id="bmiBar" height="48"></canvas>
+            </div>
+            <div class="d-flex justify-content-between" style="font-size:0.95rem;">
+                <span>15</span>
+                <span>18.5</span>
+                <span>25</span>
+                <span>30</span>
+                <span>40</span>
+            </div>
+            {% if bmi is not none %}
+                {% if bmi < 18.5 %}
+                    <div class="alert alert-info mt-3 py-2 px-3" style="font-size:1em;">
+                        Underweight (BMI &lt; 18.5): Consider gaining weight for better health.
+                    </div>
+                {% elif 18.5 <= bmi <=24.9 %}
+                    <div class="alert alert-success mt-3 py-2 px-3"
+                         style="font-size:1em;">
+                        Normal range (18.5–24.9): You're in a healthy weight zone!
+                    </div>
+                {% elif 25 <= bmi <=29.9 %}
+                    <div class="alert alert-warning mt-3 py-2 px-3" style="font-size:1em;">
+                        Overweight (25–29.9): Consider healthy lifestyle changes.
+                    </div>
+                {% elif 30 <= bmi <=39.9 %}
+                    <div class="alert alert-danger mt-3 py-2 px-3" style="font-size:1em;">
+                        Obesity (30–39.9): Increased health risks. Consult your doctor.
+                    </div>
+                {% elif bmi >= 40 %}
+                    <div class="alert alert-danger mt-3 py-2 px-3" style="font-size:1em;">
+                        Severe Obesity (BMI ≥ 40): High health risk. Seek medical advice.
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    <!-- Exercise Log Card -->
+    <div class="card chart-card shadow-sm border-0">
+        <div class="card-header bg-light" style="border-radius: 1rem 1rem 0 0;">
+            <strong>Exercise Log</strong>
+        </div>
+        <div class="card-body p-3">
+            {% if current_user.exercises %}
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Details</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for ex in current_user.exercises[:10] %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ ex.type }}</td>
+                            <td>{{ ex.created_at.strftime('%Y/%m/%d') if ex.created_at else 'N/A' }}</td>
+                            </td>
+                            <td>
+                                {% if ex.metrics %}
+                                    {% for key, value in ex.metrics.items() %}
+                                        {{ key.replace('_', ' ').capitalize() }}: {{ value }}<br>
+                                    {% endfor %}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="text-muted text-center">No exercise data yet.</div>
+            {% endif %}
+        </div>
+    </div>
+    <!-- Add Goal Modal -->
+    <div class="modal fade" id="addGoalModal" tabindex="-1" aria-labelledby="addGoalModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" action="{{ url_for('dashboard.add_goal') }}">
+                    {{ goal_form.hidden_tag() }}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addGoalModalLabel">Add Goal</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-2">{{ goal_form.description.label }} {{ goal_form.description(class="form-control") }}</div>
+                        <div class="mb-2">{{ goal_form.exercise_type.label }} {{ goal_form.exercise_type(class="form-select") }}</div>
+                        <div class="mb-2">{{ goal_form.metric.label }} {{ goal_form.metric(class="form-select") }}</div>
+                        <div class="mb-2">{{ goal_form.target_value.label }} {{ goal_form.target_value(class="form-control") }}</div>
+                        <div class="mb-2">{{ goal_form.unit.label }} {{ goal_form.unit(class="form-control",
+                            readonly=True) }}</div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">{{ goal_form.submit(class="btn
+                                btn-primary") }}</button>
+                        </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
