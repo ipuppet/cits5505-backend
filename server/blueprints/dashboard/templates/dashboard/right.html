@@ -15,9 +15,6 @@
                 <ul class="list-unstyled">
                     {% for se in current_user.scheduled_exercises %}
                         <li class="schedule-item d-flex align-items-start mb-3">
-                            <button class="btn btn-check me-3" title="Mark as done">
-                                <i class="bi bi-circle"></i>
-                            </button>
                             <div class="flex-grow-1">
                                 <div class="fw-bold" style="font-size:1.1rem;">
                                     {{ se.exercise_type }}

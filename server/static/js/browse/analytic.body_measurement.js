@@ -96,7 +96,7 @@ function createMetricDashboard(processedData) {
 }
 
 function visualizeBodyMeasurements(rawData) {
-    const processed = processBodyMeasurements(rawData.body_measurements)
+    const processed = processBodyMeasurements(rawData)
 
     createWeightChart(processed)
     if (processed.BODY_FAT.data.length > 0) {
@@ -106,4 +106,4 @@ function visualizeBodyMeasurements(rawData) {
     createMetricDashboard(processed)
 }
 
-visualizeBodyMeasurements(SharedData)
+visualizeBodyMeasurements(RawData)
