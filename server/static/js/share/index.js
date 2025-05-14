@@ -115,13 +115,15 @@ async function fetchSharedRecords(scope) {
 
 // Function definitions in global scope
 function deleteShareRecord(id) {
+    if (!confirm("Are you sure you want to delete this share record?")) return
     fetch("/share/" + id, {method: "DELETE"})
-        .then(response => response.json())
-        .then(data => {
-            alert("Share record deleted successfully.")
-            // Reload share records
-            location.reload()
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Network response was not ok")
+            }
+            return response.json()
         })
+        .then(data => location.reload())
 }
 
 function renderSharesDetail(type, data) {
@@ -144,8 +146,27 @@ function renderSharesDetail(type, data) {
         title.className = "card-title mb-0"
         title.textContent = type === "sent" ? record.receiver : record.sender
 
+        // Create button group
+        const buttonGroup = document.createElement("div")
+        buttonGroup.className = "btn-group btn-group-sm"
+
+        // View button
+        const viewButton = document.createElement("button")
+        viewButton.className = "btn btn-outline-success"
+        viewButton.setAttribute("type", "button")
+        viewButton.setAttribute("aria-label", "View")
+
+        const viewIcon = document.createElement("i")
+        viewIcon.className = "bi bi-eye"
+        viewButton.appendChild(viewIcon)
+
+        viewButton.addEventListener("click", () => {
+            location.href = `/share/${record.id}`
+        })
+
+        // Delete button
         const deleteButton = document.createElement("button")
-        deleteButton.className = "btn btn-sm btn-outline-danger"
+        deleteButton.className = "btn btn-outline-danger"
         deleteButton.setAttribute("type", "button")
         deleteButton.setAttribute("aria-label", "Delete")
 
@@ -154,12 +175,15 @@ function renderSharesDetail(type, data) {
         deleteButton.appendChild(deleteIcon)
 
         deleteButton.addEventListener("click", () => {
-            // 这里添加删除逻辑
             deleteShareRecord(record.id)
         })
 
+        // Add buttons to group
+        buttonGroup.appendChild(viewButton)
+        buttonGroup.appendChild(deleteButton)
+
         headerRow.appendChild(title)
-        headerRow.appendChild(deleteButton)
+        headerRow.appendChild(buttonGroup)
 
         const scopeContainer = document.createElement("div")
         scopeContainer.className = "card-text"
@@ -169,7 +193,7 @@ function renderSharesDetail(type, data) {
 
         const timeInfo = document.createElement("div")
         timeInfo.className = "text-muted small"
-        timeInfo.textContent = record.created_at || ""
+        timeInfo.textContent = new Date(record.created_at).toLocaleString()
 
         cardBody.appendChild(headerRow)
         cardBody.appendChild(scopeContainer)
