@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Data Analytics
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/browse/analytic.css') }}"/>
+{% endblock %}
+
+{% set data_type = ("exercises" if exercises | length > 0 else "body_measurements") %}
+
+{% block content %}
+    <div class="container py-5">
+        <div class="card shadow border-0 mb-4 no-hover">
+            <div class="card-body p-lg-4">
+                {% if data_type == "exercises" %}
+                    {% include "browse/analytics.exercise.html" %}
+                {% elif data_type == "body_measurements" %}
+                    {% include "browse/analytics.body.html" %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ExercisesMetrics = {{ exercise_metrics | tojson }}
+        const ExercisesTypes = {{ exercise_types | tojson }}
+        const BodyMeasurementTypes = {{ body_measurement_types | tojson }}
+        const RawData = {{ (exercises if data_type == "exercises" else body_measurements) | tojson }}
+    </script>
+    {% if data_type == "exercises" %}
+        <script src="{{ url_for('static', filename='js/browse/analytic.exercise.js') }}"></script>
+    {% elif data_type == "body_measurements" %}
+        <script src="{{ url_for('static', filename='js/browse/analytic.body_measurement.js') }}"></script>
+    {% endif %}
+{% endblock %}

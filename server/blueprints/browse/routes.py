@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, flash, redirect, url_for, request
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 from server.blueprints.browse import logic
 from server.blueprints.browse.forms import (
@@ -29,9 +29,19 @@ def index():
     )
 
 
-@browse_bp.route("/exercise", methods=["POST"])
+@browse_bp.route("/exercise", methods=["GET", "POST"])
 @login_required
 def exercise():
+    if request.method == "GET":
+        return render_template(
+            "browse/analytic.html",
+            exercises=current_user.exercises.all(),
+            body_measurements=[],
+            exercise_metrics=logic.get_exercises_metrics(),
+            exercise_types=logic.get_exercise_types(),
+            body_measurement_types=logic.get_body_measurement_types(),
+        )
+
     form = ExerciseForm()
     if form.validate_on_submit():
         try:
@@ -53,9 +63,19 @@ def exercise():
     return redirect(url_for("browse.index"))
 
 
-@browse_bp.route("/body_measurement", methods=["POST"])
+@browse_bp.route("/body_measurement", methods=["GET", "POST"])
 @login_required
 def body_measurement():
+    if request.method == "GET":
+        return render_template(
+            "browse/analytic.html",
+            exercises=[],
+            body_measurements=current_user.body_measurements.all(),
+            exercise_metrics=logic.get_exercises_metrics(),
+            exercise_types=logic.get_exercise_types(),
+            body_measurement_types=logic.get_body_measurement_types(),
+        )
+
     form = BodyMeasurementForm()
     if form.validate_on_submit():
         try:

@@ -29,3 +29,13 @@ function convertTimezone(data, key = "created_at") {
     }
     return result
 }
+
+// Set the default timezone in the select element
+const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+document.querySelectorAll("select[name=\"timezone\"]").forEach(select => {
+    const option = Array.from(select.options).find(opt =>
+        opt.value === browserTimezone ||
+        opt.text.includes(browserTimezone)
+    )
+    if (option) option.selected = true
+})

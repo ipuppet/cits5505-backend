@@ -167,7 +167,7 @@ function createDailyTrendChart(processedData) {
 }
 
 function visualizeExerciseData(rawData) {
-    const processed = processExerciseData(rawData.exercises)
+    const processed = processExerciseData(rawData)
 
     createTypeDistributionChart(processed)
     createCardioChart(processed)
@@ -175,4 +175,4 @@ function visualizeExerciseData(rawData) {
     createDailyTrendChart(processed)
 }
 
-visualizeExerciseData(SharedData)
+visualizeExerciseData(RawData)
