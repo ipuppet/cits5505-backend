@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 from server.app import create_app
 from server.models import db, User
 from server.blueprints.user.logic import create_user
+from server.utils.security import hash_password
 
 
 @pytest.fixture(scope="function")
@@ -55,10 +56,9 @@ def test_user(app):
             return user
             
         # If not, create a new user
-        from werkzeug.security import generate_password_hash
         new_user = User(
             username="testuser",
-            password=generate_password_hash("TestPassword123!"),
+            password=hash_password("TestPassword123!"),
             email="test@example.com",
             nickname="Test User"
         )

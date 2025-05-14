@@ -4,6 +4,7 @@ from flask import url_for, json
 
 from server.models import Share, User, Exercise, db
 from server.utils.constants import ExerciseType
+from server.utils.security import hash_password
 
 
 class TestShareFlow:
@@ -12,8 +13,6 @@ class TestShareFlow:
     @pytest.fixture
     def second_user(self, app):
         """Create a second test user for sharing tests"""
-        from werkzeug.security import generate_password_hash
-        
         # First, check if user already exists
         user = User.query.filter_by(username="seconduser").first()
         if user:
@@ -22,7 +21,7 @@ class TestShareFlow:
         # If not, create a new user
         new_user = User(
             username="seconduser",
-            password=generate_password_hash("TestPassword123!"),
+            password=hash_password("TestPassword123!"),
             email="second@example.com",
             nickname="Second User"
         )
