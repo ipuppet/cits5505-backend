@@ -7,6 +7,11 @@ function fetchWaterAmount() {
             return res.json()
         })
         .then(data => updateWaterUI(data.data))
+        .catch(err => {
+            console.error("Error fetching water amount:", err)
+            const msgEl = document.getElementById("hydration-progress-message")
+            if (msgEl) msgEl.textContent = "Error fetching hydration data. Please try again later."
+        })
 }
 
 function addWater(ml) {
