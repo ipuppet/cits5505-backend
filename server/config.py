@@ -8,8 +8,8 @@ class Config:
     MAIL_SERVER = "smtp.gmail.com"
     MAIL_PORT = 587
     MAIL_USE_TLS = True
-    MAIL_USERNAME = "howitzer3761919@gmail.com"
-    MAIL_PASSWORD = "ujewgxhkrhygcucw"
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
 
 
 class DevelopmentConfig(Config):

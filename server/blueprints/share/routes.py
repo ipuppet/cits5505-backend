@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, request, flash, url_for, redirect
 from flask_login import login_required, current_user
 
+import server.blueprints.browse.logic as browse_logic
+import server.blueprints.share.logic as share_logic
 from server.blueprints.share.forms import ShareForm, PreviewForm
 from server.utils.decorators import api_response
-import server.blueprints.share.logic as share_logic
-import server.blueprints.browse.logic as browse_logic
 
 share_bp = Blueprint("share", __name__, template_folder="templates")
 
@@ -45,8 +45,9 @@ def view(share_id):
     try:
         shared_data = share_logic.get_shared(share_id)
         return render_template(
-            "share/view.html",
-            shared_data=shared_data,
+            "share/analytic.html",
+            exercises=shared_data["exercises"],
+            body_measurements=shared_data["body_measurements"],
             exercise_metrics=browse_logic.get_exercises_metrics(),
             exercise_types=browse_logic.get_exercise_types(),
             body_measurement_types=browse_logic.get_body_measurement_types(),

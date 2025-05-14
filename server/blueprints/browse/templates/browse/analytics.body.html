@@ -1,0 +1,56 @@
+<!-- Body Measurement Dashboard -->
+<h5 class="card-title text-center mb-4">Body Metrics</h5>
+
+<!-- Weights, Body Fat, and Height -->
+<div class="row g-4 mb-4">
+    <div class="col-12 col-md-4">
+        <div class="card bg-primary text-white shadow-lg">
+            <div class="card-body text-center py-4">
+                <h3 class="h6 fw-normal mb-3">Latest Weight</h3>
+                <div class="display-5 fw-bold mb-1" id="latestWeight">-</div>
+                <div class="text-white-50 small" id="weightUnit">kg</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="card bg-info text-white shadow-lg">
+            <div class="card-body text-center py-4">
+                <h3 class="h6 fw-normal mb-3">Body Fat</h3>
+                <div class="display-5 fw-bold mb-1" id="bodyFatPercentage">-</div>
+                <div class="text-white-50 small">%</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="card bg-success text-white shadow-lg">
+            <div class="card-body text-center py-4">
+                <h3 class="h6 fw-normal mb-3">Height</h3>
+                <div class="display-5 fw-bold mb-1" id="heightDisplay">-</div>
+                <div class="text-white-50 small">cm</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart Section -->
+<div class="row g-4">
+    <div class="col-12 col-xl-6">
+        <div class="card border-0 shadow">
+            <div class="card-body">
+                <h3 class="h5 fw-semibold mb-3">Weight Trend</h3>
+                <canvas id="weightChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-xl-6">
+        <div class="card border-0 shadow">
+            <div class="card-body">
+                <h3 class="h5 fw-semibold mb-3">Body Fat Trend</h3>
+                <canvas id="bodyFatChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,35 +1,12 @@
-body{
-    background-color: #292a2c51 !important;
-}
-.left-block, .right-block{
+.left-block, .right-block {
     border-radius: 1rem;
 }
 
-.buttons{
-    display: flex;
-     margin-top: 1rem;
-    margin-bottom: 1rem;
-   
-}
-.btn-group{
+.btn-group {
     display: flex;
     max-width: 100%;
 }
-#tableButton, #chartButton{
-    width:45%;
-}
-.btn-add{
-    background-color:#fff86a;
-    color:#222;
-}
-.btn-circle{
-    width:2.2rem;
-    height:2.2rem;
-    border-radius: 50%;
-    display:flex;
-    justify-content: center;
-    align-items: center;
-    border:none;
-    font-size:1.3rem;
-    box-shadow:0 1px 4px rgba(0, 0, 0, 0.04);
+
+#tableButton, #chartButton {
+    width: 45%;
 }

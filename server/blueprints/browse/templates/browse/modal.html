@@ -1,0 +1,125 @@
+<div class="modal fade" id="exerciseModal" tabindex="-1" aria-labelledby="exerciseModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exerciseModalLabel">Add Exercise Data</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('browse.exercise') }}" id="exerciseForm"
+                      onsubmit="exerciseSubmit()">
+                    {{ exercise_form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ exercise_form.type.label(class="form-label") }}
+                        {{ exercise_form.type(class="form-select", onchange="exerciseTypeChange()") }}
+                    </div>
+                    <div id="exerciseFormContainer"></div>
+                    <input type="hidden" name="metrics" id="exerciseForm.metrics">
+                    <div class="mb-3">
+                        {{ exercise_form.date.label(class="form-label") }}
+                        {{ exercise_form.date(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ exercise_form.time.label(class="form-label") }}
+                        {{ exercise_form.time(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ exercise_form.timezone.label(class="form-label") }}
+                        {{ exercise_form.timezone(class="form-select") }}
+                    </div>
+                    {{ exercise_form.submit(class="btn btn-primary") }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="bodyMeasurementModal" tabindex="-1" aria-labelledby="bodyMeasurementModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="bodyMeasurementModalLabel">Add Body Measurement Data</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('browse.body_measurement') }}" id="bodyMeasurementForm"
+                      onsubmit="bodyMeasurementSubmit()">
+                    {{ body_measurement_form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ body_measurement_form.type.label(class="form-label") }}
+                        {{ body_measurement_form.type(class="form-select", onchange="bodyMeasurementTypeChange()") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ body_measurement_form.value.label(class="form-label") }}
+                        {{ body_measurement_form.value(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="bodyMeasurementForm.unit">Unit</label>
+                        <!-- Options for this dropdown are dynamically populated by client-side JavaScript -->
+                        <select class="form-select" id="bodyMeasurementForm.unit" name="unit">
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        {{ body_measurement_form.date.label(class="form-label") }}
+                        {{ body_measurement_form.date(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ body_measurement_form.time.label(class="form-label") }}
+                        {{ body_measurement_form.time(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ body_measurement_form.timezone.label(class="form-label") }}
+                        {{ body_measurement_form.timezone(class="form-select") }}
+                    </div>
+                    {{ body_measurement_form.submit(class="btn btn-primary") }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="calorieIntakeModal" tabindex="-1" aria-labelledby="calorieIntakeModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="calorieIntakeModalLabel">Add Calorie Intake Data</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('browse.calorie_intake') }}" id="calorieIntakeForm"
+                      onsubmit="calorieIntakeSubmit()">
+                    {{ calorie_intake_form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ calorie_intake_form.calories.label(class="form-label") }}
+                        {{ calorie_intake_form.calories(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="calorieIntakeForm.unit">Unit</label>
+                        <select class="form-select" id="calorieIntakeForm.unit" name="unit">
+                            <option value="kcal">kcal</option>
+                            <option value="kJ">kJ</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        {{ calorie_intake_form.description.label(class="form-label") }}
+                        {{ calorie_intake_form.description(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ calorie_intake_form.date.label(class="form-label") }}
+                        {{ calorie_intake_form.date(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ calorie_intake_form.time.label(class="form-label") }}
+                        {{ calorie_intake_form.time(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ calorie_intake_form.timezone.label(class="form-label") }}
+                        {{ calorie_intake_form.timezone(class="form-select") }}
+                    </div>
+                    {{ calorie_intake_form.submit(class="btn btn-primary") }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

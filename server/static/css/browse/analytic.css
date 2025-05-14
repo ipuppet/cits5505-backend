@@ -2,12 +2,7 @@
     min-height: 250px;
 }
 
-.card {
-    transition: transform 0.2s, box-shadow 0.2s;
-    border-radius: 0.75rem;
-}
-
-.card:hover {
+.card:not(.no-hover):hover {
     transform: translateY(-2px);
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
 }
