@@ -23,7 +23,7 @@ def index():
 
     if not form.validate_on_submit():
         flash(str(form.errors), "danger")
-        return redirect(url_for("user.update_user"))
+        return redirect(url_for("user.index"))
 
     try:
         logic.update_user(
@@ -32,10 +32,10 @@ def index():
             form.nickname.data,
         )
         flash("User information updated successfully!", "success")
-        return redirect(url_for("user.update_user"))
+        return redirect(url_for("user.index"))
     except Exception as e:
         flash(str(e), "danger")
-        return redirect(url_for("user.update_user"))
+        return redirect(url_for("user.index"))
 
 
 @user_bp.route("/login", methods=["POST"])
