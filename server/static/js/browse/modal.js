@@ -11,7 +11,15 @@ function exerciseTypeChange() {
         div.className = "mb-3"
         const label = document.createElement("label")
         label.className = "form-label"
-        label.textContent = formatName(metric)
+        let unitText = ""
+        if (metric === "distance") {
+            unitText = "(m)"
+        } else if (metric === "duration") {
+            unitText = "(min)"
+        } else if (metric === "weight") {
+            unitText = "(kg)"
+        }
+        label.textContent = `${formatName(metric)} ${unitText}`
         div.appendChild(label)
         const input = document.createElement("input")
         input.className = "form-control"
