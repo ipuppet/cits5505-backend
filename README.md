@@ -42,7 +42,7 @@ apps, our platform emphasizes social features, data visualization, and user moti
 - **Easy Setup:** Designed for quick local deployment with clear instructions and minimal dependencies.
 - **Test-Driven Development:** Comprehensive unit tests ensure reliability and maintainability.
 
-## Project structure
+## Project Structure
 
 ```plaintext
 .
@@ -66,7 +66,7 @@ apps, our platform emphasizes social features, data visualization, and user moti
     └── test_models
 ```
 
-### Directory structure
+### Directory Structure
 
 - `instance`: This directory contains the development configuration file and the SQLite database file. The configuration
   will override the default configuration in `server/config.py`.
@@ -88,7 +88,7 @@ apps, our platform emphasizes social features, data visualization, and user moti
 
 *`instance` should not be included in version control.*
 
-## Style guide
+## Style Guide
 
 This project follows the [Black](https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html) style
 guide for Python code. To format the code, run the following command:
@@ -137,7 +137,7 @@ Instead, edit `requirements.in` and run the following command to generate `requi
 pip-compile
 ```
 
-### Install dependencies
+### Install Dependencies
 
 Use `pip-tools` to install the dependencies. Run the following command:
 
