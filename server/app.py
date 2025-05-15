@@ -1,17 +1,16 @@
 import os
-from flask import Flask
+
 import wtforms_json
+from flask import Flask
 
 from server.models import db, migrate
 from server.utils.context_processors import inject_pytz
-from server.utils.mail import mail
-from server.utils.login_manager import login_manager
 from server.utils.json_provider import JSONProvider
+from server.utils.login_manager import login_manager
+from server.utils.mail import mail
 
 
-def create_app(config_class=None):
-    # Create and configure the app
-    app = Flask(__name__, instance_relative_config=True)
+def init_config(app, config_class):
     # Load the default configuration
     if config_class is None:
         env = os.getenv("FLASK_ENV", "production")
@@ -37,6 +36,8 @@ def create_app(config_class=None):
         pass
     app.config.from_pyfile("config.py", silent=True)
 
+
+def init_extensions(app):
     # Initialize the context processors
     app.context_processor(inject_pytz)
 
@@ -49,8 +50,6 @@ def create_app(config_class=None):
     # Initialize the database
     db.init_app(app)
     migrate.init_app(app, db)
-    with app.app_context():
-        db.create_all()
 
     # Initialize the login manager
     login_manager.init_app(app)
@@ -58,6 +57,8 @@ def create_app(config_class=None):
     # Initialize Flask-Mail
     mail.init_app(app)
 
+
+def init_blueprints(app):
     # Register the blueprints
     from server.blueprints.index.routes import index_bp
     from server.blueprints.dashboard.routes import dashboard_bp
@@ -70,5 +71,22 @@ def create_app(config_class=None):
     app.register_blueprint(user_bp, url_prefix="/user")
     app.register_blueprint(browse_bp, url_prefix="/browse")
     app.register_blueprint(share_bp, url_prefix="/share")
+
+
+def register_commands(app):
+    @app.cli.command("init-db")
+    def init_db_command():
+        with app.app_context():
+            db.create_all()
+
+
+def create_app(config_class=None):
+    # Create and configure the app
+    app = Flask(__name__, instance_relative_config=True)
+
+    init_config(app, config_class)
+    init_extensions(app)
+    init_blueprints(app)
+    register_commands(app)
 
     return app

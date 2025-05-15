@@ -174,6 +174,12 @@ export MAIL_PASSWORD="your_email_password"
 
 ### Run the Project
 
+Initialize the database and create the tables. You can do this by running the following command:
+
+```bash
+flask init-db
+```
+
 Use the following command to run the project:
 
 ```bash

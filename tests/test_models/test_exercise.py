@@ -12,11 +12,11 @@ class TestExerciseModel:
             (ExerciseType.YOGA, {"duration": 45}),
         ],
     )
-    def test_valid_exercise_creation(self, session, exercise_type, valid_metrics):
+    def test_valid_exercise_creation(self, db_session, exercise_type, valid_metrics):
         """Test valid exercise creation with correct metrics"""
         exercise = Exercise(user_id=1, type=exercise_type, metrics=valid_metrics)
-        session.add(exercise)
-        session.commit()
+        db_session.add(exercise)
+        db_session.commit()
 
         assert exercise.id is not None
         assert exercise.created_at is not None

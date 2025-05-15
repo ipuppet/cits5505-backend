@@ -39,8 +39,10 @@ def get_user_by_id(user_id: int) -> User | None:
 def get_user_by_email(email: str) -> User | None:
     """Finds a user by their email."""
     if not email:
-        return None
+        raise ValueError("Email cannot be empty")
     user = db.session.query(User).filter_by(email=email).first()
+    if not user:
+        raise UserNotFoundError(email)
     return user
 
 
@@ -222,9 +224,7 @@ def send_reset_email(email: str) -> str:
     if current_user.is_authenticated:
         if current_user.email != email:
             raise ValueError("Email does not match the logged-in user.")
-    user = get_user_by_email(email)
-    if not user:
-        raise UserNotFoundError(email)
+    get_user_by_email(email)  # Ensure the user exists
 
     serializer = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
     token = serializer.dumps(email, salt=current_app.config["EMAIL_VERIFY_SALT"])

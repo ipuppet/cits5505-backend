@@ -6,10 +6,11 @@ Flask-WTF
 wtforms-json
 wtforms[email]
 Flask-Mail
-pytest
-Flask-Testing
 python-dotenv
 requests
 pytz
 flask-login
 black
+pytest
+selenium
+pytest-flask
