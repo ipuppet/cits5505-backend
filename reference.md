@@ -5,3 +5,9 @@ index.feature1: https://www.freepik.com/free-photo/full-shot-people-exercising-t
 index.feature2: https://totalwellnessmagazine.org/articles/how-to-bulk-versus-cut
 index.feature3: https://hevycoach.com/fitness-incentive-programs-ideas/
 index.feature4: https://hevycoach.com/fitness-incentive-programs-ideas/
+
+---
+
+## AI Assistance Acknowledgement
+
+AI tools (including GitHub Copilot and OpenAI GPT) were used to assist with CSS layout, design suggestions, and code insights during the development of this project. All AI-generated content was reviewed and adapted by the project team to ensure quality and compliance with academic standards.
