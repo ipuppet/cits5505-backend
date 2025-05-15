@@ -1,5 +1,7 @@
 import os
 
+from sqlalchemy.pool import NullPool
+
 
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY")
@@ -24,5 +26,10 @@ class ProductionConfig(Config):
 
 class TestingConfig(Config):
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+    SQLALCHEMY_DATABASE_URI = "sqlite:///test.sqlite"
     WTF_CSRF_ENABLED = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "poolclass": NullPool,  # Disable connection pooling
+        "connect_args": {"check_same_thread": False},  # SQLite Allow across threads
+    }
