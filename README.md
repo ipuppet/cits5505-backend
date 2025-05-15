@@ -28,6 +28,36 @@ Our project is a modern, sport tracker web application built with Flask and SQLi
 hydration, monitor progress, and set personal goals—all within a friendly, interactive dashboard. Unlike typical fitness
 apps, our platform emphasizes social features, data visualization, and user motivation.
 
+## Purpose and Design
+
+**Sport Tracker** is a comprehensive web application designed to help users monitor, analyze, and improve their fitness journey in a modern, engaging, and social environment. The application is built with a focus on usability, data visualization, and motivation, making it suitable for both casual users and fitness enthusiasts.
+
+### Purpose
+
+- **Personal Fitness Management:** Users can log workouts, track body measurements (such as weight and BMI), monitor hydration, and set personalized fitness goals.
+- **Progress Visualization:** The app provides clear, interactive charts and dashboards to help users visualize their progress over time, making it easier to stay motivated and identify trends.
+- **Social Engagement:** Users can share achievements and progress with friends, fostering a sense of community and accountability.
+- **Motivation and Guidance:** The platform offers motivational messages, weather-based workout suggestions, and achievement badges to keep users engaged and inspired.
+
+### Design
+
+- **User-Centered Interface:** The UI is built with Bootstrap for responsiveness and accessibility, ensuring a seamless experience across devices.
+- **Modular Architecture:** The backend uses Flask blueprints to organize features into logical modules (dashboard, user, browse, share, etc.), making the codebase maintainable and extensible.
+- **Data Visualization:** Chart.js is used to present workout data, calorie intake, weight trends, and goal progress in an intuitive and visually appealing way.
+- **Security and Privacy:** User data is protected with authentication, and sharing features are designed to be private and secure.
+- **Test-Driven Development:** The project includes comprehensive unit and system tests to ensure reliability and facilitate future development.
+
+### Use
+
+1. **Registration & Login:** Users create an account and log in to access personalized features.
+2. **Dashboard:** The main dashboard displays key metrics, recent activity, hydration status, and motivational content.
+3. **Workout & Measurement Logging:** Users can add workouts, body measurements, and hydration data through simple forms.
+4. **Goal Setting:** Users set and track progress toward custom fitness goals, with real-time feedback and visual progress bars.
+5. **Social Features:** Users can connect with friends, share selected data, and celebrate achievements together.
+6. **Data Insights:** Interactive charts and summaries help users understand their habits and progress, supporting informed decision-making.
+
+**Sport Tracker** aims to make fitness tracking enjoyable, insightful, and socially rewarding, supporting users on their journey to better health.
+
 ## What Makes This Project Different?
 
 - **Social Fitness Tracking:** Users can share progress, achievements, and workout data with friends for motivation and
