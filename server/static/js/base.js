@@ -50,3 +50,8 @@ document.querySelectorAll("select[name=\"timezone\"]").forEach(select => {
     )
     if (option) option.selected = true
 })
+// Set max date to today
+const today = new Date().toLocaleDateString("en-CA")
+document.querySelectorAll("input[type=\"date\"]").forEach(input => {
+    input.setAttribute("max", today)
+})

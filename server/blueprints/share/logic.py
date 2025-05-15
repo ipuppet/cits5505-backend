@@ -1,5 +1,6 @@
 import uuid
 
+from flask_login import current_user
 from sqlalchemy.exc import SQLAlchemyError
 
 from server.models import db, Share, Exercise, BodyMeasurement, Achievement
@@ -80,6 +81,8 @@ def get_shared(share_id: uuid.UUID) -> dict[str, list]:
     """
     try:
         share = db.session.query(Share).filter_by(id=share_id, deleted=False).first()
+        if share.sender_id != current_user.id and share.receiver_id != current_user.id:
+            raise ValueError("You do not have permission to access this share.")
         if not share:
             raise ValueError("Share not found")
         return get_shared_data(
