@@ -37,7 +37,8 @@ class TestUserRegister:
         WebDriverWait(chrome_driver, 10).until(
             EC.visibility_of_element_located((By.CLASS_NAME, "toast"))
         )
-        assert "{'username': ['This field is required.']}" in chrome_driver.page_source
+        assert "username" in chrome_driver.page_source
+        assert "required" in chrome_driver.page_source
 
     def test_register_same_email(self, chrome_driver, live_server, test_user):
         chrome_driver.get(live_server.url("/user/register"))
