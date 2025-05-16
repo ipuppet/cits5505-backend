@@ -103,7 +103,9 @@ class BodyMeasurementForm(DatetimeForm):
 
     def validate_value(self, value):
         try:
-            validate_body_measurement_value(BodyMeasurementType[self.type.data], value)
+            validate_body_measurement_value(
+                BodyMeasurementType[self.type.data], value.data
+            )
         except ValueError as e:
             raise ValidationError(str(e))
 
@@ -115,6 +117,6 @@ class CalorieIntakeForm(DatetimeForm):
 
     def validate_calories(self, calories):
         try:
-            validate_float(calories)
+            validate_float(calories.data)
         except ValueError as e:
             raise ValidationError(str(e))
