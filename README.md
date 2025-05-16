@@ -55,6 +55,7 @@ apps, our platform emphasizes social features, data visualization, and user moti
 4. **Goal Setting:** Users set and track progress toward custom fitness goals, with real-time feedback and visual progress bars.
 5. **Social Features:** Users can connect with friends, share selected data, and celebrate achievements together.
 6. **Data Insights:** Interactive charts and summaries help users understand their habits and progress, supporting informed decision-making.
+7. **Private Sharing:** Easily share your dashboard or achievements with others via a secure, private link.
 
 **Sport Tracker** aims to make fitness tracking enjoyable, insightful, and socially rewarding, supporting users on their journey to better health.
 
