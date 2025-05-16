@@ -25,6 +25,7 @@ class TestGoalModel:
         assert goal.created_at is not None
 
     def test_current_value_and_achieved(self, db_session, test_user):
+        """Test current_value and achieved properties"""
         goal = Goal(
             user_id=test_user.id,
             description="Run 5km",
