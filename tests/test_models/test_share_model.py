@@ -3,22 +3,15 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from server.models import Share, User
+from server.models import Share
 from server.utils.constants import ExerciseType
 
 
 class TestShareModel:
-    def test_create_share(self, db_session, test_user):
+    def test_create_share(self, db_session, test_user, test_receiver):
         """Test creating a share record"""
         sender = test_user
-        receiver = User(
-            username="receiver",
-            password="pw",
-            email="receiver@ex.com",
-            nickname="Receiver",
-        )
-        db_session.add(receiver)
-        db_session.commit()
+        receiver = test_receiver
 
         scope = {
             "exercise_types": [ExerciseType.RUNNING.value],
@@ -50,17 +43,10 @@ class TestShareModel:
         assert share.created_at is not None
         assert share.deleted is False
 
-    def test_unique_constraint(self, db_session, test_user):
+    def test_unique_constraint(self, db_session, test_user, test_receiver):
         """Test unique constraint on sender, receiver, and scope"""
         sender = test_user
-        receiver = User(
-            username="receiver2",
-            password="pw",
-            email="receiver2@ex.com",
-            nickname="Receiver2",
-        )
-        db_session.add(receiver)
-        db_session.commit()
+        receiver = test_receiver
 
         scope = {
             "exercise_types": ["running"],
@@ -94,17 +80,10 @@ class TestShareModel:
             db_session.commit()
         db_session.rollback()
 
-    def test_scope_validation(self, db_session, test_user):
+    def test_scope_validation(self, db_session, test_user, test_receiver):
         """Test that invalid scope raises ValueError"""
         sender = test_user
-        receiver = User(
-            username="receiver3",
-            password="pw",
-            email="receiver3@ex.com",
-            nickname="Receiver3",
-        )
-        db_session.add(receiver)
-        db_session.commit()
+        receiver = test_receiver
 
         # Invalid scope (not a dict)
         with pytest.raises(ValueError):

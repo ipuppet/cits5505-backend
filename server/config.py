@@ -26,6 +26,7 @@ class ProductionConfig(Config):
 
 class TestingConfig(Config):
     TESTING = True
+    SERVER_NAME = "localhost"
     SQLALCHEMY_DATABASE_URI = "sqlite:///test.sqlite"
     WTF_CSRF_ENABLED = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False

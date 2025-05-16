@@ -2,6 +2,7 @@ import pytest
 from sqlalchemy.exc import IntegrityError
 
 from server.models import User
+from server.utils.security import check_password
 
 
 class TestUserModel:
@@ -12,23 +13,22 @@ class TestUserModel:
         assert test_user.email == "test@example.com"
         assert test_user.nickname == "Tester"
         assert test_user.created_at is not None
+        assert check_password("testpass", test_user.password)
 
     def test_unique_username(self, db_session, test_user):
         """Test that username must be unique"""
-        user2 = User(
+        user = User(
             username=test_user.username, password="b", email="b@b.com", nickname="B"
         )
-        db_session.add(user2)
+        db_session.add(user)
         with pytest.raises(IntegrityError):
             db_session.commit()
         db_session.rollback()
 
     def test_unique_email(self, db_session, test_user):
         """Test that email must be unique"""
-        user2 = User(
-            username="user2", password="b", email=test_user.email, nickname="B"
-        )
-        db_session.add(user2)
+        user = User(username="user2", password="b", email=test_user.email, nickname="B")
+        db_session.add(user)
         with pytest.raises(IntegrityError):
             db_session.commit()
         db_session.rollback()
