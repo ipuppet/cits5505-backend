@@ -4,14 +4,6 @@ document.getElementById("avatar").addEventListener("change", function () {
     }
 })
 
-// Set max date for weight input to today
-document.addEventListener("DOMContentLoaded", function () {
-    var dateInput = document.getElementById("weight-date-input");
-    if (dateInput) {
-        var today = new Date().toISOString().split('T')[0];
-        dateInput.max = today;
-    }
-});
 
 function renderMotivationMessage() {
     const messages = [
