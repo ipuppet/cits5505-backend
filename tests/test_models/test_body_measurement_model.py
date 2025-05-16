@@ -4,7 +4,7 @@ from server.utils.constants import BodyMeasurementType
 
 
 class TestBodyMeasurementModel:
-    
+
     @pytest.mark.parametrize(
         "measurement_type,valid_metrics",
         [
@@ -18,7 +18,9 @@ class TestBodyMeasurementModel:
             "body_fat_measurement",
         ],
     )
-    def test_valid_body_measurement_creation(self, db_session, measurement_type, valid_metrics):
+    def test_valid_body_measurement_creation(
+        self, db_session, measurement_type, valid_metrics
+    ):
         """Test valid body measurement creation with correct metrics"""
         body_measurement = BodyMeasurement(
             user_id=1, type=measurement_type, value=valid_metrics
@@ -29,12 +31,12 @@ class TestBodyMeasurementModel:
         assert body_measurement.id is not None
         assert body_measurement.created_at is not None
         assert body_measurement.value == valid_metrics
-   
+
     @pytest.mark.parametrize(
         "measurement_type,invalid_metrics",
         [
-            (BodyMeasurementType.WEIGHT,-10),
-            (BodyMeasurementType.HEIGHT,"abc"),
+            (BodyMeasurementType.WEIGHT, -10),
+            (BodyMeasurementType.HEIGHT, "abc"),
             (BodyMeasurementType.BODY_FAT, 200),
         ],
         ids=[
@@ -46,10 +48,8 @@ class TestBodyMeasurementModel:
     def test_invalid_body_measurement_creation(self, measurement_type, invalid_metrics):
         """Test invalid body measurement creation with incorrect metrics"""
         with pytest.raises(ValueError):
-            BodyMeasurement(
-                user_id=1, type=measurement_type, value=invalid_metrics
-            )
-    
+            BodyMeasurement(user_id=1, type=measurement_type, value=invalid_metrics)
+
     @pytest.mark.parametrize(
         "measurement_type,missing_metrics",
         [
@@ -66,11 +66,8 @@ class TestBodyMeasurementModel:
     def test_invalid_metrics_validation(self, measurement_type, missing_metrics):
         # Test validation of required metrics fields
         with pytest.raises(ValueError):
-            BodyMeasurement(
-                user_id=1, type=measurement_type, value=missing_metrics
-            )
+            BodyMeasurement(user_id=1, type=measurement_type, value=missing_metrics)
 
-    
     def test_get_by_user(self, db_session, test_user):
         """Test get_by_user static method"""
         bm1 = BodyMeasurement(
@@ -85,7 +82,7 @@ class TestBodyMeasurementModel:
         measurements = BodyMeasurement.get_by_user(test_user.id).all()
         assert len(measurements) == 2
         assert all(m.user_id == test_user.id for m in measurements)
-    
+
     def test_get_by_user_no_user(self):
         """Test get_by_user raises ValueError if user_id is missing"""
         with pytest.raises(ValueError):

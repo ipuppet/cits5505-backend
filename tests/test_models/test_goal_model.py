@@ -23,7 +23,7 @@ class TestGoalModel:
         assert goal.target_value == 10.0
         assert goal.achieved is False
         assert goal.created_at is not None
-    
+
     def test_current_value_and_achieved(self, db_session, test_user):
         """Test current_value and achieved properties"""
         goal = Goal(
@@ -62,7 +62,7 @@ class TestGoalModel:
         # Now total is 5.5km, which is >= target_value
         assert goal.current_value >= goal.target_value
         assert goal.achieved is True
-    
+
     def test_current_value_other_metric(self, db_session, test_user):
         """Test current_value with a different metric"""
         goal = Goal(
