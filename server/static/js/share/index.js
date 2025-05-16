@@ -323,7 +323,11 @@ function renderSharePreviewTable(columns, data) {
         }
         columns.forEach(column => {
             const cell = document.createElement("td")
-            cell.textContent = item[column] || "-"
+            if (column === "type") {
+                cell.textContent = formatName(item[column]) || "-"
+            } else {
+                cell.textContent = item[column] || "-"
+            }
             row.appendChild(cell)
         })
 
