@@ -1,12 +1,19 @@
 import uuid
-from flask_sqlalchemy import SQLAlchemy
+
+from flask_login import UserMixin
 from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import validates
-from flask_login import UserMixin
 
-from server.utils.validators import validate_metrics, validate_scope
 from server.utils.constants import ExerciseType, BodyMeasurementType
+from server.utils.validators import (
+    validate_metrics,
+    validate_share_scope,
+    validate_body_measurement_value,
+    validate_float,
+    validate_int,
+)
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -135,6 +142,10 @@ class Achievement(db.Model):
         default=db.func.current_timestamp(),
     )
 
+    @validates("milestone")
+    def validate_milestone(self, _key, milestone: int):
+        return validate_int(milestone)
+
     @staticmethod
     def get_by_user(user_id: int, **kwargs):
         if not user_id:
@@ -159,6 +170,10 @@ class BodyMeasurement(db.Model):
         default=db.func.current_timestamp(),
         index=True,
     )
+
+    @validates("value")
+    def validate_value(self, _key, value: float):
+        return validate_body_measurement_value(self.type, value)
 
     @staticmethod
     def get_by_user(user_id: int, **kwargs):
@@ -185,6 +200,10 @@ class CalorieIntake(db.Model):
         index=True,
     )
 
+    @validates("calories")
+    def validate_calories(self, _key, calories: float):
+        return validate_float(calories)
+
 
 class WaterIntake(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -198,6 +217,10 @@ class WaterIntake(db.Model):
         default=db.func.current_timestamp(),
         index=True,
     )
+
+    @validates("amount")
+    def validate_amount(self, _key, amount: float):
+        return validate_float(amount)
 
 
 class ScheduledExercise(db.Model):
@@ -243,6 +266,10 @@ class Goal(db.Model):
             self.achieved = True
         return total
 
+    @validates("target_value")
+    def validate_target_value(self, _key, target_value: float):
+        return validate_float(target_value)
+
 
 class Share(db.Model):
     id = db.Column(db.Uuid, primary_key=True, default=uuid.uuid4)
@@ -270,4 +297,4 @@ class Share(db.Model):
 
     @validates("scope")
     def validate_scope(self, _key, scope: dict):
-        return validate_scope(scope)
+        return validate_share_scope(scope)

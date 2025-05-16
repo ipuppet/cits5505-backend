@@ -39,6 +39,7 @@ GOAL_METRICS = [
     "weight",
 ]
 
+# integer values
 ACHIEVEMENTS = {
     ExerciseType.CYCLING: [50000, 100000, 200000],  # in m
     ExerciseType.RUNNING: [10000, 50000, 100000],
