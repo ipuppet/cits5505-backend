@@ -1,5 +1,5 @@
 import requests
-from datetime import datetime, timezone, date
+from datetime import datetime, timezone
 from sqlalchemy.exc import SQLAlchemyError
 from flask_login import current_user
 from collections import defaultdict

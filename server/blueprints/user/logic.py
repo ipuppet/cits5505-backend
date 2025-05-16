@@ -1,5 +1,6 @@
 import datetime
 import os
+import uuid
 
 from flask import current_app, url_for
 from flask_login import login_user, current_user, logout_user
@@ -7,7 +8,6 @@ from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from werkzeug.datastructures import FileStorage
-from werkzeug.utils import secure_filename
 
 from server.models import db, User
 from server.utils.login_manager import login_manager
@@ -177,7 +177,8 @@ def update_user(
 
 
 def update_avatar(file: FileStorage):
-    filename = secure_filename(file.filename)
+    ext = os.path.splitext(file.filename)[1]
+    filename = f"{uuid.uuid4()}{ext}"
     avatar_folder = os.path.join(current_app.static_folder, "avatars")
     os.makedirs(avatar_folder, exist_ok=True)
     file_path = os.path.join(avatar_folder, filename)
