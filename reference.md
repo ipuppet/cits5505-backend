@@ -10,4 +10,6 @@ index.feature4: https://hevycoach.com/fitness-incentive-programs-ideas/
 
 ## AI Assistance Acknowledgement
 
-AI tools (including GitHub Copilot and OpenAI GPT) were used to assist with CSS layout, design suggestions, and code insights during the development of this project. All AI-generated content was reviewed and adapted by the project team to ensure quality and compliance with academic standards.
+AI tools (including GitHub Copilot and OpenAI GPT) were used to assist with CSS layout, design suggestions, and code
+insights during the development of this project. All AI-generated content was reviewed and adapted by the project team
+to ensure quality and compliance with academic standards.

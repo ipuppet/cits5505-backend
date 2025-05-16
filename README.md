@@ -30,34 +30,49 @@ apps, our platform emphasizes social features, data visualization, and user moti
 
 ## Purpose and Design
 
-**Sport Tracker** is a comprehensive web application designed to help users monitor, analyze, and improve their fitness journey in a modern, engaging, and social environment. The application is built with a focus on usability, data visualization, and motivation, making it suitable for both casual users and fitness enthusiasts.
+**Sport Tracker** is a comprehensive web application designed to help users monitor, analyze, and improve their fitness
+journey in a modern, engaging, and social environment. The application is built with a focus on usability, data
+visualization, and motivation, making it suitable for both casual users and fitness enthusiasts.
 
 ### Purpose
 
-- **Personal Fitness Management:** Users can log workouts, track body measurements (such as weight and BMI), monitor hydration, and set personalized fitness goals.
-- **Progress Visualization:** The app provides clear, interactive charts and dashboards to help users visualize their progress over time, making it easier to stay motivated and identify trends.
-- **Social Engagement:** Users can share achievements and progress with friends, fostering a sense of community and accountability.
-- **Motivation and Guidance:** The platform offers motivational messages, weather-based workout suggestions, and achievement badges to keep users engaged and inspired.
+- **Personal Fitness Management:** Users can log workouts, track body measurements (such as weight and BMI), monitor
+  hydration, and set personalized fitness goals.
+- **Progress Visualization:** The app provides clear, interactive charts and dashboards to help users visualize their
+  progress over time, making it easier to stay motivated and identify trends.
+- **Social Engagement:** Users can share achievements and progress with friends, fostering a sense of community and
+  accountability.
+- **Motivation and Guidance:** The platform offers motivational messages, weather-based workout suggestions, and
+  achievement badges to keep users engaged and inspired.
 
 ### Design
 
-- **User-Centered Interface:** The UI is built with Bootstrap for responsiveness and accessibility, ensuring a seamless experience across devices.
-- **Modular Architecture:** The backend uses Flask blueprints to organize features into logical modules (dashboard, user, browse, share, etc.), making the codebase maintainable and extensible.
-- **Data Visualization:** Chart.js is used to present workout data, calorie intake, weight trends, and goal progress in an intuitive and visually appealing way.
-- **Security and Privacy:** User data is protected with authentication, and sharing features are designed to be private and secure.
-- **Test-Driven Development:** The project includes comprehensive unit and system tests to ensure reliability and facilitate future development.
+- **User-Centered Interface:** The UI is built with Bootstrap for responsiveness and accessibility, ensuring a seamless
+  experience across devices.
+- **Modular Architecture:** The backend uses Flask blueprints to organize features into logical modules (dashboard,
+  user, browse, share, etc.), making the codebase maintainable and extensible.
+- **Data Visualization:** Chart.js is used to present workout data, calorie intake, weight trends, and goal progress in
+  an intuitive and visually appealing way.
+- **Security and Privacy:** User data is protected with authentication, and sharing features are designed to be private
+  and secure.
+- **Test-Driven Development:** The project includes comprehensive unit and system tests to ensure reliability and
+  facilitate future development.
 
 ### Use
 
 1. **Registration & Login:** Users create an account and log in to access personalized features.
 2. **Dashboard:** The main dashboard displays key metrics, recent activity, hydration status, and motivational content.
-3. **Workout & Measurement Logging:** Users can add workouts, body measurements, and hydration data through simple forms.
-4. **Goal Setting:** Users set and track progress toward custom fitness goals, with real-time feedback and visual progress bars.
+3. **Workout & Measurement Logging:** Users can add workouts, body measurements, and hydration data through simple
+   forms.
+4. **Goal Setting:** Users set and track progress toward custom fitness goals, with real-time feedback and visual
+   progress bars.
 5. **Social Features:** Users can connect with friends, share selected data, and celebrate achievements together.
-6. **Data Insights:** Interactive charts and summaries help users understand their habits and progress, supporting informed decision-making.
+6. **Data Insights:** Interactive charts and summaries help users understand their habits and progress, supporting
+   informed decision-making.
 7. **Private Sharing:** Easily share your dashboard or achievements with others via a secure, private link.
 
-**Sport Tracker** aims to make fitness tracking enjoyable, insightful, and socially rewarding, supporting users on their journey to better health.
+**Sport Tracker** aims to make fitness tracking enjoyable, insightful, and socially rewarding, supporting users on their
+journey to better health.
 
 ## What Makes This Project Different?
 
@@ -258,13 +273,21 @@ flask db --help
 
 ## Future Plans
 
-We plan to continue developing Sport Tracker by introducing a Pro version with advanced analytics, personalized coaching, and priority support for a small monthly fee ($5/mo). All Free Plan features will remain available to everyone, while Pro users will enjoy additional premium benefits. Stay tuned for updates!
+We plan to continue developing Sport Track by introducing a Pro version with advanced analytics, personalized
+coaching, and priority support for a small monthly fee ($5/mo). All Free Plan features will remain available to
+everyone, while Pro users will enjoy additional premium benefits. Stay tuned for updates!
 
 ## Acknowledgements
 
-Thank you for exploring our Sport Tracker project! We hope you find it useful, inspiring, and enjoyable to use.  
-If you have any feedback, suggestions, or encounter any issues, please feel free to open an issue or contribute via pull requests.
+Thank you for exploring our Sport Track project! We hope you find it useful, inspiring, and enjoyable to use.  
+If you have any feedback, suggestions, or encounter any issues, please feel free to open an issue or contribute via pull
+requests.
 
 Good luck on your fitness journey, and happy tracking!
 
-— The Sport Tracker Team
+— The Sport Track Team
+
+
+## References
+
+[Link to the references](./reference.md)

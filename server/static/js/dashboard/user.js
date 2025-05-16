@@ -4,7 +4,6 @@ document.getElementById("avatar").addEventListener("change", function () {
     }
 })
 
-
 function renderMotivationMessage() {
     const messages = [
         "You’re one step closer to your goals!",
