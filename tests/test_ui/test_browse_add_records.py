@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -44,7 +46,6 @@ class TestBrowseAddRecords:
             print("Could not fill visible metric fields:", e)
 
         modal.find_element(By.NAME, "time").send_keys("12:00")
-        modal.find_element(By.NAME, "timezone").send_keys("Australia/Perth")
         form = modal.find_element(By.TAG_NAME, "form")
         form.submit()
 
@@ -63,8 +64,22 @@ class TestBrowseAddRecords:
         table_body = chrome_driver.find_element(By.ID, "browseTableBody")
         table_html = table_body.get_attribute("innerHTML")
 
+        target_date = datetime(2024, 5, 15, 12, 0)
+        target_date_iso = target_date.isoformat()
+        js_script = f"""
+            const d = `{target_date_iso}`;
+            const cellDate = new Date(d);
+            return cellDate.toLocaleString();
+        """
+        target_date_str = chrome_driver.execute_script(js_script)
+
+        third_td = table_body.find_elements(By.TAG_NAME, "td")[3]
+        table_date_str = third_td.get_attribute("textContent").strip()
+
         # Check for the new exercise
-        assert "5" in table_html and "30" in table_html and "15/05/2024" in table_html
+        assert "5" in table_html
+        assert "30" in table_html
+        assert target_date_str == table_date_str
 
         # --- Switch to Chart view ---
         chart_label = chrome_driver.find_element(
