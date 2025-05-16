@@ -46,7 +46,6 @@ class TestBrowseAddRecords:
             print("Could not fill visible metric fields:", e)
 
         modal.find_element(By.NAME, "time").send_keys("12:00")
-        browse_timezone = modal.find_element(By.NAME, "timezone").get_attribute("value")
         form = modal.find_element(By.TAG_NAME, "form")
         form.submit()
 
