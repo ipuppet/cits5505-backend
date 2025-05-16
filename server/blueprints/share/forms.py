@@ -5,7 +5,7 @@ from wtforms import IntegerField, DateField
 from wtforms.fields.simple import StringField
 from wtforms.validators import ValidationError, InputRequired, DataRequired
 
-from server.utils.validators import validate_scope
+from server.utils.validators import validate_share_scope
 from server.utils.wtforms_custom import JSONField
 
 
@@ -28,7 +28,7 @@ class PreviewForm(FlaskForm):
 
     @property
     def start_date_utc(self):
-        """返回UTC时区的开始日期时间"""
+        """Returns UTC timezone start date time"""
         if not self.start_date.data or not self.timezone.data:
             return None
 
@@ -40,7 +40,7 @@ class PreviewForm(FlaskForm):
 
     @property
     def end_date_utc(self):
-        """返回UTC时区的结束日期时间"""
+        """Returns UTC timezone end date time"""
         if not self.end_date.data or not self.timezone.data:
             return None
 
@@ -56,7 +56,7 @@ class PreviewForm(FlaskForm):
 
     def validate_scope(self, scope):
         try:
-            validate_scope(scope.data)
+            validate_share_scope(scope.data)
         except ValueError as e:
             raise ValidationError(str(e))
 

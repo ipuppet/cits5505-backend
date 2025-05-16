@@ -1,3 +1,6 @@
+from datetime import datetime, time, date
+
+import pytz
 from flask_wtf import FlaskForm
 from wtforms import (
     SelectField,
@@ -8,12 +11,14 @@ from wtforms import (
     TimeField,
 )
 from wtforms.validators import ValidationError, DataRequired, Optional
-from datetime import datetime, time, date
-import pytz
 
-from server.utils.validators import validate_metrics
-from server.utils.wtforms_custom import JSONField
 from server.utils.constants import ExerciseType, BodyMeasurementType
+from server.utils.validators import (
+    validate_metrics,
+    validate_body_measurement_value,
+    validate_float,
+)
+from server.utils.wtforms_custom import JSONField
 
 
 class DatetimeForm(FlaskForm):
@@ -96,8 +101,20 @@ class BodyMeasurementForm(DatetimeForm):
     value = FloatField("Value", validators=[DataRequired()])
     submit = SubmitField("Submit")
 
+    def validate_value(self, value):
+        try:
+            validate_body_measurement_value(BodyMeasurementType[self.type.data], value)
+        except ValueError as e:
+            raise ValidationError(str(e))
+
 
 class CalorieIntakeForm(DatetimeForm):
     calories = FloatField("Calories", validators=[DataRequired()])
     description = StringField("Description", validators=[Optional()])
     submit = SubmitField("Submit")
+
+    def validate_calories(self, calories):
+        try:
+            validate_float(calories)
+        except ValueError as e:
+            raise ValidationError(str(e))
