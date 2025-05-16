@@ -273,19 +273,19 @@ flask db --help
 
 ## Future Plans
 
-We plan to continue developing Sport Track by introducing a Pro version with advanced analytics, personalized
+We plan to continue developing Sport Tracker by introducing a Pro version with advanced analytics, personalized
 coaching, and priority support for a small monthly fee ($5/mo). All Free Plan features will remain available to
 everyone, while Pro users will enjoy additional premium benefits. Stay tuned for updates!
 
 ## Acknowledgements
 
-Thank you for exploring our Sport Track project! We hope you find it useful, inspiring, and enjoyable to use.  
+Thank you for exploring our Sport Tracker project! We hope you find it useful, inspiring, and enjoyable to use.  
 If you have any feedback, suggestions, or encounter any issues, please feel free to open an issue or contribute via pull
 requests.
 
 Good luck on your fitness journey, and happy tracking!
 
-— The Sport Track Team
+— The Sport Tracker Team
 
 
 ## References
