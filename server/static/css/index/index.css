@@ -86,6 +86,7 @@
     border-radius: 24px;
     padding: 60px 40px 60px 40px;
     font-size: 16px;
+    white-space: nowrap;
 }
 
 .plan-info {
