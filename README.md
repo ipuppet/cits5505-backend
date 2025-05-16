@@ -220,6 +220,10 @@ export MAIL_PASSWORD="your_email_password"
 
 ### Run the Project
 
+> This project is designed to be run in a virtual environment.  
+> If you have installed Flask in the global environment, you should uninstall it first. Otherwise, you may encounter
+> issues with the Flask command (Cannot load the `.flaskenv` file).
+
 Initialize the database and create the tables. You can do this by running the following command:
 
 ```bash
@@ -286,7 +290,6 @@ requests.
 Good luck on your fitness journey, and happy tracking!
 
 — The Sport Tracker Team
-
 
 ## References
 
