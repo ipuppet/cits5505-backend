@@ -28,7 +28,7 @@ class PreviewForm(FlaskForm):
 
     @property
     def start_date_utc(self):
-        """返回UTC时区的开始日期时间"""
+        """return UTC timezone start date time"""
         if not self.start_date.data or not self.timezone.data:
             return None
 
@@ -40,7 +40,7 @@ class PreviewForm(FlaskForm):
 
     @property
     def end_date_utc(self):
-        """返回UTC时区的结束日期时间"""
+        """return UTC timezone end date time"""
         if not self.end_date.data or not self.timezone.data:
             return None
 

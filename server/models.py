@@ -146,6 +146,7 @@ class Achievement(db.Model):
         )
 
 
+
 class BodyMeasurement(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(
@@ -159,6 +160,28 @@ class BodyMeasurement(db.Model):
         default=db.func.current_timestamp(),
         index=True,
     )
+
+    @validates("value")
+    def validate_value(self, key, value):
+        if value is None:
+            raise ValueError("Measurement value cannot be None")
+        
+        if not isinstance(value, (int, float)):
+            raise ValueError("Measurement value must be a number")
+
+        if self.type == BodyMeasurementType.WEIGHT:
+            if value <= 0:
+                raise ValueError("Weight must be a positive number")
+
+        elif self.type == BodyMeasurementType.HEIGHT:
+            if value <= 0:
+                raise ValueError("Height must be a positive number")
+
+        elif self.type == BodyMeasurementType.BODY_FAT:
+            if not (0 <= value <= 100):
+                raise ValueError("Body fat must be between 0 and 100")
+
+        return value
 
     @staticmethod
     def get_by_user(user_id: int, **kwargs):
